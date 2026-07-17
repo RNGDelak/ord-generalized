@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id = "Title"></title>
+    <title id="Title"></title>
     <style>
         body,
         html {
@@ -37,20 +37,127 @@
             white-space: nowrap;
             user-select: none;
         }
+
+        /* Floating configuration panel styling */
+        #configToggleBtn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #fff;
+            border: 0px solid #444;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #configToggleBtn:hover {
+            background: #333;
+        }
+
+        #configMenu {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            border: 1px solid #444;
+            padding: 15px;
+            width: 320px;
+            border-radius: 6px;
+            display: none;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-group {
+            margin-bottom: 12px;
+        }
+
+        .menu-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .menu-group select,
+        .menu-group textarea {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        .menu-group textarea {
+            height: 150px;
+            resize: vertical;
+            font-size: 11px;
+        }
+
+        .apply-btn {
+            width: 100%;
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .apply-btn:hover {
+            background: #0098ff;
+        }
+
     </style>
 </head>
 
 <body>
 
+    <button id="configToggleBtn" onclick="toggleConfigMenu()">Config Menu</button>
+
+    <div id="configMenu" style="width: 90%;">
+        <div class="menu-group">
+            <label for="presetSelect">Tutorial Presets (Notation System)</label>
+            <select id="presetSelect" onchange="loadPresetNotation(this.value)">
+                <option value="Libs/BMS.js">BMS (Default)</option>
+                <option value="Libs/HPrSS.js">HPrSS</option>
+            </select>
+            <hr style="border-color: #333; margin: 15px 0;">
+            <div class="menu-group">
+                <label for="codeInject">Inject Custom Script / Notation Code</label>
+                <textarea id="codeInject" placeholder="" style="height: 120px;"></textarea>
+            </div>
+            <button class="apply-btn" style="background: #28a745; margin-top: 5px;"
+                onclick="applyInjectedCode()">Execute Code Script</button>
+        </div>
+        <hr style="border-color: #333; margin: 15px 0;">
+        <div class="menu-group">
+            <label for="envConfigJson">Inject Environment Config (JSON)</label>
+            <textarea id="envConfigJson"></textarea>
+        </div>
+        <button class="apply-btn" onclick="applyInjectedConfig()">Apply Configuration</button>
+    </div>
+
     <canvas id="canvas"></canvas>
     <div id="textOverlay"></div>
 
-
-    <script src="https://peterolson.github.io/BigRational.js/BigInt_BigRat.min.js"></script>
     <script src="render.js"></script>
-    <script src="core.js"></script>
-    <script src="main.js"></script>
 
+    <script>
+        window.notation = null; 
+    </script>
+
+    <!-- Load the initial library script with an ID -->
+    <script id="notation-script" src="Libs/BMS.js"></script>
+    <script src="plot.js"></script>
+    <script src="ui.js"></script>
 </body>
 
 </html>

@@ -62,17 +62,3 @@ function clearTextLabels() {
 }
 
 
-function renderTicks(DrawSet) {
-    // Input format : [[x1, y1, x2, y2, color, lineWidth],[x1, y1, x2, y2, color, lineWidth],...]
-    for (const [x1, y1, x2, y2, color, width] of DrawSet) {
-        drawLine(x1, y1, x2, y2, color, width);
-    }
-}
-
-function renderTexts(TextSet) {
-    // Input format : [[text, color, x, y, alignX, alignY, font],[text, color, x, y, alignX, alignY, font],...]
-    for (const [text, color, x, y, alignX, alignY, font] of TextSet) {
-        createTextLabel(text, color, x, y, alignX, alignY, font);
-    }
-}
-
