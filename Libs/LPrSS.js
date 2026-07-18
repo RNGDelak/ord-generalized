@@ -316,7 +316,7 @@ window.notation = (() => {
             const offset = head - ord[root] - 1;
 
             for (let i = 0; i < n; i++)
-                ord.push(...ascend([...part], offset));
+                ord.push(...ascend(part, offset));
         }
 
         return ord;
