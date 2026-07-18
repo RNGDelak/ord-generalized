@@ -59,27 +59,62 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
+    // Check syntax first
     try {
-        const oldScript = document.getElementById('notation-script');
+        new Function(codeString);
+    } catch (err) {
+        alert(
+            "Syntax Error!\n\n" +
+            err.message
+        );
+        return;
+    }
+
+    try {
+        // Remove previous notation script
+        const oldScript = document.getElementById("notation-script");
         if (oldScript) oldScript.remove();
-        const blob = new Blob([codeString], { type: 'application/javascript' });
+
+        // Create Blob URL
+        const blob = new Blob([codeString], {
+            type: "application/javascript"
+        });
         const blobURL = URL.createObjectURL(blob);
 
-        const newScript = document.createElement('script');
-        newScript.id = 'notation-script';
+        // Create script element
+        const newScript = document.createElement("script");
+        newScript.id = "notation-script";
         newScript.src = blobURL;
 
+        // Runtime loading failure
+        newScript.onerror = () => {
+            URL.revokeObjectURL(blobURL);
+            alert("Failed to load injected script.");
+        };
+
+        // Successfully loaded
         newScript.onload = () => {
             URL.revokeObjectURL(blobURL);
-            if (typeof init === 'function') {
-                init();
+
+            try {
+                if (typeof init === "function") {
+                    init();
+                }
+            } catch (err) {
+                alert(
+                    "Runtime Error!\n\n" +
+                    err.stack
+                );
             }
         };
 
         document.body.appendChild(newScript);
 
     } catch (err) {
-        alert("Syntax or execution failure. Error: " + err.message);
+        alert(
+            "Execution Error!\n\n" +
+            err.stack
+        );
     }
 }
 
