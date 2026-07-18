@@ -73,16 +73,7 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
     label.style.left = x + "px";
     label.style.top = y + "px";
     label.style.color = color;
-
-    // DYNAMIC FONT SIZER: Automatically scales hardcoded font strings based on viewport height
-    let responsiveFont = font;
-    if (canvas.height < 600) { 
-        // If screen height is tight, scale fonts down proportionally (e.g., 24px -> 14px)
-        responsiveFont = font.replace(/(\d+)px/, (match, size) => {
-            return Math.max(10, Math.floor(parseInt(size) * (canvas.height / 750))) + "px";
-        });
-    }
-    label.style.font = responsiveFont;
+    label.style.font = font;
 
     let tx = "0";
     let ty = "0";
