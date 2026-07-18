@@ -1,14 +1,33 @@
-//Rendering section : only render
-
-const canvas = document.getElementById("canvas"); //get canvas
+// Rendering section : only render
+const canvas = document.getElementById("canvas"); // get canvas
 const ui = document.getElementById("textOverlay");
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Check if the current dimensions actually changed before resetting bounds
+    // to prevent canvas context flashing or stuttering on mobile scrolling
+    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // If the rendering engine has booted up, force an immediate redraw
+        if (typeof render === "function" && window.notation) {
+            render();
+        }
+    }
 }
 
-resizeCanvas() //resize so it fit the screen
+// Initial sync
+resizeCanvas();
+
+// Handle device rotation or desktop viewport snapping instantly
+window.addEventListener("resize", resizeCanvas);
+
+// Continuous safeguard loop: Catches layout shifts on mobile device address-bar hiding
+function continuousResizeCheck() {
+    resizeCanvas();
+    requestAnimationFrame(continuousResizeCheck);
+}
+continuousResizeCheck();
 
 const ctx = canvas.getContext("2d"); //get drawing context
 
