@@ -471,4 +471,63 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 updateKeyboardInput();
+
+window.addEventListener("touchstart", (e) => {
+    if (window.isSettingsOpen) return;
+    
+    // Stop the mobile screen from bouncing or pulling-to-refresh
+    if (e.target === canvas) e.preventDefault(); 
+
+    cam.view.mouse.isDown = true;
+    
+    // Map touch positions exactly to your desktop mouse tracking anchors
+    cam.view.mouse.lastX = e.touches[0].clientX;
+    cam.view.mouse.lastY = e.touches[0].clientY;
+}, { passive: false });
+
+window.addEventListener("touchmove", (e) => {
+    if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
+    if (e.target === canvas) e.preventDefault();
+
+    // Use the exact same tracking logic as the desktop mousemove listener
+    const dx = e.touches[0].clientX - cam.view.mouse.lastX;
+    const dy = e.touches[0].clientY - cam.view.mouse.lastY;
+    const mx = e.touches[0].clientX;
+
+    // 1. Pan (Horizontal drag matches mouse horizontal drag)
+    cam.view.x0 += dx;
+    cam.view.x1 += dx;
+
+    // 2. Zoom (Vertical drag matches mouse vertical drag)
+    if (dy !== 0) {
+        const zoomFactor = Math.max(0.05, 1 - (dy * config.zoomDragFactor));
+
+        const nextX0 = mx + (cam.view.x0 - mx) * zoomFactor;
+        const nextX1 = mx + (cam.view.x1 - mx) * zoomFactor;
+        let maxAllowedWidth = canvas.width * config.maxAllowedWidthFactor;
+        const nextWidth = nextX1 - nextX0;
+
+        if (nextWidth >= maxAllowedWidth) {
+            cam.view.x0 = nextX0;
+            cam.view.x1 = nextX1;
+        } else {
+            const currentWidth = cam.view.x1 - cam.view.x0;
+            const scaleToLimit = maxAllowedWidth / currentWidth;
+
+            cam.view.x0 = mx + (cam.view.x0 - mx) * scaleToLimit;
+            cam.view.x1 = mx + (cam.view.x1 - mx) * scaleToLimit;
+        }
+    }
+
+    // Always enforce viewport limits and redraw
+    clampViewportBounds();
+
+    cam.view.mouse.lastX = e.touches[0].clientX;
+    cam.view.mouse.lastY = e.touches[0].clientY;
+    render();
+}, { passive: false });
+
+window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
+window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
+
 init();
