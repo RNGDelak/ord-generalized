@@ -1,5 +1,5 @@
 /*
-Notation : PrSS
+Notation : LPrSS
 Limit : phi(0,w)
 */
 
@@ -101,7 +101,73 @@ function normalizeVeblen(s) {
 
 function abbreviateVeblen(s) {
   s = s.replace(/\(0,0\)(\+\(0,0\))*/g, e => (e.length + 1) / 6);
-  return s.replace(/\(/g, "φ(");
+
+  let i = 0;
+
+  function parseExpr() {
+    const terms = [parseTerm()];
+
+    while (s[i] === "+") {
+      i++;
+      terms.push(parseTerm());
+    }
+
+    // Compress consecutive equal terms
+    const out = [];
+    for (let j = 0; j < terms.length;) {
+      let k = j + 1;
+      while (k < terms.length && terms[k] === terms[j]) k++;
+
+      const count = k - j;
+
+      if (terms[j] === "1") {
+        out.push(String(count));
+      } else if (count === 1) {
+        out.push(terms[j]);
+      } else {
+        out.push(`${terms[j]}⋅${count}`);
+      }
+
+      j = k;
+    }
+
+    return out.join("+");
+  }
+
+  function parseTerm() {
+    // Number
+    if (s[i] !== "(") {
+      let start = i;
+      while (i < s.length && !",()+".includes(s[i])) i++;
+      return s.slice(start, i);
+    }
+
+    i++; // (
+
+    const left = parseExpr();
+
+    if (s[i] !== ",") throw Error("Expected ','");
+    i++;
+
+    const right = parseExpr();
+
+    if (s[i] !== ")") throw Error("Expected ')'");
+    i++;
+
+    if (left === "0") {
+      if (right === "0") return "1";
+      if (right === "1") return "&omega;";
+      return `&omega;<sup>${right}</sup>`;
+    }
+
+    if (left === "1") return `&epsilon;<sub>${right}</sub>`;
+    if (left === "2") return `&zeta;<sub>${right}</sub>`;
+    if (left === "3") return `&eta;<sub>${right}</sub>`;
+
+    return `&phi;<sub>${left}</sub>(${right})`;
+  }
+
+  return parseExpr();
 }
 
 function isNat(s) {
@@ -232,7 +298,7 @@ function SPrSS_to_Veblen(s, stringify) {
           lastnum = s[i];
         }
       }
-      phisplit.push(s.slice(last, l));  
+      phisplit.push(s.slice(last, l));
       var r = 0;
       var pl = phisplit.length;
       for (var i = 0; i < pl; i++) {
@@ -303,140 +369,140 @@ function Veblen_to_SPrSS(s, stringify) {
 
 window.notation = (() => {
 
-    function fs(ord, n) {
-        if (ord === Limit) return [0, n + 1];
+  function fs(ord, n) {
+    if (ord === Limit) return [0, n + 1];
 
-        ord = [...ord]; // avoid mutating caller
+    ord = [...ord]; // avoid mutating caller
 
-        const head = ord.pop();
+    const head = ord.pop();
 
-        if (head > 0) {
-            const root = search(ord, head);
-            const part = ord.slice(root);
-            const offset = head - ord[root] - 1;
+    if (head > 0) {
+      const root = search(ord, head);
+      const part = ord.slice(root);
+      const offset = head - ord[root] - 1;
 
-            for (let i = 0; i < n; i++)
-                ord.push(...ascend(part, offset));
-        }
-
-        return ord;
+      for (let i = 0; i < n; i++)
+        ord.push(...ascend(part, offset));
     }
 
-    function cmp(a, b) {
-        if (a === Limit && b === Limit) return 0;
-        if (a === Limit) return 1;
-        if (b === Limit) return -1;
+    return ord;
+  }
 
-        const minLength = Math.min(a.length, b.length);
+  function cmp(a, b) {
+    if (a === Limit && b === Limit) return 0;
+    if (a === Limit) return 1;
+    if (b === Limit) return -1;
 
-        for (let i = 0; i < minLength; i++) {
-            if (a[i] !== b[i])
-                return a[i] < b[i] ? -1 : 1;
-        }
+    const minLength = Math.min(a.length, b.length);
 
-        if (a.length < b.length) return -1;
-        if (a.length > b.length) return 1;
-        return 0;
+    for (let i = 0; i < minLength; i++) {
+      if (a[i] !== b[i])
+        return a[i] < b[i] ? -1 : 1;
     }
 
-    function isSuccessor(ord) {
-        return ord !== Limit && (ord.length === 0 || ord.at(-1) === 0);
+    if (a.length < b.length) return -1;
+    if (a.length > b.length) return 1;
+    return 0;
+  }
+
+  function isSuccessor(ord) {
+    return ord !== Limit && (ord.length === 0 || ord.at(-1) === 0);
+  }
+
+  function display(ord, mode) {
+    if (ord === Limit) return "Limit";
+    if (ord.length === 0) return "0";
+    if (mode == 'normal')
+      return `(${ord.join(",")})`;
+
+    if (mode == 'CNF')
+      return abbreviateVeblen(SPrSS_to_Veblen(ord))
+  }
+
+  function classifyOrdinal(ord) {
+    if (ord.length === 0) return "#808080";
+
+    if (isSuccessor(ord))
+      return "#d40000";
+
+    let tower = true;
+    for (let i = 0; i < ord.length; i++) {
+      if (ord[i] !== i) {
+        tower = false;
+        break;
+      }
     }
+    if (tower) return "#ffffff";
 
-    function display(ord, mode) {
-        if (ord === Limit) return "Limit";
-        if (ord.length === 0) return "0";
-        if (mode == 'normal')
-        return `(${ord.join(",")})`;
+    let zeroCount = 0;
+    for (const x of ord)
+      if (x === 0) zeroCount++;
 
-        if (mode == 'CNF')
-        return abbreviateVeblen(SPrSS_to_Veblen(ord))
-    }
+    if (zeroCount === 1)
+      return "#ffd000";
 
-    function classifyOrdinal(ord) {
-        if (ord.length === 0) return "#808080";
+    return "#ff8000";
+  }
 
-        if (isSuccessor(ord))
-            return "#d40000";
+  function parse(str) {
+    str = str.trim();
+    if (str === "" || str === "0") return [];
 
-        let tower = true;
-        for (let i = 0; i < ord.length; i++) {
-            if (ord[i] !== i) {
-                tower = false;
-                break;
-            }
-        }
-        if (tower) return "#ffffff";
+    str = str.replace(/[()]/g, "");
+    return str.split(",").map(Number);
+  }
 
-        let zeroCount = 0;
-        for (const x of ord)
-            if (x === 0) zeroCount++;
+  function ascend(ord, offset) {
+    for (let i = 0; i < ord.length; i++)
+      ord[i] += offset;
+    return ord;
+  }
 
-        if (zeroCount === 1)
-            return "#ffd000";
+  function search(ord, head) {
+    let root = ord.length;
+    do root--;
+    while (ord[root] >= head);
+    return root;
+  }
 
-        return "#ff8000";
-    }
+  const Zero = [];
+  const Limit = "Limit";
 
-    function parse(str) {
-        str = str.trim();
-        if (str === "" || str === "0") return [];
+  const DisplayName = ["normal", 'CNF'];
 
-        str = str.replace(/[()]/g, "");
-        return str.split(",").map(Number);
-    }
+  const ordinalTypes = [
+    ["Zero", "#808080"],
+    ["Successor Ordinal", "#d40000"],
+    ["Limit Ordinal", "#ff8000"],
+    ["Power of ω", "#ffd000"],
+    ["Tower of ω", "#ffffff"]
+  ];
 
-    function ascend(ord, offset) {
-        for (let i = 0; i < ord.length; i++)
-            ord[i] += offset;
-        return ord;
-    }
+  const Aliases = [
+    ["Small Cantor Ordinal", [0, 2]],
+    ["φ(0,ω)", Limit]
+  ];
 
-    function search(ord, head) {
-        let root = ord.length;
-        do root--;
-        while (ord[root] >= head);
-        return root;
-    }
+  const config = {
+    types: "default"
+  };
 
-    const Zero = [];
-    const Limit = "Limit";
+  const title = "LPrSS transfinite number line";
 
-    const DisplayName = ["normal",'CNF'];
-
-    const ordinalTypes = [
-        ["Zero", "#808080"],
-        ["Successor Ordinal", "#d40000"],
-        ["Limit Ordinal", "#ff8000"],
-        ["Power of ω", "#ffd000"],
-        ["Tower of ω", "#ffffff"]
-    ];
-
-    const Aliases = [
-        ["Small Cantor Ordinal", [0, 2]],
-        ["φ(0,ω)", Limit]
-    ];
-
-    const config = {
-        types: "default"
-    };
-
-    const title = "LPrSS transfinite number line";
-
-    return {
-        fs,
-        cmp,
-        isSuccessor,
-        display,
-        classifyOrdinal,
-        parse,
-        Zero,
-        Limit,
-        DisplayName,
-        ordinalTypes,
-        Aliases,
-        config,
-        title
-    };
+  return {
+    fs,
+    cmp,
+    isSuccessor,
+    display,
+    classifyOrdinal,
+    parse,
+    Zero,
+    Limit,
+    DisplayName,
+    ordinalTypes,
+    Aliases,
+    config,
+    title
+  };
 
 })();
