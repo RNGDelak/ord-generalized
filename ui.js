@@ -85,7 +85,9 @@ function executeCustomScript(codeString) {
 
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
+    document.getElementById('presetSelect').value='Libs/BMS.js';
 });
+
 function dismissHint() {
     const hintElement = document.getElementById("hint");
     if (hintElement) {

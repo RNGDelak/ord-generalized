@@ -148,7 +148,8 @@ window.notation = (() => {
     const ZERO = []
 
     function display(ord, mode) {
-        if (ord.length == 0) return '0'
+        if (ord.length == 0) return '0' //you need a fallback for 0 and limit
+        if (cmp(ord,'Limit') == 0) return 'Lim(BMS)'
         if (mode == "normal" || cmp(ord,[[0,0,0],[1,1,1],[2,2,0]]) == 1) //you need a fall back too. my program doesn't know that tho
         return ord.map(p => `(${p.join(',')})`).join('')
 

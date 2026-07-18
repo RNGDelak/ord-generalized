@@ -229,7 +229,7 @@ function sampleHighPrecision(x, width) {
     const currentViewX1Num = toNum(cam.view.x1);
     if (x >= currentViewX1Num) {
         const sampleElem = document.getElementById("sampleLabel");
-        if (sampleElem) sampleElem.innerHTML = "Lim(BMS)";
+        if (sampleElem) sampleElem.innerHTML = notation.display(notation.Limit);
         return;
     }
 
@@ -270,15 +270,12 @@ function drawTimelineLabels() {
         const px = lbl.x;
         const py = h * px / canvas.width - cam.tHeight;
 
-        const labelString = (lbl.ord === notation.Limit)
-            ? "Limit"
-            : notation.display(lbl.ord, mode);
+        const labelString = notation.display(lbl.ord, mode);
 
         createTextLabel(labelString, "#ffffff", px - 7, py - 10, "left", "bottom", "22px Serif");
 
         notation.Aliases.forEach(([name, defStr]) => {
-            let targetOrd = defStr === "Limit" ? notation.Limit : defStr;
-            if (notation.cmp(lbl.ord, targetOrd) === 0) {
+            if (notation.cmp(lbl.ord, defStr) === 0) {
                 createTextLabel(name, "#808080", px - 13, py - 35, "left", "bottom", "italic 20px Serif");
             }
         });
