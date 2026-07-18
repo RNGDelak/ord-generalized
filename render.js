@@ -67,10 +67,22 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
 
     label.className = "textLabel";
     label.innerHTML = text;
+    
+    // Explicitly enforce positioning context limits
+    label.style.position = "absolute";
     label.style.left = x + "px";
     label.style.top = y + "px";
     label.style.color = color;
-    label.style.font = font // [weight][size][family] for example "bold 24px Arial"
+
+    // DYNAMIC FONT SIZER: Automatically scales hardcoded font strings based on viewport height
+    let responsiveFont = font;
+    if (canvas.height < 600) { 
+        // If screen height is tight, scale fonts down proportionally (e.g., 24px -> 14px)
+        responsiveFont = font.replace(/(\d+)px/, (match, size) => {
+            return Math.max(10, Math.floor(parseInt(size) * (canvas.height / 750))) + "px";
+        });
+    }
+    label.style.font = responsiveFont;
 
     let tx = "0";
     let ty = "0";
@@ -86,7 +98,6 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
     }
 
     label.style.transform = `translate(${tx}, ${ty})`;
-
     ui.appendChild(label);
 
     return label;
