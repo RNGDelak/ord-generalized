@@ -59,61 +59,40 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
-    // Check syntax first
     try {
+        // Validate syntax
         new Function(codeString);
-    } catch (err) {
+    } catch (e) {
         alert(
-            "Syntax Error!\n\n" +
-            err.message
+            `Syntax Error\n\n` +
+            `${e.message}`
         );
         return;
     }
 
     try {
-        // Remove previous notation script
-        const oldScript = document.getElementById("notation-script");
-        if (oldScript) oldScript.remove();
+        const wrappedCode =
+            codeString +
+            "\n//# sourceURL=InjectedCustomCode.js";
 
-        // Create Blob URL
-        const blob = new Blob([codeString], {
-            type: "application/javascript"
-        });
-        const blobURL = URL.createObjectURL(blob);
+        const script = document.createElement("script");
+        script.id = "notation-script";
+        script.textContent = wrappedCode;
 
-        // Create script element
-        const newScript = document.createElement("script");
-        newScript.id = "notation-script";
-        newScript.src = blobURL;
+        const old = document.getElementById("notation-script");
+        if (old) old.remove();
 
-        // Runtime loading failure
-        newScript.onerror = () => {
-            URL.revokeObjectURL(blobURL);
-            alert("Failed to load injected script.");
-        };
+        document.body.appendChild(script);
 
-        // Successfully loaded
-        newScript.onload = () => {
-            URL.revokeObjectURL(blobURL);
+        if (typeof init === "function") {
+            init();
+        }
 
-            try {
-                if (typeof init === "function") {
-                    init();
-                }
-            } catch (err) {
-                alert(
-                    "Runtime Error!\n\n" +
-                    err.stack
-                );
-            }
-        };
-
-        document.body.appendChild(newScript);
-
-    } catch (err) {
+    } catch (e) {
         alert(
-            "Execution Error!\n\n" +
-            err.stack
+            `Runtime Error\n\n` +
+            `${e.message}\n\n` +
+            `${e.stack}`
         );
     }
 }
