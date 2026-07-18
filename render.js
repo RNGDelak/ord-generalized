@@ -3,13 +3,29 @@ const canvas = document.getElementById("canvas"); // get canvas
 const ui = document.getElementById("textOverlay");
 
 function resizeCanvas() {
-    // Check if the current dimensions actually changed before resetting bounds
-    // to prevent canvas context flashing or stuttering on mobile scrolling
     if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        // 1. Capture ratios of the existing layout view if it exists
+        let ratioX0 = 0.2; // Default fallback ratios
+        let ratioX1 = 0.8;
+        
+        if (canvas.width > 0 && typeof cam !== 'undefined' && cam.view) {
+            ratioX0 = cam.view.x0 / canvas.width;
+            ratioX1 = cam.view.x1 / canvas.width;
+        }
+
+        // 2. Adjust physical canvas resolution boundaries
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // If the rendering engine has booted up, force an immediate redraw
+        // 3. Re-map viewport boundaries to new pixel dimensions safely
+        if (typeof cam !== 'undefined' && cam.view) {
+            cam.view.x0 = ratioX0 * canvas.width;
+            cam.view.x1 = ratioX1 * canvas.width;
+        }
+        
+        // 4. Wipe out cached text elements so DOM tracking doesn't overlap
+        clearTextLabels(); 
+
         if (typeof render === "function" && window.notation) {
             render();
         }
