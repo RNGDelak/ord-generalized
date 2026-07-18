@@ -86,3 +86,16 @@ function executeCustomScript(codeString) {
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
 });
+function dismissHint() {
+    const hintElement = document.getElementById("hint");
+    if (hintElement) {
+        // Fade it out cleanly using the CSS transitions defined above
+        hintElement.style.opacity = "0";
+        hintElement.style.visibility = "hidden";
+        
+        // Remove pointer interactions entirely once closed so users can interact with elements behind it
+        setTimeout(() => {
+            hintElement.remove();
+        }, 400); 
+    }
+}

@@ -4,7 +4,6 @@ const ui = document.getElementById("textOverlay");
 
 function resizeCanvas() {
     if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        // 1. Capture ratios of the existing layout view if it exists
         let ratioX0 = 0.2; // Default fallback ratios
         let ratioX1 = 0.8;
         
@@ -13,17 +12,14 @@ function resizeCanvas() {
             ratioX1 = cam.view.x1 / canvas.width;
         }
 
-        // 2. Adjust physical canvas resolution boundaries
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // 3. Re-map viewport boundaries to new pixel dimensions safely
         if (typeof cam !== 'undefined' && cam.view) {
             cam.view.x0 = ratioX0 * canvas.width;
             cam.view.x1 = ratioX1 * canvas.width;
         }
-        
-        // 4. Wipe out cached text elements so DOM tracking doesn't overlap
+    
         clearTextLabels(); 
 
         if (typeof render === "function" && window.notation) {
@@ -34,9 +30,6 @@ function resizeCanvas() {
 
 // Initial sync
 resizeCanvas();
-
-// Handle device rotation or desktop viewport snapping instantly
-window.addEventListener("resize", resizeCanvas);
 
 // Continuous safeguard loop: Catches layout shifts on mobile device address-bar hiding
 function continuousResizeCheck() {
@@ -68,7 +61,6 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
     label.className = "textLabel";
     label.innerHTML = text;
     
-    // Explicitly enforce positioning context limits
     label.style.position = "absolute";
     label.style.left = x + "px";
     label.style.top = y + "px";
@@ -89,13 +81,19 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
     }
 
     label.style.transform = `translate(${tx}, ${ty})`;
-    ui.appendChild(label);
+
+    const dynamicContainer = document.getElementById("dynamicLabels") || ui;
+    dynamicContainer.appendChild(label);
 
     return label;
 }
 
 function clearTextLabels() {
-    ui.replaceChildren();
+    const dynamicContainer = document.getElementById("dynamicLabels");
+    if (dynamicContainer) {
+        dynamicContainer.replaceChildren();
+    } else {
+        ui.replaceChildren();
+    }
 }
-
 

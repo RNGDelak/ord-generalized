@@ -97,7 +97,7 @@
 
         .menu-group textarea {
             height: 150px;
-            resize: vertical;
+            resize: auto;
             font-size: 11px;
         }
 
@@ -116,6 +116,35 @@
             background: #0098ff;
         }
 
+        #hint {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.95);
+            color: #ffffff;
+            font: 18px Serif;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            line-height: 1.6;
+            user-select: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #closehint {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -123,12 +152,11 @@
 
     <button id="configToggleBtn" onclick="toggleConfigMenu()">Config Menu</button>
 
-    <div id="configMenu" style="width: 90%;">
+    <div id="configMenu" style="width: 400px;">
         <div class="menu-group">
             <label for="presetSelect">Tutorial Presets (Notation System)</label>
             <select id="presetSelect" onchange="loadPresetNotation(this.value)">
                 <option value="Libs/BMS.js">BMS (Default)</option>
-                <option value="Libs/HPrSS.js">HPrSS</option>
             </select>
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
@@ -147,7 +175,31 @@
     </div>
 
     <canvas id="canvas"></canvas>
-    <div id="textOverlay"></div>
+    <div id="textOverlay">
+        <div id="dynamicLabels"></div>
+
+
+        <div id="fpsCounter"
+            style="position: absolute; left: 10px; bottom: 10px; color: #9083ff; font: 24px Serif; user-select: none; pointer-events: none;">
+            60fps</div>
+        <div id="sampleLabel"
+            style="position: absolute; left: 10%; top: 87.5%; color: #ffffff; font: 40px Serif; user-select: none; pointer-events: none; white-space: pre-wrap; word-break: break-word; transform: translateY(-50%); max-width: 80%;">
+        </div>
+    </div>
+
+    <div id="hint">
+        <div style="text-align: left; margin-bottom: 20px;">
+            • Arrow keys / mouse drag & wheel to control<br>
+            • <strong>A</strong> to increase rendering depth, <strong>S</strong> to reduce rendering depth<br>
+            • <strong>M</strong> to switch rendering mode<br>
+            • <strong>Ctrl</strong> to slow down arrow controls, <strong>Shift</strong> to speed up<br>
+            • Open Config Menu for further settings
+        </div>
+
+        <button id="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'" onmouseout="this.style.background='#007acc'">
+            I understand
+        </button>
+    </div>
 
     <script src="render.js"></script>
 

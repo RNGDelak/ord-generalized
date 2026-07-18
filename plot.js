@@ -7,8 +7,10 @@ let config = {
     ctrlMultiplier: 0.25,
     wheelZoomIn: 1.5,
     wheelZoomOut: 2 / 3,
-    maxAllowedWidthFactor: 0.5
+    maxAllowedWidthFactor: 0.5,
+    mode: 0,
 };
+
 let cam = {
     w: canvas.width,
     h: canvas.height,
@@ -18,29 +20,38 @@ let cam = {
     ilxw: 1.0 / Math.log(canvas.width),
     fps: undefined,
     times: [],
-    lastKeyboardTime: performance.now(), 
+    lastKeyboardTime: performance.now(),
     view: {
-        x0: 0, 
-        x1: 0, 
+        x0: 0,
+        x1: 0,
         maxDepth: -1,
         mouse: { x: 0, y: 0, isDown: false, lastX: 0, lastY: 0 }
     },
     ticks: [],
     impor: [],
-    labelsToDraw: [], 
+    labelsToDraw: [],
     samplerBd: 1e20,
     samplerOrd: null,
-    activeKeys: {} 
+    activeKeys: {}
 };
+
+let lastFrameTime = performance.now();
 
 function refreshLoop() {
     window.requestAnimationFrame(() => {
         const now = performance.now();
-        while (cam.times.length > 0 && cam.times[0] <= now - 1000) {
-            cam.times.shift();
+
+        const deltaTime = now - lastFrameTime;
+
+        lastFrameTime = now;
+        const fps = 1000 / deltaTime;
+        cam.fps = fps;
+
+        const fpsElem = document.getElementById("fpsCounter");
+        if (fpsElem && cam.fps !== undefined) {
+            fpsElem.innerText = cam.fps.toFixed(1) + 'fps';
         }
-        cam.times.push(now);
-        cam.fps = cam.times.length;
+
         refreshLoop();
     });
 }
@@ -54,7 +65,7 @@ function converge1(a, b, rescale = 1) {
 function initTicks(width) {
     cam.ticks = new Array(Math.ceil(width)).fill(null);
     cam.impor = new Array(Math.ceil(width)).fill(0);
-    cam.labelsToDraw = []; 
+    cam.labelsToDraw = [];
 }
 
 function importanceSeg(x0, x1, width) {
@@ -81,7 +92,7 @@ function tickmarkLabel(x0, x1, o0, width) {
     });
 }
 function segment(x0, x1, o0, o1, eps, xmin, xmax, depth, lefts, callback) {
-    if (x1 <= xmin || x0 > xmax) return; 
+    if (x1 <= xmin || x0 > xmax) return;
 
     importanceSeg(x0, x1, xmax);
 
@@ -103,7 +114,7 @@ function segment(x0, x1, o0, o1, eps, xmin, xmax, depth, lefts, callback) {
         for (n = 0; s_x0 < top && s_x0 < xmax; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1(s_x0, x1, 1);
-            if (n > 1000) break; 
+            if (n > 1000) break;
         }
 
         let m = n + 2;
@@ -149,7 +160,7 @@ function computeTree(width) {
     segment(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, 1, 0, width, 0, 0, tickmark);
 
     tickmarkLabel(cam.view.x0, cam.view.x0, notation.Zero, width);
-    segment(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, 80, 0, width, 0, 0, tickmarkLabel);
+    segment(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, canvas.width / 8, 0, width, 0, 0, tickmarkLabel);
 
     tickmarkLabel(cam.view.x1, cam.view.x1, notation.Limit, width);
 }
@@ -165,8 +176,16 @@ function samplerCallback(x0, x1, o0, xmax) {
 }
 
 function sampleHighPrecision(x, width) {
-    cam.samplerBd = 1e20;
-    cam.samplerOrd = null;
+    if (x >= cam.view.x1) {
+        const sampleElem = document.getElementById("sampleLabel");
+        if (sampleElem) {
+            sampleElem.innerHTML = "Lim(BMS)";
+        }
+        return;
+    }
+
+    cam.samplerBd = 1e20; //
+    cam.samplerOrd = null; //
 
     const eps = 1;
     const xmin = x;
@@ -186,23 +205,17 @@ function sampleHighPrecision(x, width) {
     );
 
     if (cam.samplerBd < 1e20) {
-        const mode = notation.DisplayName[1];
+        const mode = notation.DisplayName[config.mode];
         const ordStr = notation.display(cam.samplerOrd, mode);
-
-        createTextLabel(
-            ordStr,
-            "#ffffff",
-            0,
-            canvas.height * 0.9,
-            "left",
-            "middle",
-            "bold 24px Arial"
-        );
+        const sampleElem = document.getElementById("sampleLabel");
+        if (sampleElem) {
+            sampleElem.innerHTML = ordStr;
+        }
     }
 }
 
 function drawTimelineLabels() {
-    const mode = notation.DisplayName[1];
+    const mode = notation.DisplayName[config.mode];
     const h = canvas.height;
 
     cam.labelsToDraw.forEach((lbl) => {
@@ -216,11 +229,11 @@ function drawTimelineLabels() {
         createTextLabel(
             labelString,
             "#ffffff",
-            px,
-            py,
+            px - 7,
+            py - 10,
             "left",
             "bottom",
-            "12px Arial"
+            "22px Serif"
         );
 
         notation.Aliases.forEach(([name, defStr]) => {
@@ -229,11 +242,11 @@ function drawTimelineLabels() {
                 createTextLabel(
                     name,
                     "#808080",
-                    px,
-                    py - 20,
+                    px - 13,
+                    py - 35,
                     "left",
                     "bottom",
-                    "italic 20px Arial"
+                    "italic 20px Serif"
                 );
             }
         });
@@ -241,12 +254,12 @@ function drawTimelineLabels() {
 }
 
 function drawHUD() {
-    let py = 20;
-    const px = canvas.width - 20;
+    let py = 7;
+    const px = canvas.width - 7;
 
     notation.ordinalTypes.forEach(([name, color]) => {
-        createTextLabel(name, color, px, py, "right", "top", "14px Arial");
-        py += 22;
+        createTextLabel(name, color, px, py, "right", "top", "26px Serif");
+        py += 30;
     });
 }
 function render() {
@@ -279,16 +292,6 @@ function render() {
     drawTimelineLabels();
 
     drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
-
-    createTextLabel(
-        (cam.fps ? cam.fps : '60') + 'fps',
-        "#ffffff",
-        0,
-        canvas.height * 1,
-        "left",
-        "bottom",
-        "bold 24px Arial"
-    );
 
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
@@ -392,12 +395,17 @@ window.addEventListener("keydown", (e) => {
 
     let actionTriggered = false;
 
-    if (e.key === "s") {
+    if (e.key === "m") {
+        config.mode = (config.mode + 1) % notation.DisplayName.length
+        actionTriggered = true;
+    }
+
+    if (e.key === "a") {
         cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
         actionTriggered = true;
     }
 
-    if (e.key === "d") {
+    if (e.key === "s") {
         cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
         actionTriggered = true;
     }
@@ -473,12 +481,12 @@ function updateKeyboardInput() {
 
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
-    
+
     // Stop the mobile screen from bouncing or pulling-to-refresh
-    if (e.target === canvas) e.preventDefault(); 
+    if (e.target === canvas) e.preventDefault();
 
     cam.view.mouse.isDown = true;
-    
+
     // Map touch positions exactly to your desktop mouse tracking anchors
     cam.view.mouse.lastX = e.touches[0].clientX;
     cam.view.mouse.lastY = e.touches[0].clientY;
