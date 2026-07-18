@@ -470,7 +470,6 @@ function updateKeyboardInput() {
 
     requestAnimationFrame(updateKeyboardInput);
 }
-updateKeyboardInput();
 
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
@@ -530,4 +529,5 @@ window.addEventListener("touchmove", (e) => {
 window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
 window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
 
+updateKeyboardInput();
 init();
