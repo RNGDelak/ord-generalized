@@ -2,42 +2,6 @@
 const canvas = document.getElementById("canvas"); // get canvas
 const ui = document.getElementById("textOverlay");
 
-function resizeCanvas() {
-    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        let ratioX0 = 0.2; // Default fallback ratios
-        let ratioX1 = 0.8;
-        
-        if (canvas.width > 0 && typeof cam !== 'undefined' && cam.view) {
-            ratioX0 = cam.view.x0 / canvas.width;
-            ratioX1 = cam.view.x1 / canvas.width;
-        }
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        if (typeof cam !== 'undefined' && cam.view) {
-            cam.view.x0 = ratioX0 * canvas.width;
-            cam.view.x1 = ratioX1 * canvas.width;
-        }
-    
-        clearTextLabels(); 
-
-        if (typeof render === "function" && window.notation) {
-            render();
-        }
-    }
-}
-
-// Initial sync
-resizeCanvas();
-
-// Continuous safeguard loop: Catches layout shifts on mobile device address-bar hiding
-function continuousResizeCheck() {
-    resizeCanvas();
-    requestAnimationFrame(continuousResizeCheck);
-}
-continuousResizeCheck();
-
 const ctx = canvas.getContext("2d"); //get drawing context
 
 function clearCanvas() {

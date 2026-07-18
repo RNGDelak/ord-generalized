@@ -197,6 +197,7 @@ window.notation = (() => {
     ]; //optional: for legends gui purposes so user can know colour correspond to class of ordinal 
 
     const Aliases = [
+        ["First 67 Ordinal", fs([[0],[1]],66)], //easter egg ordinal btw
         ["First Transfinite Ordinal", [[0], [1]]],
         ["Small Cantor Ordinal", [[0, 0], [1, 1]]],
         ["Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 0]]],
