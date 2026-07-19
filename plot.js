@@ -277,7 +277,7 @@ function drawTimelineLabels() {
 
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
-                createTextLabel(name, "#808080", px - 13, py - 35, "left", "bottom", "italic 20px Serif");
+                createTextLabel(name, "#808080", px - 7, py - 35, "left", "bottom", "italic 20px Serif");
             }
         });
     });
