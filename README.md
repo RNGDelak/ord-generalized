@@ -17,79 +17,122 @@ importantly, you must have at least 4 functions and gettings all the constant re
 ```js
 window.notation = (() => {
 
-  //Required: Fundamental Sequence
+  // Smallest ordinal
+  const Zero = [];
+
+  // Largest value used by the explorer.
+  // This must be accepted by fs(), cmp(), display(), etc.
+  const Limit = "Limit";
+
+  // -------------------------
+  // Required Functions
+  // -------------------------
+
+  // Fundamental sequence
+  // Returns the nth approximation of a limit ordinal.
   function fs(ord, n) {
-    if(ord == Limit) returb expanLimit(n)
-    return expab(ord,n);
+    if (ord === Limit)
+      return expandLimit(n);
+
+    return expand(ord, n);
   }
 
-  //Required: Comparator
+  // Ordinal comparison
+  //
+  // Returns:
+  //  -1 if a < b
+  //   0 if a = b
+  //   1 if a > b
+  //
+  // Must support the special value "Limit".
   function cmp(a, b) {
-    //you must support limit as an input
-    if (a == Limit && b == Limit) return 0;
-    if (a == Limit) return 1;
-    if (b == Limit) return -1;
 
-    return compare(a,b)
+    if (a === Limit && b === Limit) return 0;
+    if (a === Limit) return 1;
+    if (b === Limit) return -1;
+
+    return compare(a, b);
   }
 
-  //Required: Successor check
+  // Returns true iff ord is a successor ordinal.
   function isSuccessor(ord) {
-    return ord.isSuccessor
+    return ord.isSuccessor;
   }
- 
-  //Required: convert your ordinal into displayable string. Support html tags
+
+  // Converts an ordinal into text.
+  // HTML is allowed.
   function display(ord, mode) {
-    if(mode=="mode 1") returb ord.toString
-    if(mode=="mode 2") returb ord.toOrdinal 
-    //more modes here. Dont forget to add those to DisplayName so my program could know that
+
+    if (mode === "Standard")
+      return ord.toString();
+
+    if (mode === "Pretty")
+      return ord.toOrdinal();
+
   }
 
-  //this function will color yours ordinal number lind
+  // Determines the colour used on the number line.
+  // Must return a hexadecimal colour.
   function classifyOrdinal(ord) {
-    if (ord.IsZero)
-      return "#808080"; //Expecting HEX color as output
 
-    if (ord.IsSuccessor)
+    if (ord.isZero)
+      return "#808080";
+
+    if (ord.isSuccessor)
       return "#d40000";
 
     if (ord.isLimit)
-      return "#ff8000"; 
+      return "#ff8000";
 
   }
 
-  //Compulsory : you have to fill this your self. This should also be a valid input for all main functions
-  const Zero = []; //smallest ordinal
-  const Limit = "Limit"; //largest ordinal
+  // -------------------------
+  // Display Settings
+  // -------------------------
 
-  //List your notation name here. These will be the agrument 'mode' inside display functions
-  const DisplayName = ["mode 1", 'mode 2'];
+  // Names of every display mode.
+  // These are passed to display().
+  const DisplayName = [
+    "Standard",
+    "Pretty"
+  ];
 
-  //This will be show as a legend gui
+  // Legend shown in the UI.
   const ordinalTypes = [
     ["Zero", "#808080"],
     ["Successor Ordinal", "#d40000"],
     ["Limit Ordinal", "#ff8000"]
-    //adding more if your notations supporting it
   ];
 
-  //Adding your important ordinal here
+  // Named ordinals shown in the milestone list.
   const Aliases = [
-    ["An important ordinal", ImporOrd.Value]
+    ["An important ordinal", ImportantOrdinal]
   ];
-  
-  //currently have no function yet
-  const config = {types: "default"};
 
-  const title = "Your transfinite number line";
+  // Reserved for future configuration options.
+  const config = {
+    types: "default"
+  };
 
-  return {fs,cmp,isSuccessor,display,classifyOrdinal,parse,Zero,Limit,DisplayName,ordinalTypes,Aliases,config,title};
+  // Title displayed by the explorer.
+  const title = "My Transfinite Number Line";
+
+  return {
+    fs,
+    cmp,
+    isSuccessor,
+    display,
+    classifyOrdinal,
+    parse,
+    Zero,
+    Limit,
+    DisplayName,
+    ordinalTypes,
+    Aliases,
+    config,
+    title
+  };
 
 })();
-
-//You can either add yours helpers outside or inside the IIEF
-function helpers(M) {
-    Return M.map(x=>x)
-}
 ```
 
