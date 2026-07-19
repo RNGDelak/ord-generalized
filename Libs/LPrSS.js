@@ -1,6 +1,6 @@
 /*
 Notation : LPrSS
-Limit : phi(0,w)
+Limit : phi(0,ω)
 */
 
 //for pretty printing use abbreviateVeblen

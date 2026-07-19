@@ -1,12 +1,242 @@
 /*
 Notation : BMS
-Limit : ω-Y(1,3)
+Limit : ψ(B(ω))
 */
 
-// You must have cmp,isSuccessor,fs and display(at least 1 mode). Some constant is required too
+function unparse(ord) {
+    let str = ":";
+    let pos = 0;
+
+    for (let i = 0; i < ord.length; i++)
+        if (ord[i] === 0) {
+            str += `(${ord.slice(pos + 1, i).join(",")})`;
+            pos = i;
+        }
+
+    return str;
+}
+
+// Explorer
+function isZero(ord) {
+    return ord.length === 0;
+}
+
+function isSucc(ord) {
+    return ord.at(-1) === 0
+        && (!ord.at(-2) || ord.at(-2) === 0);
+}
+
+function rank(a, b) {
+    const minLength = Math.min(a.length, b.length);
+
+    for (let i = 0; i < minLength; i++)
+        if (a[i] !== b[i]) return a[i] > b[i];
+
+    return a.length > b.length;
+}
+
+// Expansion
+
+function fill(ord, num, func) {
+    for (let i = 0; i < num; i++)
+        ord.push(...func());
+
+    return ord;
+}
+
+function getLimit(num) {
+    return [...fill([0], num + 1, () => [1]), 0];
+}
+
+function item(col, index) {
+    return col[index] ?? 0;
+}
+
+function getColumn(ord, root, step) {
+    do root += step; while (item(ord, root - 1) > 0);
+    return root;
+}
+
+function ascendColumn(ord, root, ascendMap) {
+    for (let i = 0; item(ascendMap, i) > 0; i++) {
+        if (item(ord, root + i) === 0 && ascendMap[i] > 0)
+            ord.splice(root + i, 0, 0);
+
+        ord[root + i] += ascendMap[i];
+    }
+}
+
+function ascend(ord, ascendMap) {
+    let root = 0;
+    let ascRoot = 0;
+    do {
+        ascendColumn(ord, root, ascendMap.slice(ascRoot))
+        root = getColumn(ord, root, 1);
+        ascRoot = getColumn(ascendMap, ascRoot, 1);
+    }
+    while (root < ord.length);
+    return ord;
+}
+
+function updHead(head, column) {
+    for (let i = 0; i < head.length - 1; i++) {
+        if (head[i] <= item(column, i)) return true;
+        head[i] = item(column, i);
+    }
+
+    return false;
+}
+
+function search(ord, head) {
+    let root = ord.length;
+    let column;
+    do {
+        const mark = getColumn(ord, root, -1);
+        column = ord.slice(mark, root);
+        root = mark;
+    }
+    while (updHead(head, column));
+    return [root, column];
+}
+
+function getOffsetArray(head, root) {
+    const offset = [];
+    for (let i = 0; i < head.length - 2; i++)
+        offset.push(head[i] - item(root, i));
+
+    offset.push(0);
+    return offset;
+}
+
+function addMapColumn(map, count, offset, column, rootColumn) {
+    for (let i = 0; i < offset.length - 1; i++) {
+        if (item(column, i - 1) < count[i])
+            count[i] = 0;
+
+        if (item(column, i) <= item(rootColumn, i))
+            count[i] = item(column, i - 1);
+
+        if (count[i] > 0) break;
+        map.push(offset[i]);
+    }
+    map.push(0);
+}
+
+function getAscendMap(ord, rootColumn, offset) {
+    let count = fill([], offset.length, () => [0]);
+    let root = rootColumn.length;
+    const map = [...offset];
+
+    while (root < ord.length) {
+        const mark = getColumn(ord, root, 1);
+        const column = ord.slice(root, mark);
+        root = mark;
+
+        addMapColumn(map, count, offset, column, rootColumn);
+    }
+
+    return map;
+}
+
+
+function expand(ord, num) {
+    const head = ord.splice(getColumn(ord, ord.length, -1));
+
+    if (head.length > 1) {
+        const [root, column] = search(ord, [...head]);
+        const part = ord.slice(root);
+
+        const offset = getOffsetArray(head, column);
+        const ascendMap = getAscendMap(part, column, offset);
+
+        fill(ord, num, () => ascend(part, ascendMap));
+    }
+
+    return ord;
+}
+
+function toMatrix(ord) {
+    const matrix = [];
+    let col = [];
+    let height = 0;
+
+    for (let i = 0; i < ord.length; i++) {
+        const x = ord[i];
+
+        if (x === 0) {
+            matrix.push(col);
+            if (col.length > height) height = col.length;
+            col = [];
+        } else {
+            col.push(x);
+        }
+    }
+
+    if (col.length) {
+        matrix.push(col);
+        if (col.length > height) height = col.length;
+    }
+
+    for (let i = 0; i < matrix.length; i++) {
+        while (matrix[i].length < height)
+            matrix[i].push(0);
+    }
+
+    return matrix;
+}
+
 window.notation = (() => {
 
-    function cmp(m1, m2) {
+    //==========================
+    // Core
+    //==========================
+
+    function fs(ord, n) {
+        if (ord === Limit)
+            return getLimit(n);
+
+        return expand([...ord], n);
+    }
+
+    function cmp(a, b) {
+        if (a === Limit && b === Limit) return 0;
+        if (a === Limit) return 1;
+        if (b === Limit) return -1;
+
+        const min = Math.min(a.length, b.length);
+
+        for (let i = 0; i < min; i++) {
+            if (a[i] !== b[i])
+                return a[i] < b[i] ? -1 : 1;
+        }
+
+        if (a.length < b.length) return -1;
+        if (a.length > b.length) return 1;
+        return 0;
+    }
+
+    function isSuccessor(ord) {
+        return ord !== Limit &&
+            ord.at(-1) === 0 &&
+            (!ord.at(-2) || ord.at(-2) === 0);
+    }
+
+    //==========================
+    // Display
+    //==========================
+
+    function display(ord,mode) {
+        if (ord === Limit) return "ψ(B(ω))";
+        if (ord.length === 0) return "0";
+        let bsm = toMatrix(ord)
+        if (mode == 1 || cmp_BMS(bsm,[[0,0,0],[1,1,1],[2,2,0]]) >= 0)
+        return bsm.map(p => `(${p.join(',')})`).join('')
+
+        if (mode == 2)
+        return Conv_BMS_OCF(bsm)
+    }
+
+    function cmp_BMS(m1, m2) {
         function sequence_compare(seq1, seq2) {
             if (seq1.length === 0) {
                 if (seq2.length === 0) return 0;
@@ -44,120 +274,8 @@ window.notation = (() => {
         return c || cmp(m1.slice(1), m2.slice(1));
     }
 
-    function isSuccessor(matrix) {
-        return matrix !== "Limit" && (matrix.length === 0 || !matrix.at(-1)?.some(x => x !== 0));
-    }
-
-    function fs(m, FSterm) {
-        if (m === "Limit") {
-            return [
-                Array(FSterm + 1).fill(0),
-                Array(FSterm + 1).fill(1)
-            ];
-        }
-
-        if (m.length === 0) {
-            return [];
-        }
-
-        const parent_cache = Object.create(null);
-        const ascending_cache = Object.create(null);
-
-        function parent(x, y) {
-            const key = `${x},${y}`;
-
-            if (key in parent_cache) {
-                return parent_cache[key];
-            }
-
-            let p = x;
-
-            while ((p = y ? parent(p, y - 1) : p - 1) >= 0) {
-                if (m[p][y] < m[x][y]) break;
-            }
-
-            return parent_cache[key] = p;
-        }
-
-        function ascending(r, x, y) {
-            const key = `${r},${x},${y}`;
-
-            if (key in ascending_cache) {
-                return ascending_cache[key];
-            }
-
-            return ascending_cache[key] =
-                r <= x &&
-                (r === x || ascending(r, parent(x, y), y));
-        }
-
-        const endcol = m.length - 1;
-        let result = m.slice(0, endcol);
-
-        const child = m[endcol];
-        const ymax = child.length - 1;
-
-        let LNZ;
-
-        for (LNZ = ymax; LNZ >= 0; --LNZ) {
-            if (child[LNZ] > 0) break;
-        }
-
-        if (LNZ < 0) {
-            return result;
-        }
-
-        const BR = parent(endcol, LNZ);
-        const BRcolumn = m[BR];
-
-        const offset = child.map((v, y) =>
-            y < LNZ ? v - BRcolumn[y] : 0
-        );
-
-        const offsetAsc = Array(endcol)
-            .fill(0, BR)
-            .map((_, x) =>
-                offset.map((v, y) =>
-                    ascending(BR, x, y) ? v : 0
-                )
-            );
-
-        for (let n = 1; n <= FSterm; n++) {
-            for (let col = BR; col < endcol; col++) {
-                result.push(
-                    m[col].map(
-                        (v, y) =>
-                            v + offsetAsc[col][y] * n
-                    )
-                );
-            }
-        }
-
-        if (
-            ymax > 0 &&
-            result.every(column => column[ymax] === 0)
-        ) {
-            result = result.map(column =>
-                column.slice(0, ymax)
-            );
-        }
-
-        return result;
-    }
-
-    const ZERO = []
-
-    function display(ord, mode) {
-        if (ord.length == 0) return '0' //you need a fallback for 0 and limit
-        if (cmp(ord, 'Limit') == 0) return 'Lim(BMS)'
-        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) == 1) //you need a fall back too. my program doesn't know that tho
-            return ord.map(p => `(${p.join(',')})`).join('')
-
-        if (mode == "2 shifted-OCF")
-            return Conv_BMS_OCF(ord)
-    }
-
     function classifyOrdinal(M) {
+        M = toMatrix(M)
         if (!M.length) return "#808080"; // Zero
 
         let j = M.findLastIndex(x => !x[0]);
@@ -173,27 +291,36 @@ window.notation = (() => {
 
         const N = M.slice(j);
 
-        if (cmp(N, [[1, 1, 1]]) >= 0) return "#3f3f3f"; // Buchholz
-        if (cmp(N, [[1, 1], [2, 2]]) >= 0) return "#000fff"; // Bachmann–Howard
-        if (cmp(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff"; // Feferman–Schütte
-        if (cmp(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0"; // Veblen
-        if (cmp(N, [[1, 1]]) >= 0) return "#00FF00"; // ε
+        if (cmp_BMS(N, [[1, 1, 1]]) >= 0) return "#3f3f3f"; // Buchholz
+        if (cmp_BMS(N, [[1, 1], [2, 2]]) >= 0) return "#000fff"; // Bachmann–Howard
+        if (cmp_BMS(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff"; // Feferman–Schütte
+        if (cmp_BMS(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0"; // Veblen
+        if (cmp_BMS(N, [[1, 1]]) >= 0) return "#00FF00"; // ε
 
         if (M.at(-1)[0] == M.length - 1) return "#ffffff"; // Tower of ω
 
         return "#ffff00"; // Power of ω
     }
 
-    //optionals : in future i'll add an ordinal finder, and this is nessessary to process user inputs
-    //currently have no function yet
     function parse(str) {
-        return str;
+        return str
+            .replace(/[():]/g, "")
+            .split(",")
+            .filter(x => x.length)
+            .map(Number);
     }
 
-    const Zero = [] //compulsory: how the first ordinal defined in your system defined? Should be an valid ordinal input for above functions
-    const Limit = 'Limit' //compulsory: how the bounded ordinal in your system defined? Should be an valid ordinal input for above functions
+    //==========================
+    // Constants
+    //==========================
 
-    const DisplayName = ["normal", "2 shifted-OCF"] //compulsory: add all your mode name here so the program can query and display them
+    const Zero = [];
+    const Limit = "Limit";
+
+    const DisplayName = [
+        1,2
+    ];
+
     const ordinalTypes = [
         ["Zero", "#808080"],
         ["Successor Ordinal", "#d40000"],
@@ -205,42 +332,40 @@ window.notation = (() => {
         ["Feferman–Schütte Ordinal", "#f00fff"],
         ["Bachmann–Howard Ordinal", "#000fff"],
         ["Buchholz Ordinal", "#3f3f3f"]
-    ]; //optional: for legends gui purposes so user can know colour correspond to class of ordinal 
+    ];
 
     const Aliases = [
-        ["First 67 Ordinal", fs([[0], [1]], 66)], //easter egg ordinal btw
-        ["First Transfinite Ordinal", [[0], [1]]],
-        ["Small Cantor Ordinal", [[0, 0], [1, 1]]],
-        ["Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 0]]],
-        ["Feferman–Schütte Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1]]],
-        ["First Γ fixed point", [[0, 0], [1, 1], [2, 1], [3, 1], [2, 1]]],
-        ["Ackermann Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [3, 1]]],
-        ["Small Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [4, 0]]],
-        ["Large Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [4, 1]]],
-        ["Ackermann Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [3, 1]]],
-        ["Bachmann–Howard Ordinal", [[0, 0], [1, 1], [2, 2]]],
-        ["Buchholz's Ordinal", [[0, 0, 0], [1, 1, 1]]],
-        ["Takeuti-Feferman-Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 0], [3, 2, 0]]],
-        ["Bird's Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 1], [3, 1, 0]]],
-        ["Extended Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 1], [3, 1, 0], [2, 0, 0]]],
-        ["Multivariable Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 1], [3, 1, 1], [3, 0, 0]]],
-        ["Transfinitary Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 1], [3, 1, 1], [3, 1, 0], [2, 0, 0]]],
-        ["Dimensional Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 1], [3, 1, 1], [3, 1, 0], [4, 2, 0]]],
-        ["Small Stergent Ordinal", [[0, 0, 0], [1, 1, 1], [2, 2, 0]]],
-        ["Small Dropping Ordinal", [[0, 0, 0], [1, 1, 1], [2, 2, 1], [3, 0, 0]]],
-        ["2nd Back Gear ordinal", [[0, 0, 0], [1, 1, 1], [2, 2, 1], [3, 3, 0]]],
-        ["Omega Back ordinal / Small Bashicu ordinal", [[0, 0, 0], [1, 1, 1], [2, 2, 2]]],
-        ["Lim(TSS)", [[0, 0, 0, 0], [1, 1, 1, 1]]],
-        ["Lim(QSS)", [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]]],
-        ["Lim(BMS) / ω-Y(1,3)", 'Limit'],
-    ] //optional: important ordinal will show up with a labels.
+        ["0", []],
+        ["1", [0]],
+        ["ω", [0, 1, 0]],
+        ["ω^ω", [0, 1, 0, 2, 0]],
+        ["ε₀", [0, 0, 0, 1]],
+        ["ψ(B(ω))", Limit]
+    ];
 
-    const config = { types: "default" } //optional: currently have no function yet
-    const title = 'BMS transfinite number line' //optional: title of the page
+    const config = {
+        types: "default"
+    };
 
-    return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
+    const title = "BM4 transfinite number line";
+
+    return {
+        fs,
+        cmp,
+        isSuccessor,
+        display,
+        classifyOrdinal,
+        parse,
+        Zero,
+        Limit,
+        DisplayName,
+        ordinalTypes,
+        Aliases,
+        config,
+        title
+    };
+
 })();
-
 
 //for example, you can literally put functions outside too, atleast they not overlaps any others name in this program
 function Conv_BMS_OCF(matrix) {
