@@ -104,7 +104,7 @@ window.notation = (() => {
     ["Limit Ordinal", "#ff8000"]
   ];
 
-  // Named ordinals shown in the milestone list.
+  // These ordinal will appear with a labels with its
   const Aliases = [
     ["An important ordinal", ImportantOrdinal]
   ];
