@@ -51,6 +51,7 @@ let config = {
     wheelZoomIn: 1.5,
     wheelZoomOut: 2 / 3,
     maxAllowedWidthFactor: 0.5,
+    labelscount: 8,
     mode: 0,
 };
 
@@ -209,7 +210,7 @@ function computeTree(width) {
 
     tickmarkLabel(toNum(cam.view.x0), toNum(cam.view.x0), notation.Zero, width);
     
-    const labelEpsBI = toBigInt(canvas.width / 8);
+    const labelEpsBI = toBigInt(canvas.width / config.labelscount);
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, labelEpsBI, xminBI, xmaxBI, 0, 0, tickmarkLabel, width);
 
     tickmarkLabel(toNum(cam.view.x1), toNum(cam.view.x1), notation.Limit, width);

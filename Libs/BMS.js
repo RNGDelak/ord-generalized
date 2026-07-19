@@ -149,29 +149,39 @@ window.notation = (() => {
 
     function display(ord, mode) {
         if (ord.length == 0) return '0' //you need a fallback for 0 and limit
-        if (cmp(ord,'Limit') == 0) return 'Lim(BMS)'
-        if (mode == "normal" || cmp(ord,[[0,0,0],[1,1,1],[2,2,0]]) == 1) //you need a fall back too. my program doesn't know that tho
-        return ord.map(p => `(${p.join(',')})`).join('')
+        if (cmp(ord, 'Limit') == 0) return 'Lim(BMS)'
+        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) == 1) //you need a fall back too. my program doesn't know that tho
+            return ord.map(p => `(${p.join(',')})`).join('')
 
         if (mode == "2 shifted-OCF")
-        return Conv_BMS_OCF(ord)
+            return Conv_BMS_OCF(ord)
     }
 
-    function classifyOrdinal(ord) {
-        if (ord.length == 0) return "#808080"
+    function classifyOrdinal(M) {
+        if (!M.length) return "#808080"; // Zero
 
-        let zerocount = 1
-        let istower = true
-        for (let i = 1; i < ord.length; i++) {
-            if (ord[i][0] == 0) zerocount++;
+        let j = M.findLastIndex(x => !x[0]);
 
-            if (ord[i - 1][0] >= ord[i][0] || ord[i - 1].length != 1) istower = false;
+        if (j != 0) {
+            if (j == M.length - 1) return "#d40000"; // Successor
+            return "#ff8000"; // Limit
         }
 
-        if (istower) return "#ffffff"
-        if (zerocount == 1) return "#ffff00"
-        if (ord[ord.length - 1][0] == 0) return "#d40000"
-        return "#ff8000"
+        if (M.length == 1) return "#d40000"; // Successor
+
+        j = M.slice(j).findLastIndex(x => x[0] == 1);
+
+        const N = M.slice(j);
+
+        if (cmp(N, [[1, 1, 1]]) >= 0) return "#a0a0a0"; // Buchholz
+        if (cmp(N, [[1, 1], [2, 2]]) >= 0) return "#000fff"; // Bachmann–Howard
+        if (cmp(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff"; // Feferman–Schütte
+        if (cmp(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0"; // Veblen
+        if (cmp(N, [[1, 1]]) >= 0) return "#00FF00"; // ε
+
+        if (M.at(-1)[0] == M.length - 1) return "#ffffff"; // Tower of ω
+
+        return "#ffff00"; // Power of ω
     }
 
     //optionals : in future i'll add an ordinal finder, and this is nessessary to process user inputs
@@ -198,7 +208,7 @@ window.notation = (() => {
     ]; //optional: for legends gui purposes so user can know colour correspond to class of ordinal 
 
     const Aliases = [
-        ["First 67 Ordinal", fs([[0],[1]],66)], //easter egg ordinal btw
+        ["First 67 Ordinal", fs([[0], [1]], 66)], //easter egg ordinal btw
         ["First Transfinite Ordinal", [[0], [1]]],
         ["Small Cantor Ordinal", [[0, 0], [1, 1]]],
         ["Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 0]]],

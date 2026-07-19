@@ -421,55 +421,55 @@ window.notation = (() => {
 
   function classifyOrdinal(ord) {
     if (ord.length === 0)
-        return "#808080";
+      return "#808080";
 
     if (isSuccessor(ord))
-        return "#d40000";
+      return "#d40000";
 
     // Tower of ω
     let tower = true;
     for (let i = 0; i < ord.length; i++) {
-        if (ord[i] !== i) {
-            tower = false;
-            break;
-        }
+      if (ord[i] !== i) {
+        tower = false;
+        break;
+      }
     }
     if (tower)
-        return "#ffffff";
+      return "#ffffff";
 
     // Count zeros
     let zeroCount = 0;
     let zeroIndex = -1;
     for (let i = 0; i < ord.length; i++) {
-        if (ord[i] === 0) {
-            zeroCount++;
-            zeroIndex = i;
-        }
+      if (ord[i] === 0) {
+        zeroCount++;
+        zeroIndex = i;
+      }
     }
 
     if (zeroCount >= 2)
-        return "#ff8000";   // ordinary limit
+      return "#ff8000";   // ordinary limit
 
     if (zeroCount === 1) {
-        let lastChild = -1;
+      let lastChild = -1;
 
-        for (let i = zeroIndex + 1; i < ord.length; i++) {
-            if (search(ord.slice(0, i), ord[i]) === zeroIndex)
-                lastChild = ord[i];
-        }
+      for (let i = zeroIndex + 1; i < ord.length; i++) {
+        if (search(ord.slice(0, i), ord[i]) === zeroIndex)
+          lastChild = ord[i];
+      }
 
-        if (lastChild === 1)
-            return "#ffd000";   // ω^α
+      if (lastChild === 1)
+        return "#ffd000";   // ω^α
 
-        if (lastChild === 2)
-            return "#0fff00";   // ε
+      if (lastChild === 2)
+        return "#0fff00";   // ε
 
-        if (lastChild >= 3)
-            return "#00fff0";   // ζ, η, φ₄,...
+      if (lastChild >= 3)
+        return "#00fff0";   // ζ, η, φ₄,...
     }
 
     return "#ff8000";
-}
+  }
 
   function parse(str) {
     str = str.trim();
@@ -503,8 +503,8 @@ window.notation = (() => {
     ["Limit Ordinal", "#ff8000"],
     ["Power of ω", "#ffd000"],
     ["Tower of ω", "#ffffff"],
-    ["ε Ordinal","#0fff00"],
-    ["Veblen Ordinal","#00fff0"]
+    ["ε Ordinal", "#0fff00"],
+    ["Veblen Ordinal", "#00fff0"]
 
   ];
 
