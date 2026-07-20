@@ -339,7 +339,7 @@ if(config.DiagonalTickArrangement)
             let tickHeight = cam.tHeight;
 
 if (config.MathstickMode) {
-    const importance = Math.max(1, cam.impor[n]);
+    const importance = Math.max(0.5, cam.impor[n]);
     tickHeight *= 1 + Math.log2(importance);
 }
 
