@@ -339,8 +339,8 @@ if(config.DiagonalTickArrangement)
             let tickHeight = cam.tHeight;
 
 if (config.MathstickMode) {
-    const importance = Math.max(0.5, cam.impor[n]);
-    tickHeight *= 1 + Math.log2(importance);
+    const importance = cam.impor[n];
+    tickHeight *= Math.max(100,Maths.min(0,importance));//safe handler btw
 }
 
 drawLine(x, y - tickHeight, x, y, cam.ticks[n].color, 2);
