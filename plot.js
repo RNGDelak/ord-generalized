@@ -128,7 +128,7 @@ function importanceSeg(x0, x1, width) {
     if (x0 <= 0 || x0 > width) return;
     const l = x1 - x0;
     const idx = Math.max(0, Math.min(cam.ticks.length - 1, Math.floor(x0)));
-    cam.impor[idx] = Math.max(cam.impor[idx], l);
+    cam.impor[idx] = Math.max(cam.impor[idx],0);
 }
 
 function tickmark(x0, x1, o0, width) {
@@ -285,7 +285,7 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         const px = lbl.x;
-        const py = h/2
+        let py = h/2
         if (config.DiagonalTickArrangement)
         py = h * px / canvas.width - cam.tHeight;
 
@@ -331,7 +331,7 @@ function render() {
         if (cam.ticks[n]) {
             const x = n;
 
-const y = cam.h/2
+let y = cam.h/2
         if (config.DiagonalTickArrangement)
             y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
 
