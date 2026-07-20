@@ -1,6 +1,6 @@
 let PRECISION_SCALE = 10n ** 10n; 
 
-
+//some functions
 function updateAdaptivePrecisionScale() {
     const canvasWidth = canvas.width;
     const currentWidth = Number(cam.view.x1 - cam.view.x0); 
