@@ -62,11 +62,11 @@ let config = {
     LabelBetweenLabelSpacing: 0,
     TickBetweenLabelXoffest: 0,
 
-    Tickdensity: 100,
     SlowMode: false,
     SlowModeDepth: 5,
 
-    Tickheight: 15,
+    Tickdensity: 100,
+    Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0,
 };
