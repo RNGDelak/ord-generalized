@@ -333,7 +333,14 @@ function render() {
 
             const opacity = Math.min(1.0, Math.max(0.3, b / 255));
             ctx.globalAlpha = opacity;
-            drawLine(x, y - cam.tHeight, x, y, cam.ticks[n].color, 2);
+            let tickHeight = cam.tHeight;
+
+if (config.MathstickMode) {
+    const importance = Math.max(1, cam.impor[n]);
+    tickHeight *= 1 + Math.log2(importance);
+}
+
+drawLine(x, y - tickHeight, x, y, cam.ticks[n].color, 2);
         }
     }
     ctx.globalAlpha = 1.0;
