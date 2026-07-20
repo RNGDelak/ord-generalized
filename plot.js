@@ -69,6 +69,11 @@ let config = {
     Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0,
+
+    ColorTick: true,
+    ColorSample: false,
+    ColorLabel: false,
+    TimelineLabelColor: "#ffffff"
 };
 
 let cam = {
