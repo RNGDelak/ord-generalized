@@ -54,8 +54,8 @@ let config = {
     labelscount: 8,
     
     mode: 0,
-    MathstickMode: False,
-    DiagonalTickArrangement: True,
+    MathstickMode: false,
+    DiagonalTickArrangement: true,
     
     LabelBetweenTimelineSpacing: 0,
     LabelBetweenTickSpacing: 0,
@@ -63,7 +63,7 @@ let config = {
     TickBetweenLabelXoffest: 0,
  
     Tickdensity: 100,
-    SlowMode: False,
+    SlowMode: false,
     SlowModeDepth: 5,
     
     Tickheight: 15,
