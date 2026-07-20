@@ -333,7 +333,7 @@ function render() {
 
 const y = h/2
         if (config.DiagonalTickArrangement)
-            const y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
+            y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
 
             const b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
 
