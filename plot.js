@@ -52,7 +52,23 @@ let config = {
     wheelZoomOut: 2 / 3,
     maxAllowedWidthFactor: 0.5,
     labelscount: 8,
+    
     mode: 0,
+    MathstickMode: False,
+    DiagonalTickArrangement: True,
+    
+    LabelBetweenTimelineSpacing: 0,
+    LabelBetweenTickSpacing: 0,
+    LabelBetweenLabelSpacing: 0,
+    TickBetweenLabelXoffest: 0,
+ 
+    Tickdensity: 100,
+    SlowMode: False,
+    SlowModeDepth: 5,
+    
+    Tickheight: 15,
+    TickWidth: 2,
+    TickAnchorPoint: 0,
 };
 
 let cam = {
