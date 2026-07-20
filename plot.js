@@ -285,7 +285,9 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         const px = lbl.x;
-        const py = h * px / canvas.width - cam.tHeight;
+        const py = h/2
+        if (config.DiagonalTickArrangement)
+        py = h * px / canvas.width - cam.tHeight;
 
         const labelString = notation.display(lbl.ord, mode);
 
@@ -328,7 +330,11 @@ function render() {
     for (let n = 0; n < cam.ticks.length; n++) {
         if (cam.ticks[n]) {
             const x = n;
+
+const y = h/2
+        if (config.DiagonalTickArrangement)
             const y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
+
             const b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
 
             const opacity = Math.min(1.0, Math.max(0.3, b / 255));
