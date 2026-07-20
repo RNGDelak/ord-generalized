@@ -148,7 +148,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
     }
 
     if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
-        let rescale = 1;
+        let rescale = 2.0 / (lefts + 2);
         let top = x1 - epsBI;
         let s_x0 = x0;
         let s_x1 = x0;
