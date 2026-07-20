@@ -127,7 +127,7 @@ function importanceSeg(x0, x1, width) {
     if (x0 <= 0 || x0 > width) return;
     const l = x1 - x0;
     const idx = Math.max(0, Math.min(cam.ticks.length - 1, Math.floor(x0)));
-    cam.impor[idx] = Math.max(cam.impor[idx], l);
+    cam.impor[idx] = Math.max(cam.impor[idx], 0);
 }
 
 function tickmark(x0, x1, o0, width) {
