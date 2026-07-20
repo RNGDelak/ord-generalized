@@ -127,7 +127,7 @@ function importanceSeg(x0, x1, width) {
     if (x0 <= 0 || x0 > width) return;
     const l = x1 - x0;
     const idx = Math.max(0, Math.min(cam.ticks.length - 1, Math.floor(x0)));
-    cam.impor[idx] = Math.max(cam.impor[idx], 1);
+    cam.impor[idx] = Math.max(cam.impor[idx], 0);
 }
 
 function tickmark(x0, x1, o0, width) {
@@ -340,7 +340,7 @@ if(config.DiagonalTickArrangement)
 
 if (config.MathstickMode) {
     const importance = cam.impor[n];
-    tickHeight *= Math.max(100,Maths.min(0,importance));//safe handler btw
+    tickHeight *= Math.min(100,Math.max(0,importance));//safe handler btw
 }
 
 drawLine(x, y - tickHeight, x, y, cam.ticks[n].color, 2);
