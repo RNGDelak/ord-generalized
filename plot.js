@@ -331,7 +331,7 @@ function render() {
         if (cam.ticks[n]) {
             const x = n;
 
-const y = h/2
+const y = cam.h/2
         if (config.DiagonalTickArrangement)
             y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
 
