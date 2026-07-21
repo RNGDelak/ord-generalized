@@ -11,7 +11,7 @@ function pretty(ord) {
 
 window.notation = (() => {
 
-  // Data structure representations matching C structs:
+  // Data structure:
   // Ord = Array of OrdTerm objects [{ c: number, f: Ord, x: Ord }, ...]
   
   const Zero = [];
@@ -111,15 +111,25 @@ window.notation = (() => {
     return o.length === 1 && o[0].c === 1;
   }
 
+  function Ord_isomegatower(o) {
+    if (Ord_iszero(o)) return true;
+    return (o.length === 1 && o[0].c === 1 && Ord_iszero(o[0].f) && Ord_isomegatower(o[0].x));
+  }
+
   function Ord_lasttermcardinality(o) {
     if (Ord_iszero(o)) return Ord_zero();
     else return o[o.length - 1].f;
   }
 
+  // Deep-copy slice to prevent mutations during formatting
   function Ord_someterms(o, n0, n1) {
     let ret = [];
     for (let i = n0; i < n1; i++) {
-      ret.push(o[i]);
+      ret.push({
+        c: o[i].c,
+        f: Ord_copy(o[i].f),
+        x: Ord_copy(o[i].x)
+      });
     }
     return ret;
   }
@@ -158,6 +168,9 @@ window.notation = (() => {
     if (a === Limit && b === Limit) return 0;
     if (a === Limit) return 1;
     if (b === Limit) return -1;
+    if (Ord_iszero(a) && Ord_iszero(b)) return 0;
+    if (Ord_iszero(a)) return -1;
+    if (Ord_iszero(b)) return 1;
 
     let n, i;
     for (n = 0; ; n++) {
@@ -176,10 +189,11 @@ window.notation = (() => {
   function Ord_equal(A, B) { return cmp(A, B) === 0; }
   function Ord_lt(A, B) { return cmp(A, B) < 0; }
   function Ord_gt(A, B) { return cmp(A, B) > 0; }
+  function Ord_lte(A, B) { return cmp(A, B) <= 0; }
 
   function Ord_addproper(a, b) {
-    if (Ord_iszero(a)) return Ord_copyshallow(b);
-    if (Ord_iszero(b)) return Ord_copyshallow(a);
+    if (Ord_iszero(a)) return Ord_copy(b);
+    if (Ord_iszero(b)) return Ord_copy(a);
     let am, j, i, eq = 0;
     for (am = a.length; am > 0; am--) {
       j = cmp(a[am - 1].f, b[0].f);
@@ -191,23 +205,23 @@ window.notation = (() => {
       }
     }
     let ret = [];
-    for (let k = 0; k < (eq ? am - 1 : am); k++) ret.push(a[k]);
+    for (let k = 0; k < (eq ? am - 1 : am); k++) ret.push(Ord_copy([a[k]])[0]);
     if (eq) {
       ret.push({
         c: a[am - 1].c + b[0].c,
-        f: b[0].f,
-        x: b[0].x
+        f: Ord_copy(b[0].f),
+        x: Ord_copy(b[0].x)
       });
-      for (let k = 1; k < b.length; k++) ret.push(b[k]);
+      for (let k = 1; k < b.length; k++) ret.push(Ord_copy([b[k]])[0]);
     } else {
-      for (let k = 0; k < b.length; k++) ret.push(b[k]);
+      for (let k = 0; k < b.length; k++) ret.push(Ord_copy([b[k]])[0]);
     }
     return ret;
   }
 
   function OrdTerm_simplifyfixedpoint(t) {
     if (!Ord_ismonic(t.x)) return t;
-    let u = { c: t.c, f: t.x[0].f, x: t.x[0].x };
+    let u = { c: t.c, f: Ord_copy(t.x[0].f), x: Ord_copy(t.x[0].x) };
     if (!Ord_equal(t.f, u.f)) return t;
     if (Ord_gt(Ord_lasttermcardinality(u.x), t.f)) return u;
     else return t;
@@ -225,7 +239,13 @@ window.notation = (() => {
           x: Ord_apply(f[n].x, x)
         });
       } else {
-        for (let k = 0; k < x.length; k++) ret.push(x[k]);
+        for (let k = 0; k < x.length; k++) {
+          ret.push({
+            c: x[k].c,
+            f: Ord_copy(x[k].f),
+            x: Ord_copy(x[k].x)
+          });
+        }
       }
     }
     return ret;
@@ -393,8 +413,7 @@ window.notation = (() => {
             for (let i = lastx.length - 1; i >= 0; i--) if (Ord_equal(lastx[i].f, fsOrd)) nm++;
             let nveb = Ord_allocterms(nm);
             for (let i = 0, k = 0; i < lastx.length; i++) if (Ord_equal(lastx[i].f, fsOrd)) {
-              nveb[k] = lastx[i];
-              nveb[k].f = Ord_zero();
+              nveb[k] = { c: lastx[i].c, f: Ord_zero(), x: Ord_copy(lastx[i].x) };
               nveb[k] = OrdTerm_simplifyfixedpoint(nveb[k]);
               k++;
             }
@@ -410,20 +429,20 @@ window.notation = (() => {
               xbig = Ord_someterms(x, 0, cidx);
               pref = Ord_psi(f, xbig);
             }
-            let xvebtmp = Ord_allocterms(x.length - cidx), xveb = Ord_allocterms(x.length - cidx);
+            let xvebtmp = [], xveb = [];
             for (let i = cidx; i < x.length; i++) {
-              xvebtmp[i - cidx] = x[i];
-              xvebtmp[i - cidx].f = Ord_zero();
+              let termI = { c: x[i].c, f: Ord_zero(), x: [] };
               for (j = x[i].x.length; j > 0 && Ord_iszero(x[i].x[j - 1].f); j--);
-              xvebtmp[i - cidx].x = Ord_someterms(x[i].x, j, x[i].x.length);
-              xveb[i - cidx] = OrdTerm_simplifyfixedpoint(xvebtmp[i - cidx]);
+              termI.x = Ord_someterms(x[i].x, j, x[i].x.length);
+              xvebtmp.push(termI);
+              xveb.push(OrdTerm_simplifyfixedpoint(termI));
             }
             let sum;
             if (Ord_iszero(pref) && Ord_isfinite(xveb)) {
               let xvebp = Ord_predecessor(xveb);
               sum = Ord_addproper(pref, xvebp);
             } else sum = Ord_addproper(pref, xveb);
-            ret += `φ<sub>${Ord_printbf(nveb)}</sub>(${Ord_printbf(sum)})`;
+            ret += `&phi;<sub>${Ord_printbf(nveb)}</sub>(${Ord_printbf(sum)})`;
             done = 1;
           }
         }
@@ -446,7 +465,7 @@ window.notation = (() => {
     return Ord_printbf(ord);
   }
 
-const ordinalTypes = [
+  const ordinalTypes = [
     ["Zero", "#808080"],
     ["Successor Ordinal", "#A00000"],
     ["Limit Ordinal", "#FFA000"],
@@ -459,45 +478,40 @@ const ordinalTypes = [
     ["Buchholz Ordinal", "#404040"]
   ];
 
+  // Pre-constructed limits for Ord_type classification
+  const phi1 = Ord_psi(Ord_number(1), Ord_zero());
+  const phi11 = Ord_psi(Ord_number(1), phi1);
+  const phi111 = Ord_psi(Ord_number(1), phi11);
+
   function classifyOrdinal(o) {
     if (o === Limit) return "#404040";
     if (Ord_iszero(o)) return "#808080";
     if (!Ord_islimit(o)) return "#A00000";
 
-    // Monic / Single-term check
     if (Ord_ismonic(o)) {
       let arg = o[0].x;
-      if (Ord_iszero(arg)) return "#FFFF00"; // Power of omega (omega^0 = 1 handled prior)
+      if (Ord_iszero(arg)) {
+        if (Ord_isomegatower(o)) return "#FFFFFF";
+        return "#FFFF00";
+      }
 
       let lastTerm = arg[arg.length - 1];
       let lastf = lastTerm.f;
       let lastx = lastTerm.x;
 
       if (Ord_iszero(lastf)) {
-        // Check for Omega Tower
-        function isOmegaTower(ord) {
-          if (Ord_iszero(ord)) return true;
-          if (ord.length === 1 && ord[0].c === 1 && Ord_iszero(ord[0].f)) {
-            return isOmegaTower(ord[0].x);
-          }
-          return false;
-        }
-        if (isOmegaTower(o)) return "#FFFFFF";
+        if (Ord_isomegatower(o)) return "#FFFFFF";
         return "#FFFF00";
       } else if (Ord_isnumber(lastf, 1)) {
-        let phi1 = Ord_psi(Ord_number(1), Ord_zero());
-        let phi11 = Ord_psi(Ord_number(1), phi1);
-        let phi111 = Ord_psi(Ord_number(1), phi11);
-
         let last = Ord_psi(lastf, lastx);
-        let color = "#FF00FF"; // FefermanSchutte default
+        let color = "#FF00FF"; // Feferman-Schütte default
 
-        if (cmp(last, phi11) < 0) color = "#00FF00";      // Epsilon
-        else if (cmp(last, phi111) < 0) color = "#00FFFF"; // Veblen
+        if (Ord_lt(last, phi11)) color = "#00FF00";      // Epsilon
+        else if (Ord_lt(last, phi111)) color = "#00FFFF"; // Veblen
 
         return color;
       } else if (Ord_isfinite(lastf)) {
-        return "#0000FF"; // BachmannHoward
+        return "#0000FF"; // Bachmann-Howard
       } else {
         return "#404040"; // Buchholz
       }
@@ -505,7 +519,6 @@ const ordinalTypes = [
 
     return "#FFA000"; // General Limit Ordinal
   }
-  
 
   function parse(str) {
     str = str.trim();
@@ -517,8 +530,6 @@ const ordinalTypes = [
       return Zero;
     }
   }
-
-  function Ord_lte(A, B) { return cmp(A, B) <= 0; }
 
   const DisplayName = ["pretty", "raw"];
 
