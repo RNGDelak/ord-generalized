@@ -523,15 +523,7 @@ const ordinalTypes = [
   const DisplayName = ["pretty", "raw"];
 
   const Aliases = [
-    ["0", Zero],
-    ["1", Ord_number(1)],
-    ["ω", Ord_psi0(Ord_zero())],
-    ["ε₀", Ord_psi0(Ord_psi(Ord_number(1), Ord_zero()))],
-    ["Γ₀", Ord_psi0(Ord_psi(Ord_number(1), Ord_psi(Ord_number(1), Ord_psi(Ord_number(1), Ord_zero()))))],
-    ["Bachmann-Howard", Ord_psi0(Ord_psi(Ord_number(2), Ord_zero()))],
-    ["Buchholz", Ord_psi0(Ord_psi(Ord_psi0(Ord_number(1)), Ord_zero()))],
-    ["Takeuti-Feferman-Buchholz", Ord_psi0(Ord_psi(Ord_addproper(Ord_psi0(Ord_number(1)), Ord_number(1)), Ord_zero()))],
-    ["Extended Buchholz Limit", Limit]
+    ["Extended Buchholz Ordinal", Limit]
   ];
 
   const config = {};
