@@ -423,7 +423,7 @@ window.notation = (() => {
               let xvebp = Ord_predecessor(xveb);
               sum = Ord_addproper(pref, xvebp);
             } else sum = Ord_addproper(pref, xveb);
-            ret += `&varphi;<sub>${Ord_printbf(nveb)}</sub>(${Ord_printbf(sum)})`;
+            ret += `φ<sub>${Ord_printbf(nveb)}</sub>(${Ord_printbf(sum)})`;
             done = 1;
           }
         }
