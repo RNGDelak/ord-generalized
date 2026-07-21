@@ -383,7 +383,7 @@ window.notation = (() => {
 ["Lim(cOCF) / (0,0,0,0)(1,1,1,1)(2,2)", "Limit"]
     ];
     const config = { types: "default" };
-    const title = 'cOCF (Collapsing Ordinal Collapsing Function) System';
+    const title = 'cOCF transfinite number line';
 
     return { 
         fs, 
