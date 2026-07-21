@@ -446,13 +446,66 @@ window.notation = (() => {
     return Ord_printbf(ord);
   }
 
-  function classifyOrdinal(ord) {
-    if (ord === Limit) return "#ffffff";
-    if (Ord_iszero(ord)) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (ord.length === 1 && ord[0].c === 1 && !Ord_iszero(ord[0].x)) return "#ffd000";
-    return "#ff8000";
+const ordinalTypes = [
+    ["Zero", "#808080"],
+    ["Successor Ordinal", "#A00000"],
+    ["Limit Ordinal", "#FFA000"],
+    ["Power of ω", "#FFFF00"],
+    ["Tower of ω", "#FFFFFF"],
+    ["ε Ordinal", "#00FF00"],
+    ["Veblen Ordinal", "#00FFFF"],
+    ["Feferman–Schütte Ordinal", "#FF00FF"],
+    ["Bachmann–Howard Ordinal", "#0000FF"],
+    ["Buchholz Ordinal", "#404040"]
+  ];
+
+  function classifyOrdinal(o) {
+    if (o === Limit) return "#404040";
+    if (Ord_iszero(o)) return "#808080";
+    if (!Ord_islimit(o)) return "#A00000";
+
+    // Monic / Single-term check
+    if (Ord_ismonic(o)) {
+      let arg = o[0].x;
+      if (Ord_iszero(arg)) return "#FFFF00"; // Power of omega (omega^0 = 1 handled prior)
+
+      let lastTerm = arg[arg.length - 1];
+      let lastf = lastTerm.f;
+      let lastx = lastTerm.x;
+
+      if (Ord_iszero(lastf)) {
+        // Check for Omega Tower
+        function isOmegaTower(ord) {
+          if (Ord_iszero(ord)) return true;
+          if (ord.length === 1 && ord[0].c === 1 && Ord_iszero(ord[0].f)) {
+            return isOmegaTower(ord[0].x);
+          }
+          return false;
+        }
+        if (isOmegaTower(o)) return "#FFFFFF";
+        return "#FFFF00";
+      } else if (Ord_isnumber(lastf, 1)) {
+        let phi1 = Ord_psi(Ord_number(1), Ord_zero());
+        let phi11 = Ord_psi(Ord_number(1), phi1);
+        let phi111 = Ord_psi(Ord_number(1), phi11);
+
+        let last = Ord_psi(lastf, lastx);
+        let color = "#FF00FF"; // FefermanSchutte default
+
+        if (cmp(last, phi11) < 0) color = "#00FF00";      // Epsilon
+        else if (cmp(last, phi111) < 0) color = "#00FFFF"; // Veblen
+
+        return color;
+      } else if (Ord_isfinite(lastf)) {
+        return "#0000FF"; // BachmannHoward
+      } else {
+        return "#404040"; // Buchholz
+      }
+    }
+
+    return "#FFA000"; // General Limit Ordinal
   }
+  
 
   function parse(str) {
     str = str.trim();
@@ -468,13 +521,6 @@ window.notation = (() => {
   function Ord_lte(A, B) { return cmp(A, B) <= 0; }
 
   const DisplayName = ["pretty", "raw"];
-
-  const ordinalTypes = [
-    ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Power of ω", "#ffd000"]
-  ];
 
   const Aliases = [
     ["0", Zero],
