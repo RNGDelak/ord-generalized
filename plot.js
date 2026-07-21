@@ -56,16 +56,18 @@ let config = {
     mode: 0,
     MathstickMode: false,
     DiagonalTickArrangement: true,
+    ZoomIntoMouse: true,
 
     LabelBetweenTimelineSpacing: 0,
     LabelBetweenTickSpacing: 0,
     LabelBetweenLabelSpacing: 0,
     TickBetweenLabelXoffest: 0,
+    TimelineLabelColor: "#ffffff",
 
     SlowMode: false,
-    SlowModeDepth: 5,
+    SlowModeTickSpacing: 5,
 
-    Tickdensity: 100,
+    TickSpacing: 1,
     Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0,
@@ -73,7 +75,8 @@ let config = {
     ColorTick: true,
     ColorSample: false,
     ColorLabel: false,
-    TimelineLabelColor: "#ffffff"
+
+    fpsPrecision: 2
 };
 
 let cam = {
