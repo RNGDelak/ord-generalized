@@ -1,13 +1,11 @@
 window.isSettingsOpen = false;
 
-// Store a pristine backup of the initial configuration on load
 let initialConfigBackup = null;
 
 function toggleConfigMenu() {
     const menu = document.getElementById('configMenu');
     const canvasElement = document.getElementById('canvas');
 
-    // Flip state
     window.isSettingsOpen = (menu.style.display !== 'block');
 
     if (window.isSettingsOpen) {
@@ -42,7 +40,7 @@ window.applyInjectedConfig = function () {
     try {
         const jsonInput = document.getElementById('envConfigJson').value.trim();
         
-        // If empty, let it free untouched using the previous state or initial backup
+        // If empty, leave untouched using the previous state (do not wipe everything)
         if (!jsonInput) {
             syncConfigToTextArea();
             if (typeof render === "function") render();
@@ -58,7 +56,6 @@ window.applyInjectedConfig = function () {
     }
 };
 
-// Capture initial configuration state right after it's first available
 if (typeof config !== 'undefined' && !initialConfigBackup) {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
 }
@@ -99,7 +96,11 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // Safely extract active config if provided by the notation script, keeping existing settings untouched unless overridden
+        // --- RESTORE INITIAL/DEFAULT CONFIG BASE BEFORE APPLYING NEW SCRIPT CONFIG ---
+        if (initialConfigBackup) {
+            config = JSON.parse(JSON.stringify(initialConfigBackup));
+        }
+
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
