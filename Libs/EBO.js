@@ -1,3 +1,8 @@
+/*
+Notation : EBO
+Limit : psi_0(I)
+*/
+
 window.notation = (() => {
 
 // Convert to readable ordinal
