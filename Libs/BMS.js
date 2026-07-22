@@ -233,7 +233,7 @@ window.notation = (() => {
         ["Lim(BMS) / ω-Y(1,3)", 'Limit'],
     ]; 
 
-    const config = { types: "default" } 
+    const config = {} 
     const title = 'BMS transfinite number line' 
 
     function Conv_BMS_OCF(matrix) {
