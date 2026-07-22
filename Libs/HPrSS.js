@@ -137,7 +137,7 @@ function PrSStoCNF(s) {
     const ordinalTypes = [["Zero", "#808080"],["Successor Ordinal", "#d40000"],["Limit Ordinal", "#ff8000"],["Power of ω", "#ffd000"],["Tower of ω", "#ffffff"]]; //compulsory: for legends gui purposes so user can know colour correspond to class of ordinal 
 
     const Aliases = [["Small Cantor Ordinal", [0,2]],["Veblen Ordinal", [0,2,4,5]], ["Buchholz Ordinal", "Limit"]] //important ordinal
-    const config = { types: "default" }
+    const config = {}
     const title = 'HPrSS transfinite number line' //title
 
     return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
