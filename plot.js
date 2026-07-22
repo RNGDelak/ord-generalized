@@ -1,18 +1,27 @@
+
 let PRECISION_SCALE = 10n ** 10n; 
+
 
 function updateAdaptivePrecisionScale() {
     const canvasWidth = canvas.width;
     const currentWidth = Number(cam.view.x1 - cam.view.x0); 
+    
     
     if (!currentWidth || currentWidth <= 0) {
         PRECISION_SCALE = 10n ** 10n;
         return;
     }
 
+    
+    
     const zoomMagnitude = Number(PRECISION_SCALE) / Number(cam.view.x1 - cam.view.x0);
     const log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
+    
+    
     const requiredDigits = Math.max(10, Math.floor(log10Zoom) + 8);
+    
     const nextScale = 10n ** BigInt(requiredDigits);
+    
     
     if (nextScale !== PRECISION_SCALE) {
         const oldScale = PRECISION_SCALE;
@@ -21,6 +30,7 @@ function updateAdaptivePrecisionScale() {
         PRECISION_SCALE = nextScale;
     }
 }
+
 
 function toBigInt(num) {
     return BigInt(Math.round(num * 1e6)) * (PRECISION_SCALE / 1000000n);
@@ -59,7 +69,7 @@ let config = {
 
     TickSpacing: 1,
     Tickheight: 0.05,
-    TickWidth: 2, // Increased line thickness for clarity
+    TickWidth: 2,
     TickAnchorPoint: 0,
 
     ColorTick: true,
@@ -90,9 +100,7 @@ let cam = {
     labelsToDraw: [],
     samplerBd: 1e20,
     samplerOrd: null,
-    activeKeys: {},
-    isInteracting: false,
-    wheelTimeout: null
+    activeKeys: {}
 };
 
 let lastFrameTime = performance.now();
@@ -133,10 +141,6 @@ function importanceSeg(x0, x1, width) {
 
 function tickmark(x0, x1, o0, width) {
     if (x0 < 0 || x0 >= width) return;
-    
-    const currentTickSpacing = (config.SlowMode && cam.isInteracting) ? config.SlowModeTickSpacing : config.TickSpacing;
-    if (Math.floor(x0) % currentTickSpacing !== 0) return;
-
     importanceSeg(x0, x1, width);
     const idx = Math.max(0, Math.min(cam.ticks.length - 1, Math.floor(x0)));
     cam.ticks[idx] = {
@@ -177,6 +181,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
+      
         }
 
         let m = n + 2;
@@ -260,7 +265,19 @@ function sampleHighPrecision(x, width) {
     const xminBI = toBigInt(x);
     const xmaxBI = toBigInt(x + 1);
 
-    segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, epsBI, xminBI, xmaxBI, 0, 0, samplerCallback, width);
+    segmentBigInt(
+        cam.view.x0,
+        cam.view.x1,
+        notation.Zero,
+        notation.Limit,
+        epsBI,
+        xminBI,
+        xmaxBI,
+        0,
+        0,
+        samplerCallback,
+        width
+    );
 
     if (cam.samplerBd < 1e20) {
         const mode = notation.DisplayName[config.mode];
@@ -300,6 +317,7 @@ function drawHUD() {
 }
 
 function render() {
+    
     updateAdaptivePrecisionScale();
 
     clearCanvas();
@@ -315,39 +333,41 @@ function render() {
     cam.tHeight = cam.h * 0.05;
     cam.ilxw = 1.0 / Math.log(cam.w);
 
-    // Optimized loop + Clearer lines using config.TickWidth
-    const ticksLength = cam.ticks.length;
-    for (let n = 0; n < ticksLength; n++) {
-        const tick = cam.ticks[n];
-        if (tick) {
+    for (let n = 0; n < cam.ticks.length; n++) {
+        if (cam.ticks[n]) {
             const x = n;
             const y = cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w);
             const b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
 
-            ctx.globalAlpha = Math.min(1.0, Math.max(0.3, b / 255));
-            drawLine(x, y - cam.tHeight, x, y, tick.color, config.TickWidth);
+            const opacity = Math.min(1.0, Math.max(0.3, b / 255));
+            ctx.globalAlpha = opacity;
+            drawLine(x, y - cam.tHeight, x, y, cam.ticks[n].color, 2);
         }
     }
     ctx.globalAlpha = 1.0;
 
     drawTimelineLabels();
-    drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", config.TickWidth);
+    drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
 }
-
 function resizeCanvas() {
+    
     const oldWidth = canvas.width || window.innerWidth;
+    
+    
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    
     if (cam.view && cam.view.x0 !== undefined && cam.view.x1 !== undefined && oldWidth > 0) {
         const widthRatioBI = toBigInt(canvas.width / oldWidth);
+        
+        
         cam.view.x0 = (cam.view.x0 * widthRatioBI) / PRECISION_SCALE;
         cam.view.x1 = (cam.view.x1 * widthRatioBI) / PRECISION_SCALE;
     }
 }
-
 function init() {
     document.getElementById("Title").innerText = notation.title;
     resizeCanvas();
@@ -380,10 +400,8 @@ window.addEventListener("resize", () => {
     render();
 });
 
-// Handlers tying SlowMode purely to physical hand/input down state
 window.addEventListener("mousedown", (e) => {
     if (window.isSettingsOpen) return;
-    cam.isInteracting = true;
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.clientX;
     cam.view.mouse.lastY = e.clientY;
@@ -432,15 +450,6 @@ window.addEventListener("mousemove", (e) => {
 window.addEventListener("wheel", (e) => {
     if (window.isSettingsOpen) return;
     e.preventDefault();
-    
-    // Wheel events don't have a reliable "up" event, so we debounce the interaction state
-    cam.isInteracting = true;
-    if (cam.wheelTimeout) clearTimeout(cam.wheelTimeout);
-    cam.wheelTimeout = setTimeout(() => {
-        cam.isInteracting = false;
-        render();
-    }, 150);
-
     const zoomFactor = e.deltaY < 0 ? config.wheelZoomIn : config.wheelZoomOut;
     const zoomFactorBI = toBigInt(zoomFactor);
     const mxBI = toBigInt(e.clientX);
@@ -455,29 +464,12 @@ window.addEventListener("wheel", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("mouseup", () => {
-    if (cam.view.mouse.isDown) {
-        cam.view.mouse.isDown = false;
-        cam.isInteracting = false;
-        render(); // Final full-detail render upon releasing the hand
-    }
-});
-
-window.addEventListener("mouseleave", () => {
-    if (cam.view.mouse.isDown) {
-        cam.view.mouse.isDown = false;
-        cam.isInteracting = false;
-        render();
-    }
-});
+window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
+window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
 
 window.addEventListener("keydown", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
-
-    if (e.key === "arrowleft" || e.key === "arrowright" || e.key === "arrowup" || e.key === "arrowdown") {
-        cam.isInteracting = true;
-    }
 
     let actionTriggered = false;
     if (e.key === "m") {
@@ -500,11 +492,6 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = false;
     cam.activeKeys[e.code] = false;
-
-    if (!cam.activeKeys["arrowleft"] && !cam.activeKeys["arrowright"] && !cam.activeKeys["arrowup"] && !cam.activeKeys["arrowdown"]) {
-        cam.isInteracting = false;
-        render(); // Final full render when keys are let go
-    }
 });
 
 function updateKeyboardInput() {
@@ -571,10 +558,10 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 
+
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
     if (e.target === canvas) e.preventDefault();
-    cam.isInteracting = true;
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.touches[0].clientX;
     cam.view.mouse.lastY = e.touches[0].clientY;
@@ -620,21 +607,8 @@ window.addEventListener("touchmove", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("touchend", () => {
-    if (cam.view.mouse.isDown) {
-        cam.view.mouse.isDown = false;
-        cam.isInteracting = false;
-        render();
-    }
-});
-
-window.addEventListener("touchcancel", () => {
-    if (cam.view.mouse.isDown) {
-        cam.view.mouse.isDown = false;
-        cam.isInteracting = false;
-        render();
-    }
-});
+window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
+window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
 
 updateKeyboardInput();
 init();
