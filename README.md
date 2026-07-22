@@ -14,6 +14,10 @@
 
 importantly, you must have at least 4 functions and gettings all the constant ready
 
+and apparently, YOU MUST WARP EVERYTHING INSIDE IIEF because if you expose it, some older modules have collision with yours and lead to unexcutable
+
+
+
 ```js
 window.notation = (() => {
 
@@ -144,6 +148,10 @@ Notation : Worm (Ackermann Worm)
 Limit : ω^ω
 */
 
+
+
+window.notation = (() => {
+
 //convert to readable ordinal
 function pretty(ord) {
   if (ord.length == 0) return "0";
@@ -177,7 +185,6 @@ function pretty(ord) {
 }
 
 
-window.notation = (() => {
 
   function fs(ord, n) {
     if (ord == Limit) return [n];
