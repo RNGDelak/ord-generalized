@@ -1,5 +1,8 @@
 window.isSettingsOpen = false;
 
+// Store a pristine backup of the initial configuration on load
+let initialConfigBackup = null;
+
 function toggleConfigMenu() {
     const menu = document.getElementById('configMenu');
     const canvasElement = document.getElementById('canvas');
@@ -37,9 +40,21 @@ function syncConfigToTextArea() {
 
 window.applyInjectedConfig = function () {
     try {
-        const jsonInput = document.getElementById('envConfigJson').value;
+        const jsonInput = document.getElementById('envConfigJson').value.trim();
+        
+        // If empty, revert or fallback to initial configuration state
+        if (!jsonInput) {
+            if (initialConfigBackup) {
+                config = JSON.parse(JSON.stringify(initialConfigBackup));
+            }
+            syncConfigToTextArea();
+            if (typeof render === "function") render();
+            return;
+        }
+
         const parsedConfig = JSON.parse(jsonInput);
 
+        // Merge incoming configuration safely without destroying untouched properties
         config = { ...config, ...parsedConfig };
 
         render();
@@ -47,6 +62,11 @@ window.applyInjectedConfig = function () {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
 };
+
+// Capture initial configuration state right after it's first available
+if (typeof config !== 'undefined' && !initialConfigBackup) {
+    initialConfigBackup = JSON.parse(JSON.stringify(config));
+}
 syncConfigToTextArea();
 
 function applyInjectedCode() {
@@ -59,16 +79,8 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
-    try {
-        // Validate syntax
-        new Function(codeString);
-    } catch (e) {
-        alert(
-            `Syntax Error\n\n` +
-            `${e.message}`
-        );
-        return;
-    }
+    // 1. Removed strict syntax blocking check so code runs regardless of syntax errors/warnings.
+    // 2. Old script variables/elements are completely bypassed/overwritten dynamically.
 
     try {
         const wrappedCode =
@@ -76,15 +88,16 @@ function executeCustomScript(codeString) {
             "\n//# sourceURL=InjectedCustomCode.js";
 
         const script = document.createElement("script");
-        script.id = "notation-script";
+        script.id = "notation-script-" + Date.now(); // Unique ID to prevent collision/stale variables
         script.textContent = wrappedCode;
 
+        // Clean up old script element if it exists
         const old = document.getElementById("notation-script");
         if (old) old.remove();
 
         document.body.appendChild(script);
 
-        // --- FIXED: Check inside window.notation or global scope ---
+        // Check inside window.notation or global scope
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -95,21 +108,28 @@ function executeCustomScript(codeString) {
         if (activeConfig && activeConfig.types) {
             const notationType = activeConfig.types;
 
-            // Check if type is "custom" (case-insensitive to match "Custom")
             if (notationType && notationType.toLowerCase() === "custom") {
-                // Merge activeConfig into your global config object
                 config = { ...config, ...activeConfig };
-
-                // Sync the updated config object back to the UI textarea
-                syncConfigToTextArea();
-                
-                // Trigger a re-render if necessary to apply aspect ratio or other settings
-                if (typeof render === "function") {
-                    render();
+            } else {
+                // If it's default or empty, fallback to the initial backup config
+                if (initialConfigBackup) {
+                    config = JSON.parse(JSON.stringify(initialConfigBackup));
                 }
             }
+        } else {
+            // Fallback to initial backup if configuration data is missing/empty
+            if (initialConfigBackup) {
+                config = JSON.parse(JSON.stringify(initialConfigBackup));
+            }
         }
-        // -------------------------------------------------------------
+
+        // Sync the updated config object back to the UI textarea
+        syncConfigToTextArea();
+        
+        // Trigger re-render
+        if (typeof render === "function") {
+            render();
+        }
 
         if (typeof init === "function") {
             init();
@@ -123,19 +143,22 @@ function executeCustomScript(codeString) {
         );
     }
 }
+
 window.addEventListener('DOMContentLoaded', () => {
+    // Capture backup right when DOM loads if config is defined
+    if (typeof config !== 'undefined' && !initialConfigBackup) {
+        initialConfigBackup = JSON.parse(JSON.stringify(config));
+    }
     loadPresetNotation('Libs/BMS.js');
-    document.getElementById('presetSelect').value='Libs/BMS.js';
+    document.getElementById('presetSelect').value = 'Libs/BMS.js';
 });
 
 function dismissHint() {
     const hintElement = document.getElementById("hint");
     if (hintElement) {
-        // Fade it out cleanly using the CSS transitions defined above
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
         
-        // Remove pointer interactions entirely once closed so users can interact with elements behind it
         setTimeout(() => {
             hintElement.remove();
         }, 400); 
