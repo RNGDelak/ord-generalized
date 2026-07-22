@@ -235,7 +235,7 @@ window.notation = (() => {
         ["Lim(BMS) / ω-Y(1,3)", 'Limit'],
     ] //optional: important ordinal will show up with a labels.
 
-    const config = { types: "default" } //optional: currently have no function yet
+    const config = {} //optional: if you want to set any settings when initialisation, just put it into here, any orders 
     const title = 'BMS transfinite number line' //optional: title of the page
 
     return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
