@@ -74,19 +74,9 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
-    // 1. Validate syntax explicitly first so incorrect/bad code throws an alert error immediately
     try {
-        new Function(codeString);
-    } catch (e) {
-        alert(`Syntax Error\n\n${e.message}`);
-        return; // Halt execution so bad code doesn't silently run or fail behind the scenes
-    }
-
-    try {
-        // Completely clear out previous notation namespaces so cross-contamination (e.g. BMS -> cOCF -> Vue) doesn't occur
-        if (typeof window.notation !== 'undefined') {
-            window.notation = undefined;
-        }
+        // Clear previous notation object completely
+        window.notation = undefined;
 
         const wrappedCode =
             codeString +
@@ -103,9 +93,19 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // 2. Validate that the script successfully registered window.notation
+        // If the script doesn't explicitly attach to window.notation but defines it locally or globally, 
+        // fallback to checking global scope or auto-wrap it.
         if (typeof window.notation === 'undefined') {
-            throw new Error("The script executed, but failed to initialize a valid 'window.notation' object.");
+            // Check if a local variable named 'notation' was left or defined
+            try {
+                if (typeof notation !== 'undefined') {
+                    window.notation = notation;
+                }
+            } catch (err) {}
+        }
+
+        if (typeof window.notation === 'undefined') {
+            throw new Error("The script executed, but failed to initialize a valid 'window.notation' object. Ensure your script returns or assigns a valid notation module.");
         }
 
         let activeConfig = null;
@@ -115,14 +115,11 @@ function executeCustomScript(codeString) {
             activeConfig = config;
         }
 
-        // 3. Clean state handling to prevent switching crashes (e.g., cOCF <-> Vue <-> Ton)
         if (initialConfigBackup) {
             config = JSON.parse(JSON.stringify(initialConfigBackup));
         }
 
-        if (activeConfig && activeConfig.types && activeConfig.types.toLowerCase() === "custom") {
-            config = { ...config, ...activeConfig };
-        } else if (activeConfig) {
+        if (activeConfig) {
             config = { ...config, ...activeConfig };
         }
 
