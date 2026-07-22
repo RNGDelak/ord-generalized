@@ -74,8 +74,16 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
+    // 1. Validate syntax explicitly first so incorrect/bad code throws an alert error immediately
     try {
-        // 1. Completely clear out previous notation hooks/namespaces so old states don't bleed or lock up
+        new Function(codeString);
+    } catch (e) {
+        alert(`Syntax Error\n\n${e.message}`);
+        return; // Halt execution so bad code doesn't silently run or fail behind the scenes
+    }
+
+    try {
+        // Completely clear out previous notation namespaces so cross-contamination (e.g. BMS -> cOCF -> Vue) doesn't occur
         if (typeof window.notation !== 'undefined') {
             window.notation = undefined;
         }
@@ -88,7 +96,6 @@ function executeCustomScript(codeString) {
         script.id = "notation-script";
         script.textContent = wrappedCode;
 
-        // Remove the old script element completely before appending the new one
         const old = document.getElementById("notation-script");
         if (old) {
             old.remove();
@@ -96,28 +103,27 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // 2. Check if a valid config was produced by this newly injected script
+        // 2. Validate that the script successfully registered window.notation
+        if (typeof window.notation === 'undefined') {
+            throw new Error("The script executed, but failed to initialize a valid 'window.notation' object.");
+        }
+
         let activeConfig = null;
-        if (typeof window.notation !== 'undefined' && window.notation.config) {
+        if (window.notation.config) {
             activeConfig = window.notation.config;
         } else if (typeof config !== 'undefined') {
             activeConfig = config;
         }
 
-        // 3. Intelligent configuration merging:
-        // If the new script has a custom config, selectively merge properties.
-        // If it's a default/empty preset or switches away, fallback safely to initial clean state or keep standard properties.
+        // 3. Clean state handling to prevent switching crashes (e.g., cOCF <-> Vue <-> Ton)
+        if (initialConfigBackup) {
+            config = JSON.parse(JSON.stringify(initialConfigBackup));
+        }
+
         if (activeConfig && activeConfig.types && activeConfig.types.toLowerCase() === "custom") {
             config = { ...config, ...activeConfig };
-        } else {
-            // When switching to standard presets (like Vue, Ton, Cocf, etc.) that might rely on their own internal logic
-            // reset back to clean state first so old properties from previous notations don't contaminate it.
-            if (initialConfigBackup) {
-                config = JSON.parse(JSON.stringify(initialConfigBackup));
-            }
-            if (activeConfig) {
-                config = { ...config, ...activeConfig };
-            }
+        } else if (activeConfig) {
+            config = { ...config, ...activeConfig };
         }
 
         syncConfigToTextArea();
