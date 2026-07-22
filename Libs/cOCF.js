@@ -302,7 +302,7 @@ window.notation = (() => {
         }
         return cOCF_fs(ord, n);
     }
-alert("Loaded: " + window.notation.title);
+
     function cmp(a, b) {
         if (a === "Limit" && b === "Limit") return 0;
         if (a === "Limit" && b !== "Limit") return 1;
