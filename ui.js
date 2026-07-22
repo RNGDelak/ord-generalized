@@ -84,7 +84,7 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // --- UPDATED: Immediately accept any active configuration found ---
+        // --- SAFE MERGE: Only updates provided properties, leaves the rest alone ---
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -92,14 +92,34 @@ function executeCustomScript(codeString) {
             activeConfig = config;
         }
 
-        if (activeConfig) {
-            // Merge activeConfig into your global config object (defaults to {} if undefined)
-            config = { ...(window.config || {}), ...activeConfig };
+        if (activeConfig && typeof activeConfig === 'object') {
+            // Helper function for deep merging configurations safely
+            function deepMerge(target, source) {
+                for (const key of Object.keys(source)) {
+                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                        if (!target[key] || typeof target[key] !== 'object') {
+                            target[key] = {};
+                        }
+                        deepMerge(target[key], source[key]);
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+                return target;
+            }
+
+            // Ensure global config exists
+            if (typeof config === 'undefined') {
+                config = {};
+            }
+
+            // Merge incoming changes into the existing config without wiping anything
+            deepMerge(config, activeConfig);
 
             // Sync the updated config object back to the UI textarea
             syncConfigToTextArea();
             
-            // Trigger a re-render if necessary
+            // Trigger a re-render to apply the updated properties
             if (typeof render === "function") {
                 render();
             }
@@ -118,7 +138,6 @@ function executeCustomScript(codeString) {
         );
     }
 }
-
 
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
