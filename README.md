@@ -109,9 +109,10 @@ window.notation = (() => {
     ["An important ordinal", ImportantOrdinal]
   ];
 
-  // configs: unexpectedly simple, just set any config you want here
-  config.aspectratio=.5
-//just that simple 
+  // Reserved for future configuration options.
+  const config = {
+    types: "default"
+  };
 
   // Title displayed by the explorer.
   const title = "My Transfinite Number Line";
@@ -128,6 +129,7 @@ window.notation = (() => {
     DisplayName,
     ordinalTypes,
     Aliases,
+    config,
     title
   };
 
@@ -255,7 +257,8 @@ window.notation = (() => {
     ["ω^ω", Limit],
   ];
 
-  
+  const config = {};
+
   const title = "Worm transfinite number line";
 
   return {
@@ -270,6 +273,7 @@ window.notation = (() => {
     DisplayName,
     ordinalTypes,
     Aliases,
+    config,
     title
   };
 
