@@ -1,15 +1,10 @@
-/*
-Notation : Extended Buchholz OCF
-Limit : ExtendedBuchholzLimit
-*/
+window.notation = (() => {
 
 // Convert to readable ordinal
 function pretty(ord) {
   if (!ord || ord === "Limit") return ord === "Limit" ? "Limit" : "0";
-  return window.notation.display(ord, "pretty");
+  return display(ord, "pretty");
 }
-
-window.notation = (() => {
 
   // Data structure:
   // Ord = Array of OrdTerm objects [{ c: number, f: Ord, x: Ord }, ...]
@@ -553,7 +548,8 @@ window.notation = (() => {
     ordinalTypes,
     Aliases,
     config,
-    title
+    title,
+    pretty
   };
 
 })();
