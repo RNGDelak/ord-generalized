@@ -308,9 +308,10 @@ function drawTimelineLabels() {
 }
 
 function drawHUD() {
-    let py = 7;
+    let py = 40;
     const px = canvas.width - 7;
-    notation.ordinalTypes.forEach(([name, color]) => {
+    createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "30px Bold Serif");
+        notation.ordinalTypes.forEach(([name, color]) => {
         createTextLabel(name, color, px, py, "right", "top", "26px Serif");
         py += 30;
     });
