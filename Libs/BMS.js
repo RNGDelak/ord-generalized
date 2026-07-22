@@ -150,7 +150,7 @@ window.notation = (() => {
     function display(ord, mode) {
         if (ord.length == 0) return '0' 
         if (cmp(ord, 'Limit') == 0) return 'Lim(BMS)'
-        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) == 1) 
+        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) > 0) 
             return ord.map(p => `(${p.join(',')})`).join('')
 
         if (mode == "2 shifted-OCF")
