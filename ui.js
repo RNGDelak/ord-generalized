@@ -58,33 +58,43 @@ function applyInjectedCode() {
     executeCustomScript(customCode);
 }
 
+// Keep track of active animation frames or intervals if your notations use them
+let activeAnimationId = null;
+
 function executeCustomScript(codeString) {
     try {
-        // Validate syntax
+        // 1. Syntax Validation
         new Function(codeString);
     } catch (e) {
-        alert(
-            `Syntax Error\n\n` +
-            `${e.message}`
-        );
+        alert(`Syntax Error\n\n${e.message}`);
         return;
     }
 
     try {
-        const wrappedCode =
-            codeString +
-            "\n//# sourceURL=InjectedCustomCode.js";
+        // 2. CLEANUP PREVIOUS NOTATION STATE
+        // Stop any running requestAnimationFrame loops if defined globally
+        if (typeof window.cancelAnimationFrame === 'function' && activeAnimationId) {
+            cancelAnimationFrame(activeAnimationId);
+            activeAnimationId = null;
+        }
 
-        const script = document.createElement("script");
-        script.id = "notation-script";
-        script.textContent = wrappedCode;
+        // Clear out old global notation object to prevent property bleeding
+        if (window.notation) {
+            window.notation = undefined;
+        }
 
+        // Remove the old script element cleanly
         const old = document.getElementById("notation-script");
         if (old) old.remove();
 
+        // 3. INJECT NEW SCRIPT
+        const wrappedCode = codeString + "\n//# sourceURL=InjectedCustomCode.js";
+        const script = document.createElement("script");
+        script.id = "notation-script";
+        script.textContent = wrappedCode;
         document.body.appendChild(script);
 
-        // --- SAFE MERGE: Only updates provided properties, leaves the rest alone ---
+        // 4. CONFIGURATION MERGE
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -93,7 +103,6 @@ function executeCustomScript(codeString) {
         }
 
         if (activeConfig && typeof activeConfig === 'object') {
-            // Helper function for deep merging configurations safely
             function deepMerge(target, source) {
                 for (const key of Object.keys(source)) {
                     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
@@ -108,24 +117,19 @@ function executeCustomScript(codeString) {
                 return target;
             }
 
-            // Ensure global config exists
             if (typeof config === 'undefined') {
                 config = {};
             }
 
-            // Merge incoming changes into the existing config without wiping anything
             deepMerge(config, activeConfig);
-
-            // Sync the updated config object back to the UI textarea
             syncConfigToTextArea();
-            
-            // Trigger a re-render to apply the updated properties
+
             if (typeof render === "function") {
                 render();
             }
         }
-        // -------------------------------------------------------------
 
+        // 5. RE-INITIALIZE
         if (typeof init === "function") {
             init();
         }
