@@ -37,7 +37,8 @@ window.notation = (() => {
   const config = {
     types: "custom",
     aspectratio: 0.2,
-    Slowmode: true
+    SlowMode: true,
+    SlowModeTickSpacing: 50
   };
 
   const title = "Strong Fundamental Sequence System Transfinite Number Line";
