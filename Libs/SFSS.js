@@ -35,7 +35,8 @@ window.notation = (() => {
   const settings = {
     notation: "Ordinals",
     showOrdinals: true,
-    showCommas: true
+    showCommas: true,
+    mode: 1
   };
 
   //there a different here
