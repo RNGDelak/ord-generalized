@@ -7,7 +7,6 @@ function toggleConfigMenu() {
     const menu = document.getElementById('configMenu');
     const canvasElement = document.getElementById('canvas');
 
-    // Flip state
     window.isSettingsOpen = (menu.style.display !== 'block');
 
     if (window.isSettingsOpen) {
@@ -42,7 +41,6 @@ window.applyInjectedConfig = function () {
     try {
         const jsonInput = document.getElementById('envConfigJson').value.trim();
         
-        // If empty, revert or fallback to initial configuration state
         if (!jsonInput) {
             if (initialConfigBackup) {
                 config = JSON.parse(JSON.stringify(initialConfigBackup));
@@ -53,8 +51,6 @@ window.applyInjectedConfig = function () {
         }
 
         const parsedConfig = JSON.parse(jsonInput);
-
-        // Merge incoming configuration safely without destroying untouched properties
         config = { ...config, ...parsedConfig };
 
         render();
@@ -63,7 +59,6 @@ window.applyInjectedConfig = function () {
     }
 };
 
-// Capture initial configuration state right after it's first available
 if (typeof config !== 'undefined' && !initialConfigBackup) {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
 }
@@ -79,25 +74,29 @@ function applyInjectedCode() {
 }
 
 function executeCustomScript(codeString) {
-    // 1. Removed strict syntax blocking check so code runs regardless of syntax errors/warnings.
-    // 2. Old script variables/elements are completely bypassed/overwritten dynamically.
-
     try {
+        // 1. Completely clear out previous notation hooks/namespaces so old states don't bleed or lock up
+        if (typeof window.notation !== 'undefined') {
+            window.notation = undefined;
+        }
+
         const wrappedCode =
             codeString +
             "\n//# sourceURL=InjectedCustomCode.js";
 
         const script = document.createElement("script");
-        script.id = "notation-script-" + Date.now(); // Unique ID to prevent collision/stale variables
+        script.id = "notation-script";
         script.textContent = wrappedCode;
 
-        // Clean up old script element if it exists
+        // Remove the old script element completely before appending the new one
         const old = document.getElementById("notation-script");
-        if (old) old.remove();
+        if (old) {
+            old.remove();
+        }
 
         document.body.appendChild(script);
 
-        // Check inside window.notation or global scope
+        // 2. Check if a valid config was produced by this newly injected script
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -105,28 +104,24 @@ function executeCustomScript(codeString) {
             activeConfig = config;
         }
 
-        if (activeConfig && activeConfig.types) {
-            const notationType = activeConfig.types;
-
-            if (notationType && notationType.toLowerCase() === "custom") {
-                config = { ...config, ...activeConfig };
-            } else {
-                // If it's default or empty, fallback to the initial backup config
-                if (initialConfigBackup) {
-                    config = JSON.parse(JSON.stringify(initialConfigBackup));
-                }
-            }
+        // 3. Intelligent configuration merging:
+        // If the new script has a custom config, selectively merge properties.
+        // If it's a default/empty preset or switches away, fallback safely to initial clean state or keep standard properties.
+        if (activeConfig && activeConfig.types && activeConfig.types.toLowerCase() === "custom") {
+            config = { ...config, ...activeConfig };
         } else {
-            // Fallback to initial backup if configuration data is missing/empty
+            // When switching to standard presets (like Vue, Ton, Cocf, etc.) that might rely on their own internal logic
+            // reset back to clean state first so old properties from previous notations don't contaminate it.
             if (initialConfigBackup) {
                 config = JSON.parse(JSON.stringify(initialConfigBackup));
             }
+            if (activeConfig) {
+                config = { ...config, ...activeConfig };
+            }
         }
 
-        // Sync the updated config object back to the UI textarea
         syncConfigToTextArea();
         
-        // Trigger re-render
         if (typeof render === "function") {
             render();
         }
@@ -145,7 +140,6 @@ function executeCustomScript(codeString) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Capture backup right when DOM loads if config is defined
     if (typeof config !== 'undefined' && !initialConfigBackup) {
         initialConfigBackup = JSON.parse(JSON.stringify(config));
     }
