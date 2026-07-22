@@ -513,7 +513,9 @@ window.notation = (() => {
     ["φ(0,ω)", Limit]
   ];
 
-  const config = {  };
+  const config = {
+    types: "default"
+  };
 
   const title = "LPrSS transfinite number line";
 
