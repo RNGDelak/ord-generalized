@@ -54,10 +54,10 @@ let config = {
     TickBetweenLabelXoffest: 0,
     TimelineLabelColor: "#ffffff",
 
-    SlowMode: true,          // Enabled by default (toggle via config if needed)
-    SlowModeTickSpacing: 5,  // Spacing used during active interaction/holding
+    SlowMode: true,
+    SlowModeTickSpacing: 5,
 
-    TickSpacing: 1,          // Normal high-detail tick spacing
+    TickSpacing: 1,
     Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0,
@@ -92,8 +92,7 @@ let cam = {
     samplerOrd: null,
     activeKeys: {},
     isInteracting: false,
-    lastInteractionTime: 0,
-    needsFullRender: false
+    interactionTimeout: null
 };
 
 let lastFrameTime = performance.now();
@@ -109,31 +108,25 @@ function refreshLoop() {
         if (fpsElem && cam.fps !== undefined) {
             fpsElem.innerText = cam.fps.toFixed(1) + 'fps';
         }
-        
-        // Lazy rendering check when idle
-        checkIdleAndLazyRender();
-
         refreshLoop();
     });
 }
 refreshLoop();
 
-function checkIdleStringInterruption() {
-    cam.isInteracting = true;
-    cam.lastInteractionTime = performance.now();
-    cam.needsFullRender = true;
-}
-
-function checkIdleAndLazyRender() {
+// Stable interaction trigger to prevent flickering
+function triggerInteraction() {
     if (!config.SlowMode) return;
+    cam.isInteracting = true;
     
-    const idleDuration = performance.now() - cam.lastInteractionTime;
-    // If user has stopped interacting for more than 150ms and a full render is pending
-    if (idleDuration > 150 && cam.needsFullRender) {
-        cam.isInteracting = false;
-        cam.needsFullRender = false;
-        render(); // Trigger full detailed render when idle
+    if (cam.interactionTimeout) {
+        clearTimeout(cam.interactionTimeout);
     }
+    
+    // Stay in slow mode (coarse ticks) until user is idle for 200ms
+    cam.interactionTimeout = setTimeout(() => {
+        cam.isInteracting = false;
+        render(); // Final clean high-detail render when resting
+    }, 200);
 }
 
 function converge1BigInt(a, b, rescale = 1) {
@@ -157,9 +150,9 @@ function importanceSeg(x0, x1, width) {
 function tickmark(x0, x1, o0, width) {
     if (x0 < 0 || x0 >= width) return;
     
-    // Apply SlowMode tick spacing filter during interaction
-    const activeSpacing = (config.SlowMode && cam.isInteracting) ? config.SlowModeTickSpacing : config.TickSpacing;
-    if (Math.floor(x0) % activeSpacing !== 0) return;
+    // Use SlowModeTickSpacing when actively interacting, otherwise TickSpacing
+    const currentTickSpacing = (config.SlowMode && cam.isInteracting) ? config.SlowModeTickSpacing : config.TickSpacing;
+    if (Math.floor(x0) % currentTickSpacing !== 0) return;
 
     importanceSeg(x0, x1, width);
     const idx = Math.max(0, Math.min(cam.ticks.length - 1, Math.floor(x0)));
@@ -171,8 +164,6 @@ function tickmark(x0, x1, o0, width) {
 
 function tickmarkLabel(x0, x1, o0, width) {
     if (x0 < -150 || x0 >= width + 150) return;
-    // Hide labels during active slow mode interaction to maximize performance
-    if (config.SlowMode && cam.isInteracting) return;
     cam.labelsToDraw.push({ x: x0, ord: o0 });
 }
 
@@ -253,12 +244,12 @@ function computeTree(width) {
     
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, epsBI, xminBI, xmaxBI, 0, 0, tickmark, width);
 
-    if (!(config.SlowMode && cam.isInteracting)) {
-        tickmarkLabel(toNum(cam.view.x0), toNum(cam.view.x0), notation.Zero, width);
-        const labelEpsBI = toBigInt(canvas.width / config.labelscount);
-        segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, labelEpsBI, xminBI, xmaxBI, 0, 0, tickmarkLabel, width);
-        tickmarkLabel(toNum(cam.view.x1), toNum(cam.view.x1), notation.Limit, width);
-    }
+    tickmarkLabel(toNum(cam.view.x0), toNum(cam.view.x0), notation.Zero, width);
+    
+    const labelEpsBI = toBigInt(canvas.width / config.labelscount);
+    segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, labelEpsBI, xminBI, xmaxBI, 0, 0, tickmarkLabel, width);
+
+    tickmarkLabel(toNum(cam.view.x1), toNum(cam.view.x1), notation.Limit, width);
 }
 
 function samplerCallback(x0, x1, o0, xmax) {
@@ -272,8 +263,6 @@ function samplerCallback(x0, x1, o0, xmax) {
 }
 
 function sampleHighPrecision(x, width) {
-    if (config.SlowMode && cam.isInteracting) return; // Skip heavy sampling during active slow-mode movement
-
     const currentViewX1Num = toNum(cam.view.x1);
     if (x >= currentViewX1Num) {
         const sampleElem = document.getElementById("sampleLabel");
@@ -299,13 +288,13 @@ function sampleHighPrecision(x, width) {
 }
 
 function drawTimelineLabels() {
-    if (config.SlowMode && cam.isInteracting) return;
     const mode = notation.DisplayName[config.mode];
     const h = canvas.height;
 
     cam.labelsToDraw.forEach((lbl) => {
         const px = lbl.x;
         const py = h * px / canvas.width - cam.tHeight;
+
         const labelString = notation.display(lbl.ord, mode);
 
         createTextLabel(labelString, "#ffffff", px - 7, py - 10, "left", "bottom", "22px Serif");
@@ -408,7 +397,7 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("mousedown", (e) => {
     if (window.isSettingsOpen) return;
-    checkIdleStringInterruption();
+    triggerInteraction();
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.clientX;
     cam.view.mouse.lastY = e.clientY;
@@ -418,7 +407,7 @@ window.addEventListener("mousemove", (e) => {
     if (window.isSettingsOpen) return;
     if (!cam.view.mouse.isDown) return;
 
-    checkIdleStringInterruption();
+    triggerInteraction();
 
     const dxBI = toBigInt(e.clientX - cam.view.mouse.lastX);
     const dy = e.clientY - cam.view.mouse.lastY;
@@ -459,7 +448,7 @@ window.addEventListener("mousemove", (e) => {
 window.addEventListener("wheel", (e) => {
     if (window.isSettingsOpen) return;
     e.preventDefault();
-    checkIdleStringInterruption();
+    triggerInteraction();
 
     const zoomFactor = e.deltaY < 0 ? config.wheelZoomIn : config.wheelZoomOut;
     const zoomFactorBI = toBigInt(zoomFactor);
@@ -475,14 +464,11 @@ window.addEventListener("wheel", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("mouseup", () => {
-    cam.view.mouse.isDown = false;
-    checkIdleStringInterruption();
-});
+window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
 window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
 
 window.addEventListener("keydown", (e) => {
-    checkIdleStringInterruption();
+    triggerInteraction();
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
 
@@ -507,7 +493,6 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = false;
     cam.activeKeys[e.code] = false;
-    checkIdleStringInterruption();
 });
 
 function updateKeyboardInput() {
@@ -534,7 +519,7 @@ function updateKeyboardInput() {
     const mxBI = toBigInt(canvas.width / 2);
 
     if (cam.activeKeys["arrowleft"] || cam.activeKeys["arrowright"] || cam.activeKeys["arrowup"] || cam.activeKeys["arrowdown"]) {
-        checkIdleStringInterruption();
+        triggerInteraction();
     }
 
     if (cam.activeKeys["arrowleft"]) {
@@ -581,7 +566,7 @@ function updateKeyboardInput() {
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
     if (e.target === canvas) e.preventDefault();
-    checkIdleStringInterruption();
+    triggerInteraction();
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.touches[0].clientX;
     cam.view.mouse.lastY = e.touches[0].clientY;
@@ -590,7 +575,7 @@ window.addEventListener("touchstart", (e) => {
 window.addEventListener("touchmove", (e) => {
     if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
     if (e.target === canvas) e.preventDefault();
-    checkIdleStringInterruption();
+    triggerInteraction();
 
     const dxBI = toBigInt(e.touches[0].clientX - cam.view.mouse.lastX);
     const dy = e.touches[0].clientY - cam.view.mouse.lastY;
@@ -628,10 +613,7 @@ window.addEventListener("touchmove", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("touchend", () => {
-    cam.view.mouse.isDown = false;
-    checkIdleStringInterruption();
-});
+window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
 window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
 
 updateKeyboardInput();
