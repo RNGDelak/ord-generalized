@@ -1,3 +1,8 @@
+/*
+Notation : TON
+Limit : guessed to be (0)(1,1,1)(2,2,1)(3) / limit of SAN / w-dropping OCN
+*/
+
 window.notation = (() => {
 
   // --- Taranovsky's Notation Implementation ---
