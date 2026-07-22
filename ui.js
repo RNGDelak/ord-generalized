@@ -84,6 +84,26 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
+        // --- NEW: Check for custom notation configuration ---
+        if (typeof config !== 'undefined' && config) {
+            const notationType = config.types;
+
+            // If undefined or "default", do nothing
+            if (notationType && notationType === "custom") {
+                // Merge or assign the custom properties into your global/local config
+                // (Assuming `config` is already your main configuration object)
+                
+                // Sync the updated config object back to the UI textarea
+                syncConfigToTextArea();
+                
+                // Trigger a re-render if necessary to apply aspect ratio or other settings
+                if (typeof render === "function") {
+                    render();
+                }
+            }
+        }
+        // ----------------------------------------------------
+
         if (typeof init === "function") {
             init();
         }
