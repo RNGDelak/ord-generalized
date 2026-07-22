@@ -3,6 +3,8 @@ Notation : LPrSS
 Limit : phi(0,ω)
 */
 
+window.notation = (() => {
+
 //for pretty printing use abbreviateVeblen
 
 var itemSeparatorRegex = /[\t ,]/g;
@@ -367,8 +369,6 @@ function Veblen_to_SPrSS(s, stringify) {
   return stringify ? r.join(",") : r;
 }
 
-window.notation = (() => {
-
   function fs(ord, n) {
     if (ord === Limit) return [0, n + 1];
 
@@ -505,7 +505,6 @@ window.notation = (() => {
     ["Tower of ω", "#ffffff"],
     ["ε Ordinal", "#0fff00"],
     ["Veblen Ordinal", "#00fff0"]
-
   ];
 
   const Aliases = [
