@@ -84,15 +84,22 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // --- NEW: Check for custom notation configuration ---
-        if (typeof config !== 'undefined' && config) {
-            const notationType = config.types;
+        // --- FIXED: Check inside window.notation or global scope ---
+        let activeConfig = null;
+        if (typeof window.notation !== 'undefined' && window.notation.config) {
+            activeConfig = window.notation.config;
+        } else if (typeof config !== 'undefined') {
+            activeConfig = config;
+        }
 
-            // If undefined or "default", do nothing
-            if (notationType && notationType === "custom") {
-                // Merge or assign the custom properties into your global/local config
-                // (Assuming `config` is already your main configuration object)
-                
+        if (activeConfig && activeConfig.types) {
+            const notationType = activeConfig.types;
+
+            // Check if type is "custom" (case-insensitive to match "Custom")
+            if (notationType && notationType.toLowerCase() === "custom") {
+                // Merge activeConfig into your global config object
+                config = { ...config, ...activeConfig };
+
                 // Sync the updated config object back to the UI textarea
                 syncConfigToTextArea();
                 
@@ -102,7 +109,7 @@ function executeCustomScript(codeString) {
                 }
             }
         }
-        // ----------------------------------------------------
+        // -------------------------------------------------------------
 
         if (typeof init === "function") {
             init();
@@ -116,7 +123,6 @@ function executeCustomScript(codeString) {
         );
     }
 }
-
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
     document.getElementById('presetSelect').value='Libs/BMS.js';
