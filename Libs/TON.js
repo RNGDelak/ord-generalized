@@ -198,7 +198,6 @@ window.notation = (() => {
   ];
 
   const config = {
-    types: "custom",
     aspectratio: 0.5,
     mode: 1
   };
