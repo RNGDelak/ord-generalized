@@ -35,7 +35,6 @@ window.notation = (() => {
 
   //there a different here
   const config = {
-    types: "custom",
     aspectratio: 0.2,
     SlowMode: true,
     SlowModeTickSpacing: 50
