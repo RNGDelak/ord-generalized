@@ -84,7 +84,7 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // --- SAFE MERGE: Only updates provided properties, leaves the rest alone ---
+        // --- FIXED: Check inside window.notation or global scope ---
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -92,39 +92,21 @@ function executeCustomScript(codeString) {
             activeConfig = config;
         }
 
-        if (activeConfig && typeof activeConfig === 'object') {
-            // Ensure global config exists
-            if (typeof config === 'undefined') {
-                config = {};
-            }
+        if (activeConfig && activeConfig.types) {
+            const notationType = activeConfig.types;
 
-            // ONLY merge if activeConfig actually has properties inside it.
-            // If it's empty ({}), we leave the previous config completely untouched!
-            if (Object.keys(activeConfig).length > 0) {
-                // Helper function for deep merging configurations safely
-                function deepMerge(target, source) {
-                    for (const key of Object.keys(source)) {
-                        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                            if (!target[key] || typeof target[key] !== 'object') {
-                                target[key] = {};
-                            }
-                            deepMerge(target[key], source[key]);
-                        } else {
-                            target[key] = source[key];
-                        }
-                    }
-                    return target;
+            // Check if type is "custom" (case-insensitive to match "Custom")
+            if (notationType && notationType.toLowerCase() === "custom") {
+                // Merge activeConfig into your global config object
+                config = { ...config, ...activeConfig };
+
+                // Sync the updated config object back to the UI textarea
+                syncConfigToTextArea();
+                
+                // Trigger a re-render if necessary to apply aspect ratio or other settings
+                if (typeof render === "function") {
+                    render();
                 }
-
-                deepMerge(config, activeConfig);
-            }
-
-            // Sync the updated config object back to the UI textarea
-            syncConfigToTextArea();
-
-            // Trigger a re-render to apply the updated properties
-            if (typeof render === "function") {
-                render();
             }
         }
         // -------------------------------------------------------------
@@ -141,7 +123,6 @@ function executeCustomScript(codeString) {
         );
     }
 }
-
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
     document.getElementById('presetSelect').value='Libs/BMS.js';
@@ -153,7 +134,7 @@ function dismissHint() {
         // Fade it out cleanly using the CSS transitions defined above
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
-
+        
         // Remove pointer interactions entirely once closed so users can interact with elements behind it
         setTimeout(() => {
             hintElement.remove();
