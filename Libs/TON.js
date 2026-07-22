@@ -169,8 +169,7 @@ window.notation = (() => {
 
   function classifyOrdinal(ord) {
     if (ord === Infinity) return "#ff8000";
-    if (typeof ord === 'number') {
-      if (ord < 0) return "#808080"; // Zero
+    if (isSuccessor(ord)) {
       return "#d40000"; // Successor / Omega level
     }
     return "#ff8000"; // Limit ordinal
