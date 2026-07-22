@@ -512,9 +512,7 @@ function Veblen_to_SPrSS(s, stringify) {
     ["φ(0,ω)", Limit]
   ];
 
-  const config = {
-    types: "default"
-  };
+  const config = {};
 
   const title = "LPrSS transfinite number line";
 
