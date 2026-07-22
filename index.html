@@ -6,7 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="Title"></title>
        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>
+    eruda.init();
+    
+    // Force center alignment on load and if dynamically changed
+    window.addEventListener('DOMContentLoaded', () => {
+        const checkErudaBtn = setInterval(() => {
+            const btn = document.querySelector('.eruda-entry-btn');
+            if (btn) {
+                btn.style.setProperty('left', '50%', 'important');
+                btn.style.setProperty('transform', 'translateX(-50%)', 'important');
+                btn.style.setProperty('right', 'auto', 'important');
+            }
+        }, 500);
+    });
+</script>
     <style>
         body,
         html {
@@ -33,15 +48,6 @@
             height: 100%;
             pointer-events: none;
             overflow: hidden;
-        }
-
-  html div.eruda-container .eruda-entry-btn {
-            top: auto !important;
-            bottom: 20px !important;
-            left: 50% !important;
-            right: auto !important;
-            transform: translateX(-50%) !important;
-            z-index: 999999 !important;
         }
 
         .textLabel {
