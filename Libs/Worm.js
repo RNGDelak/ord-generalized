@@ -3,6 +3,10 @@ Notation : Worm (Ackermann Worm)
 Limit : ω^ω
 */
 
+
+
+window.notation = (() => {
+
 //convert to readable ordinal
 function pretty(ord) {
   if (ord.length == 0) return "0";
@@ -36,7 +40,6 @@ function pretty(ord) {
 }
 
 
-window.notation = (() => {
 
   function fs(ord, n) {
     if (ord == Limit) return [n];
