@@ -84,7 +84,7 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // --- FIXED: Check inside window.notation or global scope ---
+        // --- UPDATED: Immediately accept any active configuration found ---
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -92,21 +92,16 @@ function executeCustomScript(codeString) {
             activeConfig = config;
         }
 
-        if (activeConfig && activeConfig.types) {
-            const notationType = activeConfig.types;
+        if (activeConfig) {
+            // Merge activeConfig into your global config object (defaults to {} if undefined)
+            config = { ...(window.config || {}), ...activeConfig };
 
-            // Check if type is "custom" (case-insensitive to match "Custom")
-            if (notationType && notationType.toLowerCase() === "custom") {
-                // Merge activeConfig into your global config object
-                config = { ...config, ...activeConfig };
-
-                // Sync the updated config object back to the UI textarea
-                syncConfigToTextArea();
-                
-                // Trigger a re-render if necessary to apply aspect ratio or other settings
-                if (typeof render === "function") {
-                    render();
-                }
+            // Sync the updated config object back to the UI textarea
+            syncConfigToTextArea();
+            
+            // Trigger a re-render if necessary
+            if (typeof render === "function") {
+                render();
             }
         }
         // -------------------------------------------------------------
@@ -123,6 +118,8 @@ function executeCustomScript(codeString) {
         );
     }
 }
+
+
 window.addEventListener('DOMContentLoaded', () => {
     loadPresetNotation('Libs/BMS.js');
     document.getElementById('presetSelect').value='Libs/BMS.js';
