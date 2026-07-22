@@ -1,8 +1,3 @@
-/*
-Notation : BMS
-Limit : ω-Y(1,3)
-*/
-
 window.notation = (() => {
 
     function cmp(m1, m2) {
@@ -573,4 +568,5 @@ window.notation = (() => {
         return displayOCF(_o(processMatrix(matrix)))
     }
 
-    return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zer
+    return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
+})();
