@@ -1,3 +1,9 @@
+/*
+Notation : BMS
+Limit : ω-Y(1,3)
+*/
+
+
 window.notation = (() => {
 
     function cmp(m1, m2) {
