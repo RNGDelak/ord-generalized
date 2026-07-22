@@ -58,43 +58,33 @@ function applyInjectedCode() {
     executeCustomScript(customCode);
 }
 
-// Keep track of active animation frames or intervals if your notations use them
-let activeAnimationId = null;
-
 function executeCustomScript(codeString) {
     try {
-        // 1. Syntax Validation
+        // Validate syntax
         new Function(codeString);
     } catch (e) {
-        alert(`Syntax Error\n\n${e.message}`);
+        alert(
+            `Syntax Error\n\n` +
+            `${e.message}`
+        );
         return;
     }
 
     try {
-        // 2. CLEANUP PREVIOUS NOTATION STATE
-        // Stop any running requestAnimationFrame loops if defined globally
-        if (typeof window.cancelAnimationFrame === 'function' && activeAnimationId) {
-            cancelAnimationFrame(activeAnimationId);
-            activeAnimationId = null;
-        }
+        const wrappedCode =
+            codeString +
+            "\n//# sourceURL=InjectedCustomCode.js";
 
-        // Clear out old global notation object to prevent property bleeding
-        if (window.notation) {
-            window.notation = undefined;
-        }
-
-        // Remove the old script element cleanly
-        const old = document.getElementById("notation-script");
-        if (old) old.remove();
-
-        // 3. INJECT NEW SCRIPT
-        const wrappedCode = codeString + "\n//# sourceURL=InjectedCustomCode.js";
         const script = document.createElement("script");
         script.id = "notation-script";
         script.textContent = wrappedCode;
+
+        const old = document.getElementById("notation-script");
+        if (old) old.remove();
+
         document.body.appendChild(script);
 
-        // 4. CONFIGURATION MERGE
+        // --- SAFE MERGE: Only updates provided properties, leaves the rest alone ---
         let activeConfig = null;
         if (typeof window.notation !== 'undefined' && window.notation.config) {
             activeConfig = window.notation.config;
@@ -103,33 +93,42 @@ function executeCustomScript(codeString) {
         }
 
         if (activeConfig && typeof activeConfig === 'object') {
-            function deepMerge(target, source) {
-                for (const key of Object.keys(source)) {
-                    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                        if (!target[key] || typeof target[key] !== 'object') {
-                            target[key] = {};
-                        }
-                        deepMerge(target[key], source[key]);
-                    } else {
-                        target[key] = source[key];
-                    }
-                }
-                return target;
-            }
-
+            // Ensure global config exists
             if (typeof config === 'undefined') {
                 config = {};
             }
 
-            deepMerge(config, activeConfig);
+            // ONLY merge if activeConfig actually has properties inside it.
+            // If it's empty ({}), we leave the previous config completely untouched!
+            if (Object.keys(activeConfig).length > 0) {
+                // Helper function for deep merging configurations safely
+                function deepMerge(target, source) {
+                    for (const key of Object.keys(source)) {
+                        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                            if (!target[key] || typeof target[key] !== 'object') {
+                                target[key] = {};
+                            }
+                            deepMerge(target[key], source[key]);
+                        } else {
+                            target[key] = source[key];
+                        }
+                    }
+                    return target;
+                }
+
+                deepMerge(config, activeConfig);
+            }
+
+            // Sync the updated config object back to the UI textarea
             syncConfigToTextArea();
 
+            // Trigger a re-render to apply the updated properties
             if (typeof render === "function") {
                 render();
             }
         }
+        // -------------------------------------------------------------
 
-        // 5. RE-INITIALIZE
         if (typeof init === "function") {
             init();
         }
@@ -154,7 +153,7 @@ function dismissHint() {
         // Fade it out cleanly using the CSS transitions defined above
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
-        
+
         // Remove pointer interactions entirely once closed so users can interact with elements behind it
         setTimeout(() => {
             hintElement.remove();
