@@ -1,5 +1,8 @@
 window.isSettingsOpen = false;
 
+// Store a pristine backup of the initial configuration on load
+let initialConfigBackup = null;
+
 function toggleConfigMenu() {
     const menu = document.getElementById('configMenu');
     const canvasElement = document.getElementById('canvas');
@@ -37,9 +40,16 @@ function syncConfigToTextArea() {
 
 window.applyInjectedConfig = function () {
     try {
-        const jsonInput = document.getElementById('envConfigJson').value;
-        const parsedConfig = JSON.parse(jsonInput);
+        const jsonInput = document.getElementById('envConfigJson').value.trim();
+        
+        // If empty, let it free untouched using the previous state or initial backup
+        if (!jsonInput) {
+            syncConfigToTextArea();
+            if (typeof render === "function") render();
+            return;
+        }
 
+        const parsedConfig = JSON.parse(jsonInput);
         config = { ...config, ...parsedConfig };
 
         render();
@@ -47,6 +57,11 @@ window.applyInjectedConfig = function () {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
 };
+
+// Capture initial configuration state right after it's first available
+if (typeof config !== 'undefined' && !initialConfigBackup) {
+    initialConfigBackup = JSON.parse(JSON.stringify(config));
+}
 syncConfigToTextArea();
 
 function applyInjectedCode() {
@@ -84,6 +99,24 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
+        // Safely extract active config if provided by the notation script, keeping existing settings untouched unless overridden
+        let activeConfig = null;
+        if (typeof window.notation !== 'undefined' && window.notation.config) {
+            activeConfig = window.notation.config;
+        } else if (typeof config !== 'undefined') {
+            activeConfig = config;
+        }
+
+        if (activeConfig) {
+            config = { ...config, ...activeConfig };
+        }
+
+        syncConfigToTextArea();
+
+        if (typeof render === "function") {
+            render();
+        }
+
         if (typeof init === "function") {
             init();
         }
@@ -98,18 +131,19 @@ function executeCustomScript(codeString) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    if (typeof config !== 'undefined' && !initialConfigBackup) {
+        initialConfigBackup = JSON.parse(JSON.stringify(config));
+    }
     loadPresetNotation('Libs/BMS.js');
-    document.getElementById('presetSelect').value='Libs/BMS.js';
+    document.getElementById('presetSelect').value = 'Libs/BMS.js';
 });
 
 function dismissHint() {
     const hintElement = document.getElementById("hint");
     if (hintElement) {
-        // Fade it out cleanly using the CSS transitions defined above
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
         
-        // Remove pointer interactions entirely once closed so users can interact with elements behind it
         setTimeout(() => {
             hintElement.remove();
         }, 400); 
