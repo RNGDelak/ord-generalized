@@ -1,3 +1,8 @@
+/*
+Notation : SFSS
+Limit : psi_0(psd.I++/;b)
+*/
+
 window.notation = (() => {
 
   const Zero = [];
