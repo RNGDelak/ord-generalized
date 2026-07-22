@@ -1,3 +1,8 @@
+/*
+Notation : cOCF
+Limit : (0,0,0,0)(1,1,1,1)(2,2)
+*/
+
 window.notation = (() => {
     const cOCF_count = (x) => (x.match(/\(/g) || []).length - (x.match(/\)/g) || []).length;
 
