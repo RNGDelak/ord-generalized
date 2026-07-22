@@ -4,7 +4,8 @@ Limit : ψ(Ω_ω)
 */
 
 
-//for example, i can put some function outside and include it inside notation IIEF
+
+window.notation = (() => {
 function PrSStoCNF(s) {
     if (s.length==0) return '0'
     let out = "";
@@ -40,7 +41,7 @@ function PrSStoCNF(s) {
 
     return out.substring(3); // Updated from substring(1) to cleanly slice off the initial " + "
 }
-window.notation = (() => {
+
     function fs(ord, n) {
         if (ord == "Limit") return [0, n + 1]
 
