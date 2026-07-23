@@ -738,25 +738,23 @@ window.addEventListener("touchmove", (e) => {
 window.addEventListener("touchend", () => {
     if (config.SlowMode && slowModeRect.isDrawing) {
         slowModeRect.isDrawing = false;
-        
-        const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
-        const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
-       
+
+        const rawMinX = Math.min(slowModeRect.startX, slowModeRect.currentX);
+        const rawMaxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
+
+       if (Math.abs(rawMaxX - rawMinX) > 5) {
             pushViewportHistory();
-            
+
             const canvasWidth = canvas.width;
-            const currentWidth = cam.view.x1 - cam.view.x0;
-            
-            // Map the drawn screen coordinates relative to the current viewport span
-            const leftRatio = minX / canvasWidth;
-            const rightRatio = maxX / canvasWidth;
-            
-            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(currentWidth)));
-            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(currentWidth)));
-            
+            const viewSpan = cam.view.x1 - cam.view.x0;
+
+            // Map selection window to absolute BigInt coordinates
+            const targetX0 = cam.view.x0 + (viewSpan * BigInt(Math.round(rawMinX))) / BigInt(canvasWidth);
+            const targetX1 = cam.view.x0 + (viewSpan * BigInt(Math.round(rawMaxX))) / BigInt(canvasWidth);
+
             cam.view.x0 = targetX0;
             cam.view.x1 = targetX1;
-        
+        }
         render();
         return;
     }
