@@ -15,6 +15,14 @@ function toggleConfigMenu() {
     }
 }
 
+// Add this helper function to reset/initialize notations when loading a preset/notation system
+function resetNotationsForSystem() {
+    config.modes = [0];
+    if (typeof updateNotationConfigUI === "function") {
+        updateNotationConfigUI();
+    }
+}
+
 // Add this logic block to plot.js
 function updateDepthDisplay() {
     const displayElem = document.getElementById("depthDisplay");
@@ -41,6 +49,7 @@ async function loadPresetNotation(scriptPath) {
         const scriptCode = await response.text();
         document.getElementById('codeInject').value = scriptCode;
         executeCustomScript(scriptCode);
+resetNotationsForSystem()
 
     } catch (err) {
         alert("Could not load preset text: " + err.message);
@@ -86,6 +95,7 @@ function applyInjectedCode() {
         return;
     }
     executeCustomScript(customCode);
+    resetNotationsForSystem()
 }
 
 function executeCustomScript(codeString) {
