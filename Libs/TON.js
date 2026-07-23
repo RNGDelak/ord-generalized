@@ -203,7 +203,7 @@ window.notation = (() => {
 
   const config = {
     aspectratio: 0.5,
-    mode: 1
+    modes:[1]
   };
 
   const title = "Taranovsky's Ordinal Notation transfinite number line";
