@@ -268,7 +268,7 @@ function updateNotationConfigUI() {
 
 function addNotationSelector() {
     if (window.notation && window.notation.DisplayName) {
-        const nextMode = 0;
+        const nextMode = (config.modes.length > 0) ? (config.modes[config.modes.length - 1] + 1) % window.notation.DisplayName.length : 0;
         config.modes.push(nextMode);
         updateNotationConfigUI();
         if (typeof render === "function") render();
