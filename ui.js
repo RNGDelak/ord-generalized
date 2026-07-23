@@ -37,13 +37,6 @@ function resetNotationsForSystem() {
     }
 }
 
-// Add this logic block to plot.js
-function updateDepthDisplay() {
-    const displayElem = document.getElementById("depthDisplay");
-    if (displayElem) {
-        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Infinite" : `Depth: ${cam.view.maxDepth}`;
-    }
-}
 
 function adjustDepth(amount) {
     if (amount < 0) {
