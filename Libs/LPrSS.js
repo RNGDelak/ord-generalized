@@ -495,7 +495,7 @@ function Veblen_to_SPrSS(s, stringify) {
   const Zero = [];
   const Limit = "Limit";
 
-  const DisplayName = ["normal", 'CNF'];
+  const DisplayName = ["normal", 'pretty'];
 
   const ordinalTypes = [
     ["Zero", "#808080"],
@@ -512,7 +512,7 @@ function Veblen_to_SPrSS(s, stringify) {
     ["φ(0,ω)", Limit]
   ];
 
-  const config = {mode:1};
+  const config = {modes:[1]};
 
   const title = "LPrSS transfinite number line";
 
