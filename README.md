@@ -1,7 +1,6 @@
 # A transfinite Number line where you can edits and play!
 
 
-
 ## How to use the transfinte number lines
 
 

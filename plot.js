@@ -1,18 +1,26 @@
 let PRECISION_SCALE = 10n ** 10n; 
 
+
 function updateAdaptivePrecisionScale() {
     const canvasWidth = canvas.width;
     const currentWidth = Number(cam.view.x1 - cam.view.x0); 
+    
     
     if (!currentWidth || currentWidth <= 0) {
         PRECISION_SCALE = 10n ** 10n;
         return;
     }
 
+    
+    
     const zoomMagnitude = Number(PRECISION_SCALE) / Number(cam.view.x1 - cam.view.x0);
     const log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
+    
+    
     const requiredDigits = Math.max(10, Math.floor(log10Zoom) + 8);
+    
     const nextScale = 10n ** BigInt(requiredDigits);
+    
     
     if (nextScale !== PRECISION_SCALE) {
         const oldScale = PRECISION_SCALE;
@@ -22,6 +30,7 @@ function updateAdaptivePrecisionScale() {
     }
 }
 
+
 function toBigInt(num) {
     return BigInt(Math.round(num * 1e6)) * (PRECISION_SCALE / 1000000n);
 }
@@ -29,14 +38,6 @@ function toBigInt(num) {
 function toNum(big) {
     if (PRECISION_SCALE === 0n) return 0;
     return Number(big * 1000000n / PRECISION_SCALE) / 1000000;
-}
-
-// Convert Screen/Canvas X Pixel coordinate to World BigInt Coordinate
-function canvasToWorldX(pixelX) {
-    const canvasWidthBI = BigInt(Math.round(canvas.width));
-    if (canvasWidthBI === 0n) return cam.view.x0;
-    const viewWidthBI = cam.view.x1 - cam.view.x0;
-    return cam.view.x0 + (BigInt(Math.round(pixelX)) * viewWidthBI / canvasWidthBI);
 }
 
 let config = {
@@ -51,16 +52,16 @@ let config = {
     maxAllowedWidthFactor: 0.5,
     labelscount: 8,
 
-    modes: [0],
+    modes: [0], // Changed from mode: 0 to an array
     MathstickMode: false,
     DiagonalTickArrangement: true,
     ZoomIntoMouse: true,
 
     LabelBetweenTimelineSpacing: 0,
     LabelBetweenTickSpacing: 0,
-    LabelBetweenLabelSpacing: 10,
+    LabelBetweenLabelSpacing: 10, // Spacing between stacked notation labels
     TickBetweenLabelXoffest: 0,
-    TimelineLabelOffset: 20,
+    TimelineLabelOffset: 20,     // Offset variables from config
     TimelineLabelColor: "#ffffff",
 
     SlowMode: false,
@@ -101,61 +102,6 @@ let cam = {
     samplerOrd: null,
     activeKeys: {}
 };
-
-// --- Slow Mode & History Stack ---
-let zoomHistory = [];
-let slowModeState = {
-    isDrawing: false,
-    startX: 0,
-    startY: 0,
-    currentX: 0,
-    currentY: 0
-};
-
-function pushZoomHistory() {
-    zoomHistory.push({
-        x0: cam.view.x0,
-        x1: cam.view.x1,
-        scale: PRECISION_SCALE
-    });
-}
-
-function revertZoom() {
-    // If currently drawing, cancel rectangle
-    if (slowModeState.isDrawing) {
-        slowModeState.isDrawing = false;
-        render();
-        return;
-    }
-    // Revert to previous viewport in history
-    if (zoomHistory.length > 0) {
-        const prev = zoomHistory.pop();
-        PRECISION_SCALE = prev.scale;
-        cam.view.x0 = prev.x0;
-        cam.view.x1 = prev.x1;
-        clampViewportBounds();
-        render();
-    }
-}
-
-// Convert rectangle boundaries on screen directly into viewport BigInt coordinates
-function applyRectangleZoom() {
-    const xMinPixel = Math.min(slowModeState.startX, slowModeState.currentX);
-    const xMaxPixel = Math.max(slowModeState.startX, slowModeState.currentX);
-    
-    // Require a minimum width drag to trigger zoom
-    if (xMaxPixel - xMinPixel > 5) {
-        pushZoomHistory();
-        
-        // Map canvas positions directly to world position
-        const newX0 = canvasToWorldX(xMinPixel);
-        const newX1 = canvasToWorldX(xMaxPixel);
-        
-        cam.view.x0 = newX0;
-        cam.view.x1 = newX1;
-        clampViewportBounds();
-    }
-}
 
 let lastFrameTime = performance.now();
 
@@ -235,6 +181,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
+      
         }
 
         let m = n + 2;
@@ -341,6 +288,7 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20) {
         let htmlContent = "";
+        // Stack notations based on config.modes array order
         config.modes.forEach(modeIdx => {
             const mode = notation.DisplayName[modeIdx];
             const ordStr = notation.display(cam.samplerOrd, mode);
@@ -358,17 +306,21 @@ function drawTimelineLabels() {
         const px = lbl.x;
         const py = h * px / canvas.width - cam.tHeight - config.TimelineLabelOffset;
 
+        // Iterate backwards (or adjust index offset) so the first notation in config.modes 
+        // appears at the top of the stack, matching the sample label box layout.
         const totalModes = config.modes.length;
         config.modes.forEach((modeIdx, i) => {
             const mode = notation.DisplayName[modeIdx];
             const labelString = notation.display(lbl.ord, mode);
             
+            // Invert index stacking order to match sample layout direction
             const invertedIndex = totalModes - 1 - i;
             const currentY = py - (invertedIndex * (22 + config.LabelBetweenLabelSpacing));
             
             createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
         });
 
+        // Timeline / Aliases added after all notations
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
                 const totalStackHeight = totalModes * 22 + (totalModes - 1) * config.LabelBetweenLabelSpacing;
@@ -383,28 +335,14 @@ function drawHUD() {
     let py = 40;
     const px = canvas.width - 7;
     createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "bold 30px Serif");
-    notation.ordinalTypes.forEach(([name, color]) => {
+        notation.ordinalTypes.forEach(([name, color]) => {
         createTextLabel(name, color, px, py, "right", "top", "26px Serif");
         py += 30;
     });
 }
 
-function drawSlowModeRectangle() {
-    if (config.SlowMode && slowModeState.isDrawing) {
-        const rx = Math.min(slowModeState.startX, slowModeState.currentX);
-        const ry = Math.min(slowModeState.startY, slowModeState.currentY);
-        const rw = Math.abs(slowModeState.currentX - slowModeState.startX);
-        const rh = Math.abs(slowModeState.currentY - slowModeState.startY);
-
-        ctx.strokeStyle = "rgba(0, 150, 255, 0.8)";
-        ctx.fillStyle = "rgba(0, 150, 255, 0.15)";
-        ctx.lineWidth = 2;
-        ctx.fillRect(rx, ry, rw, rh);
-        ctx.strokeRect(rx, ry, rw, rh);
-    }
-}
-
 function render() {
+    
     updateAdaptivePrecisionScale();
 
     clearCanvas();
@@ -437,22 +375,24 @@ function render() {
     drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
-    drawSlowModeRectangle();
 }
-
 function resizeCanvas() {
+    
     const oldWidth = canvas.width || window.innerWidth;
+    
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    
     if (cam.view && cam.view.x0 !== undefined && cam.view.x1 !== undefined && oldWidth > 0) {
         const widthRatioBI = toBigInt(canvas.width / oldWidth);
+        
+        
         cam.view.x0 = (cam.view.x0 * widthRatioBI) / PRECISION_SCALE;
         cam.view.x1 = (cam.view.x1 * widthRatioBI) / PRECISION_SCALE;
     }
 }
-
 function init() {
     document.getElementById("Title").innerText = notation.title;
     resizeCanvas();
@@ -485,17 +425,8 @@ window.addEventListener("resize", () => {
     render();
 });
 
-// --- Mouse Drag and Slow Mode Event Handlers ---
 window.addEventListener("mousedown", (e) => {
     if (window.isSettingsOpen) return;
-    if (config.SlowMode) {
-        slowModeState.isDrawing = true;
-        slowModeState.startX = e.clientX;
-        slowModeState.startY = e.clientY;
-        slowModeState.currentX = e.clientX;
-        slowModeState.currentY = e.clientY;
-        return;
-    }
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.clientX;
     cam.view.mouse.lastY = e.clientY;
@@ -503,12 +434,6 @@ window.addEventListener("mousedown", (e) => {
 
 window.addEventListener("mousemove", (e) => {
     if (window.isSettingsOpen) return;
-    if (config.SlowMode && slowModeState.isDrawing) {
-        slowModeState.currentX = e.clientX;
-        slowModeState.currentY = e.clientY;
-        render();
-        return;
-    }
     if (!cam.view.mouse.isDown) return;
 
     const dxBI = toBigInt(e.clientX - cam.view.mouse.lastX);
@@ -547,26 +472,8 @@ window.addEventListener("mousemove", (e) => {
     render();
 });
 
-window.addEventListener("mouseup", (e) => {
-    if (config.SlowMode && slowModeState.isDrawing) {
-        slowModeState.isDrawing = false;
-        applyRectangleZoom();
-        render();
-        return;
-    }
-    cam.view.mouse.isDown = false;
-});
-
-window.addEventListener("mouseleave", () => {
-    if (config.SlowMode && slowModeState.isDrawing) {
-        slowModeState.isDrawing = false;
-        render();
-    }
-    cam.view.mouse.isDown = false;
-});
-
 window.addEventListener("wheel", (e) => {
-    if (window.isSettingsOpen || config.SlowMode) return;
+    if (window.isSettingsOpen) return;
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? config.wheelZoomIn : config.wheelZoomOut;
     const zoomFactorBI = toBigInt(zoomFactor);
@@ -582,6 +489,10 @@ window.addEventListener("wheel", (e) => {
     render();
 }, { passive: false });
 
+window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
+window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
+
+// Add this logic block to plot.js
 function updateDepthDisplay() {
     const displayElem = document.getElementById("depthDisplay");
     if (displayElem) {
@@ -593,26 +504,21 @@ window.addEventListener("keydown", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
 
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        revertZoom();
-        return;
-    }
-
     let actionTriggered = false;
     if (e.key === "m") {
-        config.modes[0] = (config.modes[0] + 1) % notation.DisplayName.length;
+        config.mode[0] = (config.mode[0] + 1) % notation.DisplayName.length;
         actionTriggered = true;
     }
     if (e.key === "a") {
         cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
-        updateDepthDisplay();
+        updateDepthDisplay()
         actionTriggered = true;
     }
     if (e.key === "s") {
         cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
-        updateDepthDisplay();
+        updateDepthDisplay()
         actionTriggered = true;
+        
     }
     if (actionTriggered) {
         render();
@@ -625,7 +531,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 function updateKeyboardInput() {
-    if (window.isSettingsOpen || config.SlowMode) {
+    if (window.isSettingsOpen) {
         requestAnimationFrame(updateKeyboardInput);
         return;
     }
@@ -688,18 +594,9 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 
-// --- Touch Event Handlers ---
+
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
-    if (config.SlowMode) {
-        if (e.target === canvas) e.preventDefault();
-        slowModeState.isDrawing = true;
-        slowModeState.startX = e.touches[0].clientX;
-        slowModeState.startY = e.touches[0].clientY;
-        slowModeState.currentX = e.touches[0].clientX;
-        slowModeState.currentY = e.touches[0].clientY;
-        return;
-    }
     if (e.target === canvas) e.preventDefault();
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.touches[0].clientX;
@@ -707,15 +604,7 @@ window.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 window.addEventListener("touchmove", (e) => {
-    if (window.isSettingsOpen) return;
-    if (config.SlowMode && slowModeState.isDrawing) {
-        if (e.target === canvas) e.preventDefault();
-        slowModeState.currentX = e.touches[0].clientX;
-        slowModeState.currentY = e.touches[0].clientY;
-        render();
-        return;
-    }
-    if (!cam.view.mouse.isDown) return;
+    if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
     if (e.target === canvas) e.preventDefault();
 
     const dxBI = toBigInt(e.touches[0].clientX - cam.view.mouse.lastX);
@@ -754,23 +643,8 @@ window.addEventListener("touchmove", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("touchend", () => {
-    if (config.SlowMode && slowModeState.isDrawing) {
-        slowModeState.isDrawing = false;
-        applyRectangleZoom();
-        render();
-        return;
-    }
-    cam.view.mouse.isDown = false;
-});
-
-window.addEventListener("touchcancel", () => {
-    if (config.SlowMode && slowModeState.isDrawing) {
-        slowModeState.isDrawing = false;
-        render();
-    }
-    cam.view.mouse.isDown = false;
-});
+window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
+window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
 
 updateKeyboardInput();
 init();
