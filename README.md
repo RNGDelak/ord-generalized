@@ -1,4 +1,4 @@
-# A transfinite Number line where you can plugin and play!!
+# A transfinite Number line where you can plugin and play!
 
 ## How to use the transfinte number lines
 
