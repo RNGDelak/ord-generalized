@@ -422,6 +422,21 @@ window.notation = (() => {
       if (d != '0') { a += '+' + display(d); }
       return a;
    }
+function P_func(M, r, n) {
+            if (r == -1) { return n - 1; }
+            let q = P_func(M, r - 1, n);
+            while (q > -1 && M[q][r] >= M[n][r]) { q = P_func(M, r - 1, q); }
+            return q;
+        }
+
+        function C(M, n) {
+            let X = [];
+            for (let i = 0; i < M.length; i++) {
+                if (P_func(M, 0, i) == n) { X.push(i); }
+            }
+            return X;
+        }
+
         function U(M, n) {
             if (M[n][1] == 0 || M[n][2] == 1 || n + 1 == M.length) { return [0, null]; }
             let m = P_func(M, 1, n);
