@@ -119,7 +119,7 @@ function pretty(ord) {
     ["ω^ω", Limit],
   ];
 
-  const config = {mode:1};
+  const config = {modes:[1]};
 
   const title = "Worm transfinite number line";
 
