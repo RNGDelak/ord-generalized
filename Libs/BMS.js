@@ -351,56 +351,68 @@ window.notation = (() => {
         }
 
         function displayOCF(x, y) {
-            if (x == '0') { return '0'; }
-            if (/^(p\(0\)\+)*p\(0\)$/.test(x)) { return ((x.length + 1) / 5).toString(); }
-            let f = (x[0] == 'p') ? `p(${sua(arg(x))[0]})` : 'P(0)';
-            let g = null;
-            let h = null;
-            if (f == 'p(0)') { f = 'p(p(0))'; g = log(x); h = firstTerm(x)[0]; }
-            else { g = div(log(x), f); h = `${f == 'P(0)' ? 'P' : 'p'}(${split(arg(x), f)[0]})`; }
-            let c = div(x, h);
-            let d = sub(x, mul(h, div(x, h)));
-            if (c == 'p(0)' && d == '0') {
-                if (exp(x) != x) {
-                    if (x == 'p(p(0))') { return 'ω'; }
-                    if (lt(x, 'p(P(0))')) { return `ω<sup>${displayOCF(log(x))}</sup>`; }
-                    return `${displayOCF(f)}<sup>${displayOCF(g)}</sup>`
-                }
-                if (x == 'P(0)') { return 'T'; }
-                let m = div(log(lastTerm(arg(x))[1]), 'P(0)');
-                let k = exp(mul('P(0)', div(log(lastTerm(arg(x))[1]), 'P(0)')));
-                k = div(arg(x), k);
-                k = sua(k);
-                let t = exp(add(mul('P(0)', m), 'P(0)'));
-                let l = null;
-                if (k[0] == '0') { l = '0'; }
-                else { l = 'p(' + mul(exp(mul('P(0)', m)), k[0]) + ')'; }
-                let r = 'p(' + mul(exp(mul('P(0)', m)), add(k[0], 'P(0)')) + ')';
-                let [a, b] = split(k[1], r);
-                a = 'p(' + mul(exp(mul('P(0)', m)), a) + ')'
-                if (a == 'p(0)') { a = '0'; }
-                l = add(l, add(a, b))
-                let s = ''
-                if (lastTerm(arg(x))[1][0] == 'P' && b != '0') {
-                    if (m == 'p(0)') { s = 'Ω'; }
-                    else if (m == 'p(0)+p(0)') { s = 'I'; }
-                    else if (lt(m, 'p(P(P(p(P(P(P(0)))))))')) { s = `I(${displayOCF(sub(m, 'p(0)+p(0)'))},x)`; }
-                    else if (m == 'P(0)') { s = 'M'; }
-                    if (s == '') { return `ψ(${displayOCF(arg(x))})`; }
-                    if (l == 'p(0)') { return s.replace('x', '0'); }
-                    if (s.includes('x')) { return s.replace('x', displayOCF(sub(l, 'p(0)'))); }
-                    return `${s}<sub>${displayOCF(l)}</sub>`;
-                }
-                return `ψ(${displayOCF(arg(x))})`;
-            }
-            let a = displayOCF(h);
-            if (c != 'p(0)') {
-                if (!op(c)) { a += displayOCF(c) }
-                else { a += `&sdot;(${displayOCF(c)})`; }
-            }
-            if (d != '0') { a += '+' + displayOCF(d); }
-            return a;
-        }
+      //if(!y){return 'X'}
+      //console.log(x);
+      if (x == '0') { return '0'; }
+      if (/^(p\(0\)\+)*p\(0\)$/.test(x)) { return ((x.length + 1) / 5).toString(); }
+      let f = (x[0] == 'p') ? `p(${sua(arg(x))[0]})` : 'P(0)';
+      let f1 = (x[0] == 'p') ? sua(arg(x), 'P(0)')[1] : arg(x);
+      let g = null;
+      let h = null;
+      if (f == 'p(0)') { f = 'p(p(0))'; g = log(x); h = firstTerm(x)[0]; }
+      else { g = div(log(x), f); h = `${f == 'P(0)' ? 'P' : 'p'}(${split(arg(x), f)[0]})`; }
+      let c = div(x, h);
+      let d = sub(x, mul(h, div(x, h)));
+      //console.log(f,g,h,'',c,d);
+      if (c == 'p(0)' && d == '0') {
+         if (exp(x) != x) {
+            if (x == 'p(p(0))') { return 'ω'; }
+            if (lt(x, 'p(P(0))')) { return `ω<sup>${display(log(x))}</sup>`; }
+            return `${display(f)}<sup>${display(g)}</sup>`
+         }
+         if (x == 'P(0)') { return 'T'; }
+         let m = div(log(lastTerm(arg(x))[1]), 'P(0)');
+         let k = exp(mul('P(0)', div(log(lastTerm(arg(x))[1]), 'P(0)')));
+         k = div(arg(x), k);
+         //console.log(arg(x),k,m)
+         k = sua(k);
+         t = exp(add(mul('P(0)', m), 'P(0)'));
+         let l = null;
+         if (k[0] == '0') { l = '0'; }
+         else { l = 'p(' + mul(exp(mul('P(0)', m)), k[0]) + ')'; }
+         let r = 'p(' + mul(exp(mul('P(0)', m)), add(k[0], 'P(0)')) + ')';
+         let [a, b] = split(k[1], r);
+         a = 'p(' + mul(exp(mul('P(0)', m)), a) + ')'
+         //console.log(k,r,l,a,b)
+         if (a == 'p(0)') { a = '0'; }
+         l = add(l, add(a, b))
+         let s = ''
+         if (lastTerm(arg(x))[1][0] == 'P' && b != '0') {
+            if (m == 'p(0)') { s = 'Ω'; }
+            else if (m == 'p(0)+p(0)') { s = 'I'; }
+            else if (lt(m, 'p(P(P(p(P(P(P(0)))))))')) { s = `I(${display(sub(m, 'p(0)+p(0)'))},x)`; }
+            else if (m == 'P(0)') { s = 'M'; }
+            else if (m == 'P(P(0))') { s = 'N'; }
+            else if (m == 'P(P(P(0)))') { s = 'K'; }
+            else if (m == 'P(P(P(P(0))))') { s = 'U'; }
+            else if (lt(m, 'P(p(P(P(P(0)+p(P(P(P(0)+P(0))))))))') && !lt(lastTerm(m)[1], 'P(0)')) { s = `M(${display(sub(div(m, 'P(0)'), 'p(0)'))},x)`; }
+            if (s == '') { return `ψ(${display(arg(x))})`; }
+            if (l == 'p(0)') { return s.replace('x', '0'); }
+            if (s.includes('x')) { return s.replace('x', display(sub(l, 'p(0)'))); }
+            return `${s}<sub>${display(l)}</sub>`;
+         }
+         if (lt(f, 'p(P(p(P(P(0)))))') && gt(x, 'p(P(0))')) { return `ψ<sub>${display(div(arg(f), 'P(0)'))}</sub>(${display(f1)})`; }
+         return `ψ(${display(arg(x))})`;
+      }
+      let a = display(h);
+      //console.log(f,h,c,d)
+      if (c != 'p(0)') {
+         if (!op(c)) { a += display(c) }
+         else { a += `&sdot;(${display(c)})`; }
+      }
+      if (d != '0') { a += '+' + display(d); }
+      return a;
+   }
 
         function P_func(M, r, n) {
             if (r == -1) { return n - 1; }
