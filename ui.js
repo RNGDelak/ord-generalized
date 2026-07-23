@@ -168,3 +168,74 @@ function dismissHint() {
         }, 400); 
     }
 }
+
+function updateNotationConfigUI() {
+    const container = document.getElementById("notationSelectContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    config.modes.forEach((modeVal, index) => {
+        const row = document.createElement("div");
+        row.style.marginBottom = "4px";
+
+        // Select dropdown for notation display options
+        const select = document.createElement("select");
+        select.style.background = "transparent";
+        select.style.color = "#fff";
+        select.style.border = "none";
+        select.style.outline = "none";
+        select.style.cursor = "pointer";
+        select.style.fontFamily = "inherit";
+
+        if (window.notation && window.notation.DisplayName) {
+            window.notation.DisplayName.forEach((name, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.innerText = name;
+                opt.style.background = "#111"; // dropdown options background for readability
+                if (idx === modeVal) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        select.onchange = (e) => {
+            config.modes[index] = parseInt(e.target.value);
+            if (typeof render === "function") render();
+        };
+
+        // Remove button
+        const removeBtn = document.createElement("button");
+        removeBtn.innerText = "Remove notation (select)";
+        removeBtn.style.background = "transparent";
+        removeBtn.style.color = "#ff4444";
+        removeBtn.style.border = "none";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.style.marginLeft = "8px";
+
+        removeBtn.onclick = () => {
+            if (config.modes.length > 1) {
+                config.modes.splice(index, 1);
+                updateNotationConfigUI();
+                if (typeof render === "function") render();
+            }
+        };
+
+        row.appendChild(select);
+        row.appendChild(removeBtn);
+        container.appendChild(row);
+    });
+}
+
+function addNotationSelector() {
+    if (window.notation && window.notation.DisplayName) {
+        const nextMode = (config.modes.length > 0) ? (config.modes[config.modes.length - 1] + 1) % window.notation.DisplayName.length : 0;
+        config.modes.push(nextMode);
+        updateNotationConfigUI();
+        if (typeof render === "function") render();
+    }
+}
+
+// Initialize the UI elements once window loads
+window.addEventListener("DOMContentLoaded", () => {
+    updateNotationConfigUI();
+});
