@@ -492,6 +492,14 @@ window.addEventListener("wheel", (e) => {
 window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
 window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
 
+// Add this logic block to plot.js
+function updateDepthDisplay() {
+    const displayElem = document.getElementById("depthDisplay");
+    if (displayElem) {
+        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Infinite" : `Depth: ${cam.view.maxDepth}`;
+    }
+}
+
 window.addEventListener("keydown", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
@@ -503,11 +511,14 @@ window.addEventListener("keydown", (e) => {
     }
     if (e.key === "a") {
         cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
+        updateDepthDisplay()
         actionTriggered = true;
     }
     if (e.key === "s") {
         cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
+        updateDepthDisplay()
         actionTriggered = true;
+        
     }
     if (actionTriggered) {
         render();
