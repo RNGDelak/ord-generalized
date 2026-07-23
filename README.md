@@ -4,7 +4,7 @@
 ## How to use the transfinte number lines
 
 
-- Tap/Mouse Scroll/Arrow keys to zoom and pan.
+- Tap/Mouse Scroll/Arrow keys to zoom and pan
 
 - A/S to adjust rendering depth
 
