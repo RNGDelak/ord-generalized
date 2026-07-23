@@ -17,7 +17,9 @@ function toggleConfigMenu() {
 
 // Add this helper function to reset/initialize notations when loading a preset/notation system
 function resetNotationsForSystem() {
-    config.modes = [0];
+    if (typeof config !== 'undefined') {
+        config.modes = [0];
+    }
     if (typeof updateNotationConfigUI === "function") {
         updateNotationConfigUI();
     }
@@ -48,8 +50,8 @@ async function loadPresetNotation(scriptPath) {
 
         const scriptCode = await response.text();
         document.getElementById('codeInject').value = scriptCode;
+        resetNotationsForSystem();
         executeCustomScript(scriptCode);
-resetNotationsForSystem()
 
     } catch (err) {
         alert("Could not load preset text: " + err.message);
@@ -66,7 +68,7 @@ function syncConfigToTextArea() {
 window.applyInjectedConfig = function () {
     try {
         const jsonInput = document.getElementById('envConfigJson').value.trim();
-        
+
         // If empty, leave untouched using the previous state (do not wipe everything)
         if (!jsonInput) {
             syncConfigToTextArea();
@@ -94,8 +96,8 @@ function applyInjectedCode() {
         alert("Please paste some code first!");
         return;
     }
+    resetNotationsForSystem();
     executeCustomScript(customCode);
-    resetNotationsForSystem()
 }
 
 function executeCustomScript(codeString) {
@@ -140,6 +142,11 @@ function executeCustomScript(codeString) {
             config = { ...config, ...activeConfig };
         }
 
+        // Ensure modes array remains initialized post-script injection
+        if (!config.modes || !Array.isArray(config.modes) || config.modes.length === 0) {
+            config.modes = [0];
+        }
+
         syncConfigToTextArea();
 
         if (typeof render === "function") {
@@ -148,6 +155,10 @@ function executeCustomScript(codeString) {
 
         if (typeof init === "function") {
             init();
+        }
+
+        if (typeof updateNotationConfigUI === "function") {
+            updateNotationConfigUI();
         }
 
     } catch (e) {
@@ -163,6 +174,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (typeof config !== 'undefined' && !initialConfigBackup) {
         initialConfigBackup = JSON.parse(JSON.stringify(config));
     }
+    if (typeof config !== 'undefined' && (!config.modes || !Array.isArray(config.modes))) {
+        config.modes = [0];
+    }
     loadPresetNotation('Libs/BMS.js');
     document.getElementById('presetSelect').value = 'Libs/BMS.js';
 });
@@ -172,7 +186,7 @@ function dismissHint() {
     if (hintElement) {
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
-        
+
         setTimeout(() => {
             hintElement.remove();
         }, 400); 
@@ -183,6 +197,10 @@ function updateNotationConfigUI() {
     const container = document.getElementById("notationSelectContainer");
     if (!container) return;
     container.innerHTML = "";
+
+    if (!config.modes || !Array.isArray(config.modes)) {
+        config.modes = [0];
+    }
 
     config.modes.forEach((modeVal, index) => {
         const row = document.createElement("div");
@@ -215,7 +233,7 @@ function updateNotationConfigUI() {
 
         // Remove button
         const removeBtn = document.createElement("button");
-        removeBtn.innerText = "Remove notation";
+        removeBtn.innerText = "Remove notation (select)";
         removeBtn.style.background = "transparent";
         removeBtn.style.color = "#ff4444";
         removeBtn.style.border = "none";
