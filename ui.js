@@ -15,6 +15,24 @@ function toggleConfigMenu() {
     }
 }
 
+// Add this logic block to plot.js
+function updateDepthDisplay() {
+    const displayElem = document.getElementById("depthDisplay");
+    if (displayElem) {
+        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Max" : `Depth: ${cam.view.maxDepth}`;
+    }
+}
+
+function adjustDepth(amount) {
+    if (amount < 0) {
+        cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
+    } else {
+        cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
+    }
+    updateDepthDisplay();
+    render();
+}
+
 async function loadPresetNotation(scriptPath) {
     try {
         const response = await fetch(scriptPath);
