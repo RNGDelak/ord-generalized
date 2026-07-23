@@ -1,5 +1,5 @@
 window.isSettingsOpen = false;
-//mostly ais, sorry
+
 let initialConfigBackup = null;
 
 
