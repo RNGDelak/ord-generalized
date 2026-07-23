@@ -311,7 +311,7 @@ window.notation = (() => {
   ];
 
   const config = {
-    mode:1
+    modes:[1]
   };
 
   const title = "n-shifted psi transfinite number line";
