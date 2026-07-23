@@ -5,19 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="Title"></title>
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>
-eruda.init();
-let opened = false;
-
-devBtn.onclick = () => {
-    opened = !opened;
-
-    if (opened)
-        eruda.show();
-    else
-        eruda.hide();
-};</script>
     <style>
         body,
         html {
@@ -158,16 +145,6 @@ devBtn.onclick = () => {
             border-radius: 4px;
             cursor: pointer;
         }
-#devBtn{
-    position: fixed;
-    left: 15px;
-    bottom: 15px;
-    z-index: 99999;
-
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-}
     </style>
 </head>
 
@@ -175,7 +152,6 @@ devBtn.onclick = () => {
 
     <button id="configToggleBtn" onclick="toggleConfigMenu()">Config Menu</button>
 
-<button id="devBtn">Dev</button>
 
     <div id="configMenu" style="width: 400px;">
         <div class="menu-group">
