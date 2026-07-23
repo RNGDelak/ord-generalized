@@ -115,10 +115,8 @@ window.notation = (() => {
     ["An important ordinal", ImportantOrdinal]
   ];
 
-  // Reserved for future configuration options.
-  const config = {
-    types: "default"
-  };
+  // leave empty if there nothing to change 
+  const config = {};
 
   // Title displayed by the explorer.
   const title = "My Transfinite Number Line";
@@ -266,7 +264,7 @@ function pretty(ord) {
     ["ω^ω", Limit],
   ];
 
-  const config = {};
+  const config = {mode:[1]};//you must put an array of number represents the orders of notations incase you want a starting notation. look for configs for more 
 
   const title = "Worm transfinite number line";
 
