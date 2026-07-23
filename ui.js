@@ -19,7 +19,7 @@ function toggleConfigMenu() {
 function updateDepthDisplay() {
     const displayElem = document.getElementById("depthDisplay");
     if (displayElem) {
-        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Max" : `Depth: ${cam.view.maxDepth}`;
+        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Infinite" : `Depth: ${cam.view.maxDepth}`;
     }
 }
 
