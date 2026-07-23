@@ -103,6 +103,35 @@ let cam = {
     activeKeys: {}
 };
 
+let viewportHistory = [];
+
+function pushViewportHistory() {
+    viewportHistory.push({
+        x0: cam.view.x0,
+        x1: cam.view.x1,
+        precision: PRECISION_SCALE
+    });
+    if (viewportHistory.length > 50) viewportHistory.shift();
+}
+
+function undoViewport() {
+    if (viewportHistory.length > 0) {
+        const prev = viewportHistory.pop();
+        PRECISION_SCALE = prev.precision;
+        cam.view.x0 = prev.x0;
+        cam.view.x1 = prev.x1;
+        render();
+    }
+}
+
+let slowModeRect = {
+    isDrawing: false,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0
+};
+
 let lastFrameTime = performance.now();
 
 function refreshLoop() {
@@ -288,7 +317,6 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20) {
         let htmlContent = "";
-        // Stack notations based on config.modes array order
         config.modes.forEach(modeIdx => {
             const mode = notation.DisplayName[modeIdx];
             const ordStr = notation.display(cam.samplerOrd, mode);
@@ -306,21 +334,17 @@ function drawTimelineLabels() {
         const px = lbl.x;
         const py = h * px / canvas.width - cam.tHeight - config.TimelineLabelOffset;
 
-        // Iterate backwards (or adjust index offset) so the first notation in config.modes 
-        // appears at the top of the stack, matching the sample label box layout.
         const totalModes = config.modes.length;
         config.modes.forEach((modeIdx, i) => {
             const mode = notation.DisplayName[modeIdx];
             const labelString = notation.display(lbl.ord, mode);
             
-            // Invert index stacking order to match sample layout direction
             const invertedIndex = totalModes - 1 - i;
             const currentY = py - (invertedIndex * (22 + config.LabelBetweenLabelSpacing));
             
             createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
         });
 
-        // Timeline / Aliases added after all notations
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
                 const totalStackHeight = totalModes * 22 + (totalModes - 1) * config.LabelBetweenLabelSpacing;
@@ -342,7 +366,6 @@ function drawHUD() {
 }
 
 function render() {
-    
     updateAdaptivePrecisionScale();
 
     clearCanvas();
@@ -375,24 +398,32 @@ function render() {
     drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
+
+    if (config.SlowMode && slowModeRect.isDrawing) {
+        ctx.strokeStyle = "rgba(0, 152, 255, 0.8)";
+        ctx.fillStyle = "rgba(0, 152, 255, 0.15)";
+        ctx.lineWidth = 2;
+        const rw = slowModeRect.currentX - slowModeRect.startX;
+        const rh = slowModeRect.currentY - slowModeRect.startY;
+        ctx.fillRect(slowModeRect.startX, slowModeRect.startY, rw, rh);
+        ctx.strokeRect(slowModeRect.startX, slowModeRect.startY, rw, rh);
+    }
 }
+
 function resizeCanvas() {
-    
     const oldWidth = canvas.width || window.innerWidth;
-    
     
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    
     if (cam.view && cam.view.x0 !== undefined && cam.view.x1 !== undefined && oldWidth > 0) {
         const widthRatioBI = toBigInt(canvas.width / oldWidth);
-        
         
         cam.view.x0 = (cam.view.x0 * widthRatioBI) / PRECISION_SCALE;
         cam.view.x1 = (cam.view.x1 * widthRatioBI) / PRECISION_SCALE;
     }
 }
+
 function init() {
     document.getElementById("Title").innerText = notation.title;
     resizeCanvas();
@@ -427,6 +458,14 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("mousedown", (e) => {
     if (window.isSettingsOpen) return;
+    if (config.SlowMode) {
+        slowModeRect.isDrawing = true;
+        slowModeRect.startX = e.clientX;
+        slowModeRect.startY = e.clientY;
+        slowModeRect.currentX = e.clientX;
+        slowModeRect.currentY = e.clientY;
+        return;
+    }
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.clientX;
     cam.view.mouse.lastY = e.clientY;
@@ -434,6 +473,12 @@ window.addEventListener("mousedown", (e) => {
 
 window.addEventListener("mousemove", (e) => {
     if (window.isSettingsOpen) return;
+    if (config.SlowMode && slowModeRect.isDrawing) {
+        slowModeRect.currentX = e.clientX;
+        slowModeRect.currentY = e.clientY;
+        render();
+        return;
+    }
     if (!cam.view.mouse.isDown) return;
 
     const dxBI = toBigInt(e.clientX - cam.view.mouse.lastX);
@@ -473,7 +518,7 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("wheel", (e) => {
-    if (window.isSettingsOpen) return;
+    if (window.isSettingsOpen || config.SlowMode) return;
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? config.wheelZoomIn : config.wheelZoomOut;
     const zoomFactorBI = toBigInt(zoomFactor);
@@ -489,10 +534,37 @@ window.addEventListener("wheel", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
-window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
+window.addEventListener("mouseup", (e) => {
+    if (config.SlowMode && slowModeRect.isDrawing) {
+        slowModeRect.isDrawing = false;
+        
+        const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
+        const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
+        
+        if (Math.abs(maxX - minX) > 5) {
+            pushViewportHistory();
+            
+            const canvasWidth = canvas.width;
+            const leftRatio = minX / canvasWidth;
+            const rightRatio = maxX / canvasWidth;
+            
+            const viewSpan = cam.view.x1 - cam.view.x0;
+            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(viewSpan)));
+            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(viewSpan)));
+            
+            cam.view.x0 = targetX0;
+            cam.view.x1 = targetX1;
+        }
+        render();
+        return;
+    }
+    cam.view.mouse.isDown = false;
+});
+window.addEventListener("mouseleave", () => {
+    if (slowModeRect.isDrawing) slowModeRect.isDrawing = false;
+    cam.view.mouse.isDown = false;
+});
 
-// Add this logic block to plot.js
 function updateDepthDisplay() {
     const displayElem = document.getElementById("depthDisplay");
     if (displayElem) {
@@ -501,24 +573,29 @@ function updateDepthDisplay() {
 }
 
 window.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        undoViewport();
+        return;
+    }
+
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
 
     let actionTriggered = false;
     if (e.key === "m") {
-        config.mode[0] = (config.mode[0] + 1) % notation.DisplayName.length;
+        config.modes[0] = (config.modes[0] + 1) % notation.DisplayName.length;
         actionTriggered = true;
     }
     if (e.key === "a") {
         cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
-        updateDepthDisplay()
+        updateDepthDisplay();
         actionTriggered = true;
     }
     if (e.key === "s") {
         cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
-        updateDepthDisplay()
+        updateDepthDisplay();
         actionTriggered = true;
-        
     }
     if (actionTriggered) {
         render();
@@ -531,7 +608,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 function updateKeyboardInput() {
-    if (window.isSettingsOpen) {
+    if (window.isSettingsOpen || config.SlowMode) {
         requestAnimationFrame(updateKeyboardInput);
         return;
     }
@@ -594,17 +671,32 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 
-
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
     if (e.target === canvas) e.preventDefault();
+    if (config.SlowMode) {
+        slowModeRect.isDrawing = true;
+        slowModeRect.startX = e.touches[0].clientX;
+        slowModeRect.startY = e.touches[0].clientY;
+        slowModeRect.currentX = e.touches[0].clientX;
+        slowModeRect.currentY = e.touches[0].clientY;
+        return;
+    }
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.touches[0].clientX;
     cam.view.mouse.lastY = e.touches[0].clientY;
 }, { passive: false });
 
 window.addEventListener("touchmove", (e) => {
-    if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
+    if (window.isSettingsOpen) return;
+    if (config.SlowMode && slowModeRect.isDrawing) {
+        if (e.target === canvas) e.preventDefault();
+        slowModeRect.currentX = e.touches[0].clientX;
+        slowModeRect.currentY = e.touches[0].clientY;
+        render();
+        return;
+    }
+    if (!cam.view.mouse.isDown) return;
     if (e.target === canvas) e.preventDefault();
 
     const dxBI = toBigInt(e.touches[0].clientX - cam.view.mouse.lastX);
@@ -643,8 +735,36 @@ window.addEventListener("touchmove", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
-window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
+window.addEventListener("touchend", () => {
+    if (config.SlowMode && slowModeRect.isDrawing) {
+        slowModeRect.isDrawing = false;
+        
+        const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
+        const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
+        
+        if (Math.abs(maxX - minX) > 5) {
+            pushViewportHistory();
+            
+            const canvasWidth = canvas.width;
+            const leftRatio = minX / canvasWidth;
+            const rightRatio = maxX / canvasWidth;
+            
+            const viewSpan = cam.view.x1 - cam.view.x0;
+            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(viewSpan)));
+            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(viewSpan)));
+            
+            cam.view.x0 = targetX0;
+            cam.view.x1 = targetX1;
+        }
+        render();
+        return;
+    }
+    cam.view.mouse.isDown = false;
+});
+window.addEventListener("touchcancel", () => {
+    if (slowModeRect.isDrawing) slowModeRect.isDrawing = false;
+    cam.view.mouse.isDown = false;
+});
 
 updateKeyboardInput();
 init();
