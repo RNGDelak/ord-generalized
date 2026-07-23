@@ -263,6 +263,12 @@
         <button id="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'" onmouseout="this.style.background='#007acc'">
             I understand
         </button>
+
+    <div id="notationControls" style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff; font-family: Arial, sans-serif; pointer-events: auto;">
+        <div id="notationSelectContainer"></div>
+        <button onclick="addNotationSelector()" style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+ Add notation (select)</button>
+    </div>
+
     </div>
 
     <script src="render.js"></script>
