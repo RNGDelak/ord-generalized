@@ -580,7 +580,7 @@ function P_func(M, r, n) {
                 return r;
             });
         }
-        return displayOCF(_o(processMatrix(matrix)))
+        return display(_o(processMatrix(matrix)))
     }
 
     return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
