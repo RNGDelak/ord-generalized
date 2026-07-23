@@ -145,6 +145,52 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* Center-bottom mobile depth adjuster styling */
+        #mobileDepthControls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(20, 20, 20, 0.85);
+            padding: 8px 14px;
+            border-radius: 30px;
+            border: 1px solid #444;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            user-select: none;
+        }
+
+        #mobileDepthControls button {
+            background: #007acc;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #mobileDepthControls button:active {
+            background: #0098ff;
+        }
+
+        #depthDisplay {
+            color: #fff;
+            font-size: 14px;
+            font-family: monospace;
+            min-width: 70px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -157,7 +203,7 @@
         <div class="menu-group">
             <label for="presetSelect">Tutorial Presets (Notation System)</label>
             <select id="presetSelect" onchange="loadPresetNotation(this.value)">
-                <option value="Libs/BMS.js">BMS (Default)</option>
+                <option value="Libs/BMS.js">BMS (Default)</option>
                 <option value="Libs/HPrSS.js">HPrSS</option>
                 <option value="Libs/LPrSS.js">LPrSS</option>
                 <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
@@ -195,6 +241,13 @@
         <div id="sampleLabel"
             style="position: absolute; left: 10%; top: 87.5%; color: #ffffff; font: 40px Serif; user-select: none; pointer-events: none; white-space: pre-wrap; word-break: break-word; transform: translateY(-50%); max-width: 80%;">
         </div>
+    </div>
+
+    <!-- Center-Bottom Mobile Depth Adjuster UI -->
+    <div id="mobileDepthControls">
+        <button onclick="adjustDepth(-1)">-</button>
+        <span id="depthDisplay">Depth: Max</span>
+        <button onclick="adjustDepth(1)">+</button>
     </div>
 
     <div id="hint">
