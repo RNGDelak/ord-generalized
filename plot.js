@@ -1,4 +1,3 @@
-
 let PRECISION_SCALE = 10n ** 10n; 
 
 
