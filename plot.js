@@ -53,15 +53,16 @@ let config = {
     maxAllowedWidthFactor: 0.5,
     labelscount: 8,
 
-    mode: 0,
+    modes: [0], // Changed from mode: 0 to an array
     MathstickMode: false,
     DiagonalTickArrangement: true,
     ZoomIntoMouse: true,
 
     LabelBetweenTimelineSpacing: 0,
     LabelBetweenTickSpacing: 0,
-    LabelBetweenLabelSpacing: 0,
+    LabelBetweenLabelSpacing: 10, // Spacing between stacked notation labels
     TickBetweenLabelXoffest: 0,
+    TimelineLabelOffset: 20,     // Offset variables from config
     TimelineLabelColor: "#ffffff",
 
     SlowMode: false,
