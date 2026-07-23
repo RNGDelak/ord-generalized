@@ -304,22 +304,26 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         const px = lbl.x;
-        let py = h * px / canvas.width - cam.tHeight - config.TimelineLabelOffset;
+        const py = h * px / canvas.width - cam.tHeight - config.TimelineLabelOffset;
 
-        // Draw stacked notations from config.modes
+        // Iterate backwards (or adjust index offset) so the first notation in config.modes 
+        // appears at the top of the stack, matching the sample label box layout.
+        const totalModes = config.modes.length;
         config.modes.forEach((modeIdx, i) => {
             const mode = notation.DisplayName[modeIdx];
             const labelString = notation.display(lbl.ord, mode);
             
-            // Apply vertical stack spacing
-            const currentY = py - (i * (22 + config.LabelBetweenLabelSpacing));
+            // Invert index stacking order to match sample layout direction
+            const invertedIndex = totalModes - 1 - i;
+            const currentY = py - (invertedIndex * (22 + config.LabelBetweenLabelSpacing));
+            
             createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
         });
 
         // Timeline / Aliases added after all notations
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
-                const totalStackHeight = config.modes.length * 22 + (config.modes.length - 1) * config.LabelBetweenLabelSpacing;
+                const totalStackHeight = totalModes * 22 + (totalModes - 1) * config.LabelBetweenLabelSpacing;
                 const aliasY = py - totalStackHeight - 15;
                 createTextLabel(name, "#808080", px - 7, aliasY, "left", "bottom", "italic 20px Serif");
             }
