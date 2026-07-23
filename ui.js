@@ -2,6 +2,7 @@ window.isSettingsOpen = false;
 
 let initialConfigBackup = null;
 
+
 function toggleConfigMenu() {
     const menu = document.getElementById('configMenu');
     const canvasElement = document.getElementById('canvas');
