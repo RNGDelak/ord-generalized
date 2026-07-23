@@ -255,7 +255,14 @@ function sampleHighPrecision(x, width) {
     const currentViewX1Num = toNum(cam.view.x1);
     if (x >= currentViewX1Num) {
         const sampleElem = document.getElementById("sampleLabel");
-        if (sampleElem) sampleElem.innerHTML = notation.display(notation.Limit);
+        if (sampleElem) {
+            let htmlContent = "";
+            config.modes.forEach(modeIdx => {
+                const mode = notation.DisplayName[modeIdx];
+                htmlContent += `<div>${notation.display(notation.Limit, mode)}</div>`;
+            });
+            sampleElem.innerHTML = htmlContent;
+        }
         return;
     }
 
@@ -281,28 +288,41 @@ function sampleHighPrecision(x, width) {
     );
 
     if (cam.samplerBd < 1e20) {
-        const mode = notation.DisplayName[config.mode];
-        const ordStr = notation.display(cam.samplerOrd, mode);
+        let htmlContent = "";
+        // Stack notations based on config.modes array order
+        config.modes.forEach(modeIdx => {
+            const mode = notation.DisplayName[modeIdx];
+            const ordStr = notation.display(cam.samplerOrd, mode);
+            htmlContent += `<div>${ordStr}</div>`;
+        });
         const sampleElem = document.getElementById("sampleLabel");
-        if (sampleElem) sampleElem.innerHTML = ordStr;
+        if (sampleElem) sampleElem.innerHTML = htmlContent;
     }
 }
 
 function drawTimelineLabels() {
-    const mode = notation.DisplayName[config.mode];
     const h = canvas.height;
 
     cam.labelsToDraw.forEach((lbl) => {
         const px = lbl.x;
-        const py = h * px / canvas.width - cam.tHeight;
+        let py = h * px / canvas.width - cam.tHeight - config.TimelineLabelOffset;
 
-        const labelString = notation.display(lbl.ord, mode);
+        // Draw stacked notations from config.modes
+        config.modes.forEach((modeIdx, i) => {
+            const mode = notation.DisplayName[modeIdx];
+            const labelString = notation.display(lbl.ord, mode);
+            
+            // Apply vertical stack spacing
+            const currentY = py - (i * (22 + config.LabelBetweenLabelSpacing));
+            createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
+        });
 
-        createTextLabel(labelString, "#ffffff", px - 7, py - 10, "left", "bottom", "22px Serif");
-
+        // Timeline / Aliases added after all notations
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
-                createTextLabel(name, "#808080", px - 7, py - 35, "left", "bottom", "italic 20px Serif");
+                const totalStackHeight = config.modes.length * 22 + (config.modes.length - 1) * config.LabelBetweenLabelSpacing;
+                const aliasY = py - totalStackHeight - 15;
+                createTextLabel(name, "#808080", px - 7, aliasY, "left", "bottom", "italic 20px Serif");
             }
         });
     });
@@ -475,7 +495,7 @@ window.addEventListener("keydown", (e) => {
 
     let actionTriggered = false;
     if (e.key === "m") {
-        config.mode = (config.mode + 1) % notation.DisplayName.length;
+        config.mode[0] = (config.mode[0] + 1) % notation.DisplayName.length;
         actionTriggered = true;
     }
     if (e.key === "a") {
