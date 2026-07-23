@@ -1,27 +1,27 @@
-let PRECISION_SCALE = 10n ** 10n; 
+let PRECISION_SCALE = 10n ** 10n;
 
 
 function updateAdaptivePrecisionScale() {
     const canvasWidth = canvas.width;
-    const currentWidth = Number(cam.view.x1 - cam.view.x0); 
-    
-    
+    const currentWidth = Number(cam.view.x1 - cam.view.x0);
+
+
     if (!currentWidth || currentWidth <= 0) {
         PRECISION_SCALE = 10n ** 10n;
         return;
     }
 
-    
-    
+
+
     const zoomMagnitude = Number(PRECISION_SCALE) / Number(cam.view.x1 - cam.view.x0);
     const log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
-    
-    
+
+
     const requiredDigits = Math.max(10, Math.floor(log10Zoom) + 8);
-    
+
     const nextScale = 10n ** BigInt(requiredDigits);
-    
-    
+
+
     if (nextScale !== PRECISION_SCALE) {
         const oldScale = PRECISION_SCALE;
         cam.view.x0 = (cam.view.x0 * nextScale) / oldScale;
@@ -90,7 +90,7 @@ let cam = {
     times: [],
     lastKeyboardTime: performance.now(),
     view: {
-        x0: 0n, 
+        x0: 0n,
         x1: 0n,
         maxDepth: -1,
         mouse: { x: 0, y: 0, isDown: false, lastX: 0, lastY: 0 }
@@ -206,11 +206,11 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         let s_x0 = x0;
         let s_x1 = x0;
         let n = 0;
-        
+
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
-      
+
         }
 
         let m = n + 2;
@@ -254,15 +254,15 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
 
 function computeTree(width) {
     initTicks(width);
-    
+
     const epsBI = toBigInt(1);
     const xminBI = toBigInt(0);
     const xmaxBI = toBigInt(width);
-    
+
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, epsBI, xminBI, xmaxBI, 0, 0, tickmark, width);
 
     tickmarkLabel(toNum(cam.view.x0), toNum(cam.view.x0), notation.Zero, width);
-    
+
     const labelEpsBI = toBigInt(canvas.width / config.labelscount);
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, labelEpsBI, xminBI, xmaxBI, 0, 0, tickmarkLabel, width);
 
@@ -338,10 +338,10 @@ function drawTimelineLabels() {
         config.modes.forEach((modeIdx, i) => {
             const mode = notation.DisplayName[modeIdx];
             const labelString = notation.display(lbl.ord, mode);
-            
+
             const invertedIndex = totalModes - 1 - i;
             const currentY = py - (invertedIndex * (22 + config.LabelBetweenLabelSpacing));
-            
+
             createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
         });
 
@@ -359,7 +359,7 @@ function drawHUD() {
     let py = 40;
     const px = canvas.width - 7;
     createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "bold 30px Serif");
-        notation.ordinalTypes.forEach(([name, color]) => {
+    notation.ordinalTypes.forEach(([name, color]) => {
         createTextLabel(name, color, px, py, "right", "top", "26px Serif");
         py += 30;
     });
@@ -412,13 +412,13 @@ function render() {
 
 function resizeCanvas() {
     const oldWidth = canvas.width || window.innerWidth;
-    
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     if (cam.view && cam.view.x0 !== undefined && cam.view.x1 !== undefined && oldWidth > 0) {
         const widthRatioBI = toBigInt(canvas.width / oldWidth);
-        
+
         cam.view.x0 = (cam.view.x0 * widthRatioBI) / PRECISION_SCALE;
         cam.view.x1 = (cam.view.x1 * widthRatioBI) / PRECISION_SCALE;
     }
@@ -494,7 +494,7 @@ window.addEventListener("mousemove", (e) => {
 
         const nextX0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorBI / PRECISION_SCALE);
         const nextX1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorBI / PRECISION_SCALE);
-        
+
         const maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
         const nextWidth = nextX1 - nextX0;
 
@@ -537,21 +537,21 @@ window.addEventListener("wheel", (e) => {
 window.addEventListener("mouseup", (e) => {
     if (config.SlowMode && slowModeRect.isDrawing) {
         slowModeRect.isDrawing = false;
-        
+
         const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
         const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
-        
+
         if (Math.abs(maxX - minX) > 5) {
             pushViewportHistory();
-            
+
             const canvasWidth = canvas.width;
             const leftRatio = minX / canvasWidth;
             const rightRatio = maxX / canvasWidth;
-            
+
             const viewSpan = cam.view.x1 - cam.view.x0;
-            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(viewSpan)));
-            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(viewSpan)));
-            
+            const targetX0 = cam.view.x0 + (viewSpan * BigInt(Math.round(minX))) / BigInt(canvasWidth);
+            const targetX1 = cam.view.x0 + (viewSpan * BigInt(Math.round(maxX))) / BigInt(canvasWidth);
+
             cam.view.x0 = targetX0;
             cam.view.x1 = targetX1;
         }
@@ -739,18 +739,19 @@ window.addEventListener("touchend", () => {
     if (config.SlowMode && slowModeRect.isDrawing) {
         slowModeRect.isDrawing = false;
 
-        const rawMinX = Math.min(slowModeRect.startX, slowModeRect.currentX);
-        const rawMaxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
+        const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
+        const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
 
-       if (Math.abs(rawMaxX - rawMinX) > 5) {
+        if (Math.abs(maxX - minX) > 5) {
             pushViewportHistory();
 
             const canvasWidth = canvas.width;
-            const viewSpan = cam.view.x1 - cam.view.x0;
+            const leftRatio = minX / canvasWidth;
+            const rightRatio = maxX / canvasWidth;
 
-            // Map selection window to absolute BigInt coordinates
-            const targetX0 = cam.view.x0 + (viewSpan * BigInt(Math.round(rawMinX))) / BigInt(canvasWidth);
-            const targetX1 = cam.view.x0 + (viewSpan * BigInt(Math.round(rawMaxX))) / BigInt(canvasWidth);
+            const viewSpan = cam.view.x1 - cam.view.x0;
+            const targetX0 = cam.view.x0 + (viewSpan * BigInt(Math.round(minX))) / BigInt(canvasWidth);
+            const targetX1 = cam.view.x0 + (viewSpan * BigInt(Math.round(maxX))) / BigInt(canvasWidth);
 
             cam.view.x0 = targetX0;
             cam.view.x1 = targetX1;
