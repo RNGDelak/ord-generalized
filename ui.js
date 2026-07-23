@@ -205,7 +205,7 @@ function updateNotationConfigUI() {
 
         // Remove button
         const removeBtn = document.createElement("button");
-        removeBtn.innerText = "Remove notation (select)";
+        removeBtn.innerText = "Remove notation";
         removeBtn.style.background = "transparent";
         removeBtn.style.color = "#ff4444";
         removeBtn.style.border = "none";
@@ -228,7 +228,7 @@ function updateNotationConfigUI() {
 
 function addNotationSelector() {
     if (window.notation && window.notation.DisplayName) {
-        const nextMode = (config.modes.length > 0) ? (config.modes[config.modes.length - 1] + 1) % window.notation.DisplayName.length : 0;
+        const nextMode = 0;
         config.modes.push(nextMode);
         updateNotationConfigUI();
         if (typeof render === "function") render();
