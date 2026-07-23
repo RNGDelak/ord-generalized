@@ -741,21 +741,22 @@ window.addEventListener("touchend", () => {
         
         const minX = Math.min(slowModeRect.startX, slowModeRect.currentX);
         const maxX = Math.max(slowModeRect.startX, slowModeRect.currentX);
-        
-        if (Math.abs(maxX - minX) > 5) {
+       
             pushViewportHistory();
             
             const canvasWidth = canvas.width;
+            const currentWidth = cam.view.x1 - cam.view.x0;
+            
+            // Map the drawn screen coordinates relative to the current viewport span
             const leftRatio = minX / canvasWidth;
             const rightRatio = maxX / canvasWidth;
             
-            const viewSpan = cam.view.x1 - cam.view.x0;
-            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(viewSpan)));
-            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(viewSpan)));
+            const targetX0 = cam.view.x0 + BigInt(Math.round(leftRatio * Number(currentWidth)));
+            const targetX1 = cam.view.x0 + BigInt(Math.round(rightRatio * Number(currentWidth)));
             
             cam.view.x0 = targetX0;
             cam.view.x1 = targetX1;
-        }
+        
         render();
         return;
     }
