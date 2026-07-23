@@ -245,6 +245,7 @@
         <button onclick="adjustDepth(-1)">-</button>
         <span id="depthDisplay">Depth: Infinite</span>
         <button onclick="adjustDepth(1)">+</button>
+ <button id="revertBtn" onclick="undoViewport()" style="background: rgba(0,0,0,0); color: #ffffff; border: none; font: 16px Serif; cursor: pointer; padding: 5px 10px; user-select: none; pointer-events: auto;">Revert</button>
     </div>
 
     <div id="hint">
@@ -264,7 +265,6 @@
   <div id="notationControls" style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff; font-family: serif; pointer-events: auto;">
         <div id="notationSelectContainer"></div>
         <button onclick="addNotationSelector()" style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+ Add notation</button>
-    <button id="revertBtn" onclick="undoViewport()" style="background: rgba(0,0,0,0); color: #0098ff; border: none; font: 16px Serif; cursor: pointer; padding: 5px 10px; user-select: none; pointer-events: auto;">Revert</button>
     </div>
  
 
