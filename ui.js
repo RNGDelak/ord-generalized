@@ -18,7 +18,18 @@ function toggleConfigMenu() {
 // Add this helper function to reset/initialize notations when loading a preset/notation system
 function resetNotationsForSystem() {
     if (typeof config !== 'undefined') {
-        config.modes = [0];
+        // Check if the incoming notation module specifies a default mode or modes
+        if (window.notation && window.notation.config) {
+            if (Array.isArray(window.notation.config.modes)) {
+                config.modes = [...window.notation.config.modes];
+            } else if (typeof window.notation.config.mode === 'number') {
+                config.modes = [window.notation.config.mode];
+            } else {
+                config.modes = [0];
+            }
+        } else {
+            config.modes = [0];
+        }
     }
     if (typeof updateNotationConfigUI === "function") {
         updateNotationConfigUI();
