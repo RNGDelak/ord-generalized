@@ -495,7 +495,7 @@ function Veblen_to_SPrSS(s, stringify) {
   const Zero = [];
   const Limit = "Limit";
 
-  const DisplayName = ["normal", 'pretty'];
+  const DisplayName = ["normal", 'CNF'];
 
   const ordinalTypes = [
     ["Zero", "#808080"],
