@@ -586,6 +586,7 @@ function undoViewport() {
 }
 
 window.addEventListener("keydown", (e) => {
+    if(window.isSettingsOpen) return;
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
 
@@ -620,6 +621,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
+    if(window.isSettingsOpen) return;
     cam.activeKeys[e.key.toLowerCase()] = false;
     cam.activeKeys[e.code] = false;
 });
