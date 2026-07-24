@@ -398,8 +398,15 @@ function resizeCanvas() {
     }
 }
 function init() {
-    document.getElementById("Title").innerText = notation.title;
+    PRECISION_SCALE = 10n ** 10n; 
+    
+    cam.history = []; 
+   
+    if (cam.selection) cam.selection.active = false;
+    if (typeof selectionBox !== 'undefined') selectionBox.style.display = "none";
+   
     resizeCanvas();
+
 
     const minZoom = canvas.width * 0.8;
     cam.view.x0 = toBigInt(0.5 * (canvas.width - minZoom));
