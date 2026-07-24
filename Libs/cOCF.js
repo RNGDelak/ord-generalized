@@ -379,7 +379,7 @@ window.notation = (() => {
         ["Bachmann-Howard Ordinal", "p(p(P(0)+P(0)))"],
         ["Lim(cOCF) / (0,0,0,0)(1,1,1,1)(2,2)", "Limit"]
     ];
-    const config = {modes:[1]};
+    const config = {modes:[1],SlowMode:true};
     const title = 'cOCF transfinite number line';
 
     return { 

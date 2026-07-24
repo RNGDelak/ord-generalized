@@ -236,7 +236,7 @@
             style="position: absolute; left: 10px; bottom: 10px; color: #9083ff; font: 24px Serif; user-select: none; pointer-events: none;">
             60fps</div>
         <div id="sampleLabel"
-            style="position: absolute; left: 10%; top: 87.5%; color: #ffffff; font: 40px Serif; user-select: none; pointer-events: none; white-space: pre-wrap; word-break: break-word; transform: translateY(-50%); max-width: 80%;">
+            style="position: absolute; left: 10%; top: 83.5%; color: #ffffff; font: 30px Serif; user-select: none; pointer-events: none; white-space: pre-wrap; word-break: break-word; transform: translateY(-50%); max-width: 80%;">
         </div>
     </div>
 
@@ -245,6 +245,7 @@
         <button onclick="adjustDepth(-1)">-</button>
         <span id="depthDisplay">Depth: Infinite</span>
         <button onclick="adjustDepth(1)">+</button>
+        <button id="revertBtn" onclick="if (undoViewport()) { render(); }" style="background: rgba(0,0,0,0); color: #0098ff; border: none; font: 16px Serif; cursor: pointer; padding: 15px 10px; user-select: none; pointer-events: auto;">Revert</button>
     </div>
 
     <div id="hint">

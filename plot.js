@@ -1,27 +1,27 @@
-let PRECISION_SCALE = 10n ** 10n; 
+let PRECISION_SCALE = 10n ** 10n;
 
 
 function updateAdaptivePrecisionScale() {
     const canvasWidth = canvas.width;
-    const currentWidth = Number(cam.view.x1 - cam.view.x0); 
-    
-    
+    const currentWidth = Number(cam.view.x1 - cam.view.x0);
+
+
     if (!currentWidth || currentWidth <= 0) {
         PRECISION_SCALE = 10n ** 10n;
         return;
     }
 
-    
-    
+
+
     const zoomMagnitude = Number(PRECISION_SCALE) / Number(cam.view.x1 - cam.view.x0);
     const log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
-    
-    
+
+
     const requiredDigits = Math.max(10, Math.floor(log10Zoom) + 8);
-    
+
     const nextScale = 10n ** BigInt(requiredDigits);
-    
-    
+
+
     if (nextScale !== PRECISION_SCALE) {
         const oldScale = PRECISION_SCALE;
         cam.view.x0 = (cam.view.x0 * nextScale) / oldScale;
@@ -62,10 +62,9 @@ let config = {
     LabelBetweenLabelSpacing: 10, // Spacing between stacked notation labels
     TickBetweenLabelXoffest: 0,
     TimelineLabelOffset: 20,     // Offset variables from config
-    TimelineLabelColor: "#ffffff",
+    TimelineLabelColor: "#808080",
 
     SlowMode: false,
-    SlowModeTickSpacing: 5,
 
     TickSpacing: 1,
     Tickheight: 0.05,
@@ -90,7 +89,7 @@ let cam = {
     times: [],
     lastKeyboardTime: performance.now(),
     view: {
-        x0: 0n, 
+        x0: 0n,
         x1: 0n,
         maxDepth: -1,
         mouse: { x: 0, y: 0, isDown: false, lastX: 0, lastY: 0 }
@@ -100,7 +99,9 @@ let cam = {
     labelsToDraw: [],
     samplerBd: 1e20,
     samplerOrd: null,
-    activeKeys: {}
+    activeKeys: {},
+    history: [], // Stores previous zoom states for Ctrl+Z
+    selection: { active: false, startX: 0, currentX: 0, startY: 0, currentY: 0 } // Tracks the rectangle tool
 };
 
 let lastFrameTime = performance.now();
@@ -177,11 +178,11 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         let s_x0 = x0;
         let s_x1 = x0;
         let n = 0;
-        
+
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
-      
+
         }
 
         let m = n + 2;
@@ -225,15 +226,15 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
 
 function computeTree(width) {
     initTicks(width);
-    
+
     const epsBI = toBigInt(1);
     const xminBI = toBigInt(0);
     const xmaxBI = toBigInt(width);
-    
+
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, epsBI, xminBI, xmaxBI, 0, 0, tickmark, width);
 
     tickmarkLabel(toNum(cam.view.x0), toNum(cam.view.x0), notation.Zero, width);
-    
+
     const labelEpsBI = toBigInt(canvas.width / config.labelscount);
     segmentBigInt(cam.view.x0, cam.view.x1, notation.Zero, notation.Limit, labelEpsBI, xminBI, xmaxBI, 0, 0, tickmarkLabel, width);
 
@@ -287,15 +288,10 @@ function sampleHighPrecision(x, width) {
     );
 
     if (cam.samplerBd < 1e20) {
-        let htmlContent = "";
-        // Stack notations based on config.modes array order
-        config.modes.forEach(modeIdx => {
-            const mode = notation.DisplayName[modeIdx];
-            const ordStr = notation.display(cam.samplerOrd, mode);
-            htmlContent += `<div>${ordStr}</div>`;
-        });
+        const mode = notation.DisplayName[config.modes[0]];
+        const ordStr = notation.display(cam.samplerOrd, mode);
         const sampleElem = document.getElementById("sampleLabel");
-        if (sampleElem) sampleElem.innerHTML = htmlContent;
+        if (sampleElem) sampleElem.innerHTML = ordStr;
     }
 }
 
@@ -312,11 +308,11 @@ function drawTimelineLabels() {
         config.modes.forEach((modeIdx, i) => {
             const mode = notation.DisplayName[modeIdx];
             const labelString = notation.display(lbl.ord, mode);
-            
+
             // Invert index stacking order to match sample layout direction
             const invertedIndex = totalModes - 1 - i;
             const currentY = py - (invertedIndex * (22 + config.LabelBetweenLabelSpacing));
-            
+
             createTextLabel(labelString, "#ffffff", px - 7, currentY, "left", "bottom", "22px Serif");
         });
 
@@ -325,7 +321,7 @@ function drawTimelineLabels() {
             if (notation.cmp(lbl.ord, defStr) === 0) {
                 const totalStackHeight = totalModes * 22 + (totalModes - 1) * config.LabelBetweenLabelSpacing;
                 const aliasY = py - totalStackHeight - 15;
-                createTextLabel(name, "#808080", px - 7, aliasY, "left", "bottom", "italic 20px Serif");
+                createTextLabel(name, config.TimelineLabelColor, px - 7, aliasY, "left", "bottom", "italic 20px Serif");
             }
         });
     });
@@ -335,14 +331,16 @@ function drawHUD() {
     let py = 40;
     const px = canvas.width - 7;
     createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "bold 30px Serif");
-        notation.ordinalTypes.forEach(([name, color]) => {
+    notation.ordinalTypes.forEach(([name, color]) => {
         createTextLabel(name, color, px, py, "right", "top", "26px Serif");
         py += 30;
     });
+    if(config.SlowMode)
+        createTextLabel('Slow Mode Enabled', 'rgb(255,0,0)', 0, 0, "left", "top", "20px Serif");
 }
 
 function render() {
-    
+
     updateAdaptivePrecisionScale();
 
     clearCanvas();
@@ -375,20 +373,26 @@ function render() {
     drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
+
+    drawTimelineLabels();
+    drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
+    sampleHighPrecision(cam.w / 2, cam.w);
+    drawHUD();
+
 }
 function resizeCanvas() {
-    
+
     const oldWidth = canvas.width || window.innerWidth;
-    
-    
+
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    
+
     if (cam.view && cam.view.x0 !== undefined && cam.view.x1 !== undefined && oldWidth > 0) {
         const widthRatioBI = toBigInt(canvas.width / oldWidth);
-        
-        
+
+
         cam.view.x0 = (cam.view.x0 * widthRatioBI) / PRECISION_SCALE;
         cam.view.x1 = (cam.view.x1 * widthRatioBI) / PRECISION_SCALE;
     }
@@ -420,6 +424,40 @@ function clampViewportBounds() {
     }
 }
 
+function applySelectionZoom() {
+    if (!config.SlowMode || !cam.selection.active) return;
+    cam.selection.active = false;
+    selectionBox.style.display = "none";
+
+    const xStart = Math.min(cam.selection.startX, cam.selection.currentX);
+    const xEnd = Math.max(cam.selection.startX, cam.selection.currentX);
+
+    if (xEnd - xStart > 5) {
+        cam.history.push({ x0: cam.view.x0, x1: cam.view.x1 });
+
+        const W_BI = toBigInt(canvas.width);
+        const xStartBI = toBigInt(xStart);
+        const boxW_BI = toBigInt(xEnd - xStart);
+
+        const v0_new = (cam.view.x0 - xStartBI) * W_BI / boxW_BI;
+        const v1_new = (cam.view.x1 - xStartBI) * W_BI / boxW_BI;
+
+        cam.view.x0 = v0_new;
+        cam.view.x1 = v1_new;
+
+        clampViewportBounds();
+        render();
+    }
+}
+const selectionBox = document.createElement("div");
+selectionBox.style.position = "absolute";
+selectionBox.style.background = "rgba(0, 150, 255, 0.2)";
+selectionBox.style.border = "1px solid rgba(0, 150, 255, 0.8)";
+selectionBox.style.pointerEvents = "none"; // Ensures it doesn't block mouse events
+selectionBox.style.display = "none";
+selectionBox.style.zIndex = "100";
+document.body.appendChild(selectionBox);
+
 window.addEventListener("resize", () => {
     resizeCanvas();
     render();
@@ -430,12 +468,43 @@ window.addEventListener("mousedown", (e) => {
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.clientX;
     cam.view.mouse.lastY = e.clientY;
+
+    if (config.SlowMode) {
+        cam.selection.active = true;
+        cam.selection.startX = e.clientX;
+        cam.selection.startY = e.clientY;
+
+        cam.selection.currentX = e.clientX;
+        cam.selection.currentY = e.clientY;
+        selectionBox.style.left = e.clientX + "px";
+        selectionBox.style.top = e.clientY + "px";
+        selectionBox.style.width = "0px";
+        selectionBox.style.height = "0px";
+        selectionBox.style.display = "block";
+    }
 });
 
 window.addEventListener("mousemove", (e) => {
-    if (window.isSettingsOpen) return;
-    if (!cam.view.mouse.isDown) return;
+    if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
 
+    if (config.SlowMode) {
+        cam.selection.currentX = e.clientX;
+        cam.selection.currentY = e.clientY;
+
+        // Update the HTML selection box dimensions
+        const x = Math.min(cam.selection.startX, cam.selection.currentX);
+        const y = Math.min(cam.selection.startY, cam.selection.currentY);
+        const w = Math.abs(cam.selection.currentX - cam.selection.startX);
+        const h = Math.abs(cam.selection.currentY - cam.selection.startY);
+
+        selectionBox.style.left = x + "px";
+        selectionBox.style.top = y + "px";
+        selectionBox.style.width = w + "px";
+        selectionBox.style.height = h + "px";
+        return;
+    }
+
+    // Original panning/zooming logic
     const dxBI = toBigInt(e.clientX - cam.view.mouse.lastX);
     const dy = e.clientY - cam.view.mouse.lastY;
     const mxBI = toBigInt(e.clientX);
@@ -449,7 +518,7 @@ window.addEventListener("mousemove", (e) => {
 
         const nextX0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorBI / PRECISION_SCALE);
         const nextX1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorBI / PRECISION_SCALE);
-        
+
         const maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
         const nextWidth = nextX1 - nextX0;
 
@@ -473,7 +542,7 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("wheel", (e) => {
-    if (window.isSettingsOpen) return;
+    if (window.isSettingsOpen || config.SlowMode) return; // Disable wheel zoom in SlowMode
     e.preventDefault();
     const zoomFactor = e.deltaY < 0 ? config.wheelZoomIn : config.wheelZoomOut;
     const zoomFactorBI = toBigInt(zoomFactor);
@@ -489,8 +558,14 @@ window.addEventListener("wheel", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("mouseup", () => cam.view.mouse.isDown = false);
-window.addEventListener("mouseleave", () => cam.view.mouse.isDown = false);
+window.addEventListener("mouseup", () => {
+    cam.view.mouse.isDown = false;
+    applySelectionZoom();
+});
+window.addEventListener("mouseleave", () => {
+    cam.view.mouse.isDown = false;
+    applySelectionZoom();
+});
 
 // Add this logic block to plot.js
 function updateDepthDisplay() {
@@ -500,26 +575,45 @@ function updateDepthDisplay() {
     }
 }
 
+function undoViewport() {
+    if (config.SlowMode && cam.history && cam.history.length > 0) {
+        const prevState = cam.history.pop();
+        cam.view.x0 = prevState.x0;
+        cam.view.x1 = prevState.x1;
+        return true;
+    }
+    return false;
+}
+
 window.addEventListener("keydown", (e) => {
     cam.activeKeys[e.key.toLowerCase()] = true;
     cam.activeKeys[e.code] = true;
 
     let actionTriggered = false;
+
+    // -- Undo Logic --
+    if (e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey)) {
+        if (undoViewport()) {
+            actionTriggered = true;
+        }
+    }
+
+    // Existing bindings
     if (e.key === "m") {
-        config.mode[0] = (config.mode[0] + 1) % notation.DisplayName.length;
+        config.modes[0] = (config.modes[0] + 1) % notation.DisplayName.length;
         actionTriggered = true;
     }
     if (e.key === "a") {
         cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
-        updateDepthDisplay()
+        updateDepthDisplay();
         actionTriggered = true;
     }
     if (e.key === "s") {
         cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
-        updateDepthDisplay()
+        updateDepthDisplay();
         actionTriggered = true;
-        
     }
+
     if (actionTriggered) {
         render();
     }
@@ -547,43 +641,47 @@ function updateKeyboardInput() {
     }
 
     let moved = false;
-    const panSpeedBI = toBigInt(canvas.width * config.panSpeedBaseFactor * dt);
-    const zoomFactorInBI = toBigInt(Math.pow(config.zoomSpeedBase, dt));
-    const zoomFactorOutBI = toBigInt(Math.pow(1 / config.zoomSpeedBase, dt));
 
-    const mxBI = toBigInt(canvas.width / 2);
+    // Only process keyboard navigation if SlowMode is off
+    if (!config.SlowMode) {
+        const panSpeedBI = toBigInt(canvas.width * config.panSpeedBaseFactor * dt);
+        const zoomFactorInBI = toBigInt(Math.pow(config.zoomSpeedBase, dt));
+        const zoomFactorOutBI = toBigInt(Math.pow(1 / config.zoomSpeedBase, dt));
 
-    if (cam.activeKeys["arrowleft"]) {
-        cam.view.x0 += panSpeedBI;
-        cam.view.x1 += panSpeedBI;
-        moved = true;
-    }
-    if (cam.activeKeys["arrowright"]) {
-        cam.view.x0 -= panSpeedBI;
-        cam.view.x1 -= panSpeedBI;
-        moved = true;
-    }
-    if (cam.activeKeys["arrowup"]) {
-        cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
-        cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
-        moved = true;
-    }
-    if (cam.activeKeys["arrowdown"]) {
-        const currentWidth = cam.view.x1 - cam.view.x0;
-        const maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
-        const targetWidth = currentWidth * zoomFactorOutBI / PRECISION_SCALE;
+        const mxBI = toBigInt(canvas.width / 2);
 
-        if (targetWidth >= maxAllowedWidthBI) {
-            cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
-            cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
-        } else {
-            if (currentWidth > 0n) {
-                const scaleToLimitBI = (maxAllowedWidthBI * PRECISION_SCALE) / currentWidth;
-                cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
-                cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
-            }
+        if (cam.activeKeys["arrowleft"]) {
+            cam.view.x0 += panSpeedBI;
+            cam.view.x1 += panSpeedBI;
+            moved = true;
         }
-        moved = true;
+        if (cam.activeKeys["arrowright"]) {
+            cam.view.x0 -= panSpeedBI;
+            cam.view.x1 -= panSpeedBI;
+            moved = true;
+        }
+        if (cam.activeKeys["arrowup"]) {
+            cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
+            cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
+            moved = true;
+        }
+        if (cam.activeKeys["arrowdown"]) {
+            const currentWidth = cam.view.x1 - cam.view.x0;
+            const maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
+            const targetWidth = currentWidth * zoomFactorOutBI / PRECISION_SCALE;
+
+            if (targetWidth >= maxAllowedWidthBI) {
+                cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
+                cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
+            } else {
+                if (currentWidth > 0n) {
+                    const scaleToLimitBI = (maxAllowedWidthBI * PRECISION_SCALE) / currentWidth;
+                    cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
+                    cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
+                }
+            }
+            moved = true;
+        }
     }
 
     if (moved) {
@@ -594,19 +692,51 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 
-
 window.addEventListener("touchstart", (e) => {
     if (window.isSettingsOpen) return;
     if (e.target === canvas) e.preventDefault();
     cam.view.mouse.isDown = true;
     cam.view.mouse.lastX = e.touches[0].clientX;
     cam.view.mouse.lastY = e.touches[0].clientY;
+
+    if (config.SlowMode) {
+        cam.selection.active = true;
+        cam.selection.startX = e.touches[0].clientX;
+        cam.selection.startY = e.touches[0].clientY;
+        cam.selection.currentX = e.touches[0].clientX;
+        cam.selection.currentY = e.touches[0].clientY;
+
+        selectionBox.style.left = e.touches[0].clientX + "px";
+        selectionBox.style.top = e.touches[0].clientY + "px";
+        selectionBox.style.width = "0px";
+        selectionBox.style.height = "0px";
+        selectionBox.style.display = "block";
+    }
 }, { passive: false });
 
 window.addEventListener("touchmove", (e) => {
     if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
     if (e.target === canvas) e.preventDefault();
 
+    if (config.SlowMode) {
+        cam.selection.currentX = e.touches[0].clientX;
+        cam.selection.currentY = e.touches[0].clientY;
+
+        // Update the HTML selection box dimensions for touch
+        const x = Math.min(cam.selection.startX, cam.selection.currentX);
+        const y = Math.min(cam.selection.startY, cam.selection.currentY);
+        const w = Math.abs(cam.selection.currentX - cam.selection.startX);
+        const h = Math.abs(cam.selection.currentY - cam.selection.startY);
+
+        selectionBox.style.left = x + "px";
+        selectionBox.style.top = y + "px";
+        selectionBox.style.width = w + "px";
+        selectionBox.style.height = h + "px";
+
+        return; // Prevent heavy render calls
+    }
+
+    // Original touch panning/zooming logic (SlowMode is OFF)
     const dxBI = toBigInt(e.touches[0].clientX - cam.view.mouse.lastX);
     const dy = e.touches[0].clientY - cam.view.mouse.lastY;
     const mxBI = toBigInt(e.touches[0].clientX);
@@ -643,8 +773,14 @@ window.addEventListener("touchmove", (e) => {
     render();
 }, { passive: false });
 
-window.addEventListener("touchend", () => cam.view.mouse.isDown = false);
-window.addEventListener("touchcancel", () => cam.view.mouse.isDown = false);
+window.addEventListener("touchend", () => {
+    cam.view.mouse.isDown = false;
+    applySelectionZoom();
+});
+window.addEventListener("touchcancel", () => {
+    cam.view.mouse.isDown = false;
+    applySelectionZoom();
+});
 
 updateKeyboardInput();
 init();
