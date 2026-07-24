@@ -39,6 +39,27 @@
             user-select: none;
         }
 
+        /* Revert Button styling */
+        #revertBtn {
+            position: absolute;
+            bottom: 55px; /* Placed directly above the configToggleBtn */
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #0098ff;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font: 16px Serif;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        #revertBtn:hover {
+            background: #333;
+        }
+
         /* Floating configuration panel styling */
         #configToggleBtn {
             position: absolute;
@@ -179,7 +200,7 @@
         }
 
         #mobileDepthControls button:active {
-      background :rgba(20, 20, 20, 0);
+            background :rgba(20, 20, 20, 0);
         }
 
         #depthDisplay {
@@ -192,7 +213,8 @@
 </head>
 
 <body>
-
+    <!-- Placed Revert Button directly above Config Toggle -->
+    <button id="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
     <button id="configToggleBtn" onclick="toggleConfigMenu()">Config Menu</button>
 
 
@@ -208,7 +230,7 @@
                 <option value="Libs/cOCF.js">Experimental -- cOCF</option>
                 <option value="Libs/TON.js">Experimental -- TON</option>
                 <option value="Libs/n-shifted-OCF.js">Experimental -- n-shifted OCF</option>
-               
+
             </select>
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
@@ -240,12 +262,11 @@
         </div>
     </div>
 
-    <!-- Center-Bottom Mobile Depth Adjuster UI -->
+    <!-- Center-Bottom Mobile Depth Adjuster UI (Revert Button Removed From Here) -->
     <div id="mobileDepthControls">
         <button onclick="adjustDepth(-1)">-</button>
         <span id="depthDisplay">Depth: Infinite</span>
         <button onclick="adjustDepth(1)">+</button>
-        <button id="revertBtn" onclick="if (undoViewport()) { render(); }" style="background: rgba(0,0,0,0); color: #0098ff; border: none; font: 16px Serif; cursor: pointer; padding: 15px 10px; user-select: none; pointer-events: auto;">Revert</button>
     </div>
 
     <div id="hint">
