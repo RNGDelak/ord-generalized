@@ -849,3 +849,279 @@ window.addEventListener("touchcancel", () => {
 
 updateKeyboardInput();
 init();
+
+
+window.isSettingsOpen = false;
+
+let initialConfigBackup = null;
+
+
+function toggleConfigMenu() {
+    const menu = document.getElementById('configMenu');
+    const canvasElement = document.getElementById('canvas');
+
+    window.isSettingsOpen = (menu.style.display !== 'block');
+
+    if (window.isSettingsOpen) {
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+// Add this helper function to reset/initialize notations when loading a preset/notation system
+function resetNotationsForSystem() {
+    if (typeof config !== 'undefined') {
+        // Check if the incoming notation module specifies a default mode or modes
+        if (window.notation && window.notation.config) {
+            if (Array.isArray(window.notation.config.modes)) {
+                config.modes = [...window.notation.config.modes];
+            } else if (typeof window.notation.config.mode === 'number') {
+                config.modes = [window.notation.config.mode];
+            } else {
+                config.modes = [0];
+            }
+        } else {
+            config.modes = [0];
+        }
+    }
+    if (typeof updateNotationConfigUI === "function") {
+        updateNotationConfigUI();
+    }
+}
+
+
+function adjustDepth(amount) {
+    if (amount < 0) {
+        cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
+    } else {
+        cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
+    }
+    updateDepthDisplay();
+    render();
+}
+
+async function loadPresetNotation(scriptPath) {
+    try {
+        const response = await fetch(scriptPath);
+        if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
+
+        const scriptCode = await response.text();
+        document.getElementById('codeInject').value = scriptCode;
+        resetNotationsForSystem();
+        executeCustomScript(scriptCode);
+
+    } catch (err) {
+        alert("Could not load preset text: " + err.message);
+    }
+}
+
+function syncConfigToTextArea() {
+    const configTextArea = document.getElementById('envConfigJson');
+    if (configTextArea) {
+        configTextArea.value = JSON.stringify(config, null, 4);
+    }
+}
+
+window.applyInjectedConfig = function () {
+    try {
+        const jsonInput = document.getElementById('envConfigJson').value.trim();
+
+        // If empty, leave untouched using the previous state (do not wipe everything)
+        if (!jsonInput) {
+            syncConfigToTextArea();
+            if (typeof render === "function") render();
+            return;
+        }
+
+        const parsedConfig = JSON.parse(jsonInput);
+        config = { ...config, ...parsedConfig };
+
+        render();
+    } catch (err) {
+        alert("Malformed configuration injection script. Error: " + err.message);
+    }
+};
+
+if (typeof config !== 'undefined' && !initialConfigBackup) {
+    initialConfigBackup = JSON.parse(JSON.stringify(config));
+}
+syncConfigToTextArea();
+
+function applyInjectedCode() {
+    const customCode = document.getElementById('codeInject').value.trim();
+    if (!customCode) {
+        alert("Please paste some code first!");
+        return;
+    }
+    resetNotationsForSystem();
+    executeCustomScript(customCode);
+}
+
+function executeCustomScript(codeString) {
+    try {
+        // Validate syntax
+        new Function(codeString);
+    } catch (e) {
+        alert(
+            `Syntax Error\n\n` +
+            `${e.message}`
+        );
+        return;
+    }
+
+    try {
+        const wrappedCode =
+            codeString +
+            "\n//# sourceURL=InjectedCustomCode.js";
+
+        const script = document.createElement("script");
+        script.id = "notation-script";
+        script.textContent = wrappedCode;
+
+        const old = document.getElementById("notation-script");
+        if (old) old.remove();
+
+        document.body.appendChild(script);
+
+        // --- RESTORE INITIAL/DEFAULT CONFIG BASE BEFORE APPLYING NEW SCRIPT CONFIG ---
+        if (initialConfigBackup) {
+            config = JSON.parse(JSON.stringify(initialConfigBackup));
+        }
+
+        let activeConfig = null;
+        if (typeof window.notation !== 'undefined' && window.notation.config) {
+            activeConfig = window.notation.config;
+        } else if (typeof config !== 'undefined') {
+            activeConfig = config;
+        }
+
+        if (activeConfig) {
+            config = { ...config, ...activeConfig };
+        }
+
+        // Ensure modes array remains initialized post-script injection
+        if (!config.modes || !Array.isArray(config.modes) || config.modes.length === 0) {
+            config.modes = [0];
+        }
+
+        syncConfigToTextArea();
+
+        if (typeof render === "function") {
+            render();
+        }
+
+        if (typeof init === "function") {
+            init();
+        }
+
+        if (typeof updateNotationConfigUI === "function") {
+            updateNotationConfigUI();
+        }
+
+    } catch (e) {
+        alert(
+            `Runtime Error\n\n` +
+            `${e.message}\n\n` +
+            `${e.stack}`
+        );
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof config !== 'undefined' && !initialConfigBackup) {
+        initialConfigBackup = JSON.parse(JSON.stringify(config));
+    }
+    if (typeof config !== 'undefined' && (!config.modes || !Array.isArray(config.modes))) {
+        config.modes = [0];
+    }
+    loadPresetNotation('Libs/BMS.js');
+    document.getElementById('presetSelect').value = 'Libs/BMS.js';
+});
+
+function dismissHint() {
+    const hintElement = document.getElementById("hint");
+    if (hintElement) {
+        hintElement.style.opacity = "0";
+        hintElement.style.visibility = "hidden";
+
+        setTimeout(() => {
+            hintElement.remove();
+        }, 400); 
+    }
+}
+
+function updateNotationConfigUI() {
+    const container = document.getElementById("notationSelectContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!config.modes || !Array.isArray(config.modes)) {
+        config.modes = [0];
+    }
+
+    config.modes.forEach((modeVal, index) => {
+        const row = document.createElement("div");
+        row.style.marginBottom = "4px";
+
+        // Select dropdown for notation display options
+        const select = document.createElement("select");
+        select.style.background = "transparent";
+        select.style.color = "#fff";
+        select.style.border = "none";
+        select.style.outline = "none";
+        select.style.cursor = "pointer";
+        select.style.fontFamily = "inherit";
+
+        if (window.notation && window.notation.DisplayName) {
+            window.notation.DisplayName.forEach((name, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.innerText = name;
+                opt.style.background = "#111"; // dropdown options background for readability
+                if (idx === modeVal) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        select.onchange = (e) => {
+            config.modes[index] = parseInt(e.target.value);
+            if (typeof render === "function") render();
+        };
+
+        // Remove button
+        const removeBtn = document.createElement("button");
+        removeBtn.innerText = "Remove notation";
+        removeBtn.style.background = "transparent";
+        removeBtn.style.color = "#ff4444";
+        removeBtn.style.border = "none";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.style.marginLeft = "8px";
+
+        removeBtn.onclick = () => {
+            if (config.modes.length > 1) {
+                config.modes.splice(index, 1);
+                updateNotationConfigUI();
+                if (typeof render === "function") render();
+            }
+        };
+
+        row.appendChild(select);
+        row.appendChild(removeBtn);
+        container.appendChild(row);
+    });
+}
+
+function addNotationSelector() {
+    if (window.notation && window.notation.DisplayName) {
+        const nextMode = (config.modes.length > 0) ? (config.modes[config.modes.length - 1] + 1) % window.notation.DisplayName.length : 0;
+        config.modes.push(nextMode);
+        updateNotationConfigUI();
+        if (typeof render === "function") render();
+    }
+}
+
+// Initialize the UI elements once window loads
+window.addEventListener("DOMContentLoaded", () => {
+    updateNotationConfigUI();
+});
