@@ -51,6 +51,8 @@ let config = {
     TickAnchorPoint: 0.5,
 
     DefaultTickColor: '#a0a0a0',
+    DefaultSampleColor: '#ffffff',
+    DefaultLabelColor: '#ffffff',
     ColorTick: true,
     ColorSample: false,
     ColorLabel: false,
@@ -315,9 +317,8 @@ function sampleHighPrecision(x, width) {
     if (cam.samplerBd < 1e20) {
         let mode = notation.DisplayName[config.modes[0]];
         sampleElem.innerHTML = notation.display(cam.samplerOrd, mode);
-        if (config.ColorSample) {
-            sampleElem.style.color = notation.classifyOrdinal(cam.samplerOrd);
-        }
+        if (config.ColorSample) sampleElem.style.color = notation.classifyOrdinal(cam.samplerOrd);
+        else sampleElem.style.color = config.DefaultSampleColor
     }
 }
 
@@ -337,7 +338,7 @@ function drawTimelineLabels() {
         config.modes.forEach((modeIdx, i) => {
             let mode = window.notation.DisplayName[modeIdx];
             let labelString = notation.display(lbl.ord, mode);
-            let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : "#ffffff";
+            let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
             let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
 
             createTextLabel(labelString, color, px + config.TickBetweenLabelXoffest, currentY, "left", "bottom", "22px Serif");
