@@ -53,12 +53,8 @@ function loadConfigFromSlot() {
 
         // Update UI Textarea and Notation UI
         syncConfigToTextArea();
-        if (typeof updateNotationConfigUI === "function") {
-            updateNotationConfigUI();
-        }
-
-        // Re-render Canvas
-        if (typeof render === "function") render();
+        updateNotationConfigUI();
+        render();
 
         alert(`Configuration loaded successfully from Slot ${slotSelect.value}!`);
     } catch (err) {
@@ -90,9 +86,7 @@ function resetNotationsForSystem() {
             config.modes = [0];
         }
     }
-    if (typeof updateNotationConfigUI === "function") {
-        updateNotationConfigUI();
-    }
+    updateNotationConfigUI();
 }
 
 function adjustDepth(amount) {
@@ -132,7 +126,7 @@ window.applyInjectedConfig = function () {
 
         if (!jsonInput) {
             syncConfigToTextArea();
-            if (typeof render === "function") render();
+            render();
             return;
         }
 
@@ -201,9 +195,9 @@ function executeCustomScript(codeString) {
 
         syncConfigToTextArea();
 
-        if (typeof render === "function") render();
-        if (typeof init === "function") init();
-        if (typeof updateNotationConfigUI === "function") updateNotationConfigUI();
+        render();
+        init();
+        updateNotationConfigUI();
 
     } catch (e) {
         alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
@@ -253,7 +247,7 @@ function updateNotationConfigUI() {
 
         select.onchange = (e) => {
             config.modes[index] = parseInt(e.target.value);
-            if (typeof render === "function") render();
+            render();
         };
 
         const removeBtn = document.createElement("button");
@@ -268,7 +262,7 @@ function updateNotationConfigUI() {
             if (config.modes.length > 1) {
                 config.modes.splice(index, 1);
                 updateNotationConfigUI();
-                if (typeof render === "function") render();
+                render();
             }
         };
 
@@ -283,7 +277,7 @@ function addNotationSelector() {
         const nextMode = (config.modes.length > 0) ? (config.modes[config.modes.length - 1] + 1) % window.notation.DisplayName.length : 0;
         config.modes.push(nextMode);
         updateNotationConfigUI();
-        if (typeof render === "function") render();
+        render();
     }
 }
 
