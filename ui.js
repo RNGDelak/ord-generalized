@@ -2,24 +2,82 @@ window.isSettingsOpen = false;
 
 let initialConfigBackup = null;
 
+// ==========================================
+// CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
+// ==========================================
 
-function toggleConfigMenu() {
-    const menu = document.getElementById('configMenu');
-    const canvasElement = document.getElementById('canvas');
+function saveConfigToSlot() {
+    const slotSelect = document.getElementById("slotSelect");
+    if (!slotSelect) return;
+    
+    const slotKey = `user_config_slot_${slotSelect.value}`;
+    
+    try {
+        // Read directly from UI or fallback to global config object
+        const jsonTextArea = document.getElementById("envConfigJson");
+        let dataToSave = config;
+        
+        if (jsonTextArea && jsonTextArea.value.trim()) {
+            dataToSave = JSON.parse(jsonTextArea.value.trim());
+        }
 
-    window.isSettingsOpen = (menu.style.display !== 'block');
-
-    if (window.isSettingsOpen) {
-        menu.style.display = 'block';
-    } else {
-        menu.style.display = 'none';
+        localStorage.setItem(slotKey, JSON.stringify(dataToSave));
+        alert(`Configuration saved successfully to Slot ${slotSelect.value}!`);
+    } catch (err) {
+        alert("Failed to save config: " + err.message);
     }
 }
 
-// Add this helper function to reset/initialize notations when loading a preset/notation system
+function loadConfigFromSlot() {
+    const slotSelect = document.getElementById("slotSelect");
+    if (!slotSelect) return;
+
+    const slotKey = `user_config_slot_${slotSelect.value}`;
+    const savedData = localStorage.getItem(slotKey);
+
+    if (!savedData) {
+        alert(`Slot ${slotSelect.value} is empty!`);
+        return;
+    }
+
+    try {
+        const parsedConfig = JSON.parse(savedData);
+        
+        // Merge saved data into global config
+        config = { ...config, ...parsedConfig };
+
+        // Ensure modes array remains valid
+        if (!config.modes || !Array.isArray(config.modes) || config.modes.length === 0) {
+            config.modes = [0];
+        }
+
+        // Update UI Textarea and Notation UI
+        syncConfigToTextArea();
+        if (typeof updateNotationConfigUI === "function") {
+            updateNotationConfigUI();
+        }
+
+        // Re-render Canvas
+        if (typeof render === "function") render();
+
+        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!`);
+    } catch (err) {
+        alert("Failed to load config: " + err.message);
+    }
+}
+
+// ==========================================
+// CORE SETTINGS LOGIC
+// ==========================================
+
+function toggleConfigMenu() {
+    const menu = document.getElementById('configMenu');
+    window.isSettingsOpen = (menu.style.display !== 'block');
+    menu.style.display = window.isSettingsOpen ? 'block' : 'none';
+}
+
 function resetNotationsForSystem() {
     if (typeof config !== 'undefined') {
-        // Check if the incoming notation module specifies a default mode or modes
         if (window.notation && window.notation.config) {
             if (Array.isArray(window.notation.config.modes)) {
                 config.modes = [...window.notation.config.modes];
@@ -36,7 +94,6 @@ function resetNotationsForSystem() {
         updateNotationConfigUI();
     }
 }
-
 
 function adjustDepth(amount) {
     if (amount < 0) {
@@ -57,7 +114,6 @@ async function loadPresetNotation(scriptPath) {
         document.getElementById('codeInject').value = scriptCode;
         resetNotationsForSystem();
         executeCustomScript(scriptCode);
-
     } catch (err) {
         alert("Could not load preset text: " + err.message);
     }
@@ -74,7 +130,6 @@ window.applyInjectedConfig = function () {
     try {
         const jsonInput = document.getElementById('envConfigJson').value.trim();
 
-        // If empty, leave untouched using the previous state (do not wipe everything)
         if (!jsonInput) {
             syncConfigToTextArea();
             if (typeof render === "function") render();
@@ -107,20 +162,14 @@ function applyInjectedCode() {
 
 function executeCustomScript(codeString) {
     try {
-        // Validate syntax
         new Function(codeString);
     } catch (e) {
-        alert(
-            `Syntax Error\n\n` +
-            `${e.message}`
-        );
+        alert(`Syntax Error\n\n${e.message}`);
         return;
     }
 
     try {
-        const wrappedCode =
-            codeString +
-            "\n//# sourceURL=InjectedCustomCode.js";
+        const wrappedCode = codeString + "\n//# sourceURL=InjectedCustomCode.js";
 
         const script = document.createElement("script");
         script.id = "notation-script";
@@ -131,7 +180,6 @@ function executeCustomScript(codeString) {
 
         document.body.appendChild(script);
 
-        // --- RESTORE INITIAL/DEFAULT CONFIG BASE BEFORE APPLYING NEW SCRIPT CONFIG ---
         if (initialConfigBackup) {
             config = JSON.parse(JSON.stringify(initialConfigBackup));
         }
@@ -147,54 +195,27 @@ function executeCustomScript(codeString) {
             config = { ...config, ...activeConfig };
         }
 
-        // Ensure modes array remains initialized post-script injection
         if (!config.modes || !Array.isArray(config.modes) || config.modes.length === 0) {
             config.modes = [0];
         }
 
         syncConfigToTextArea();
 
-        if (typeof render === "function") {
-            render();
-        }
-
-        if (typeof init === "function") {
-            init();
-        }
-
-        if (typeof updateNotationConfigUI === "function") {
-            updateNotationConfigUI();
-        }
+        if (typeof render === "function") render();
+        if (typeof init === "function") init();
+        if (typeof updateNotationConfigUI === "function") updateNotationConfigUI();
 
     } catch (e) {
-        alert(
-            `Runtime Error\n\n` +
-            `${e.message}\n\n` +
-            `${e.stack}`
-        );
+        alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
     }
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-    if (typeof config !== 'undefined' && !initialConfigBackup) {
-        initialConfigBackup = JSON.parse(JSON.stringify(config));
-    }
-    if (typeof config !== 'undefined' && (!config.modes || !Array.isArray(config.modes))) {
-        config.modes = [0];
-    }
-    loadPresetNotation('Libs/BMS.js');
-    document.getElementById('presetSelect').value = 'Libs/BMS.js';
-});
 
 function dismissHint() {
     const hintElement = document.getElementById("hint");
     if (hintElement) {
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
-
-        setTimeout(() => {
-            hintElement.remove();
-        }, 400); 
+        setTimeout(() => hintElement.remove(), 400); 
     }
 }
 
@@ -211,7 +232,6 @@ function updateNotationConfigUI() {
         const row = document.createElement("div");
         row.style.marginBottom = "4px";
 
-        // Select dropdown for notation display options
         const select = document.createElement("select");
         select.style.background = "transparent";
         select.style.color = "#fff";
@@ -225,7 +245,7 @@ function updateNotationConfigUI() {
                 const opt = document.createElement("option");
                 opt.value = idx;
                 opt.innerText = name;
-                opt.style.background = "#111"; // dropdown options background for readability
+                opt.style.background = "#111";
                 if (idx === modeVal) opt.selected = true;
                 select.appendChild(opt);
             });
@@ -236,7 +256,6 @@ function updateNotationConfigUI() {
             if (typeof render === "function") render();
         };
 
-        // Remove button
         const removeBtn = document.createElement("button");
         removeBtn.innerText = "Remove notation";
         removeBtn.style.background = "transparent";
@@ -268,7 +287,17 @@ function addNotationSelector() {
     }
 }
 
-// Initialize the UI elements once window loads
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof config !== 'undefined' && !initialConfigBackup) {
+        initialConfigBackup = JSON.parse(JSON.stringify(config));
+    }
+    if (typeof config !== 'undefined' && (!config.modes || !Array.isArray(config.modes))) {
+        config.modes = [0];
+    }
+    loadPresetNotation('Libs/BMS.js');
+    
+    const presetSelect = document.getElementById('presetSelect');
+    if (presetSelect) presetSelect.value = 'Libs/BMS.js';
+    
     updateNotationConfigUI();
 });

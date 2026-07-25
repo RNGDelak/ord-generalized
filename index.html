@@ -42,7 +42,8 @@
         /* Revert Button styling */
         #revertBtn {
             position: absolute;
-            bottom: 55px; /* Placed directly above the configToggleBtn */
+            bottom: 55px;
+            /* Placed directly above the configToggleBtn */
             right: 15px;
             z-index: 10;
             background: rgba(0, 0, 0, 0);
@@ -200,7 +201,7 @@
         }
 
         #mobileDepthControls button:active {
-            background :rgba(20, 20, 20, 0);
+            background: rgba(20, 20, 20, 0);
         }
 
         #depthDisplay {
@@ -235,7 +236,9 @@
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
                 <label for="codeInject">Inject Custom Script / Notation Code</label>
-                <div style="color:red; margin-bottom:8px;"><strong>For code injections, please read</strong> <a href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject code</a></div>
+                <div style="color:red; margin-bottom:8px;"><strong>For code injections, please read</strong> <a
+                        href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to
+                        Inject code</a></div>
                 <textarea id="codeInject" placeholder="" style="height: 120px;"></textarea>
             </div>
             <button class="apply-btn" style="background: #28a745; margin-top: 5px;"
@@ -244,6 +247,18 @@
         <hr style="border-color: #333; margin: 15px 0;">
         <div class="menu-group">
             <label for="envConfigJson">Inject Environment Config (JSON)</label>
+            <div class="slot-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+                <button onclick="saveConfigToSlot()">Save</button>
+                <button onclick="loadConfigFromSlot()">Load</button>
+
+                <select id="slotSelect" style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
+                    <option value="1">Slot 1</option>
+                    <option value="2">Slot 2</option>
+                    <option value="3">Slot 3</option>
+                    <option value="4">Slot 4</option>
+                    <option value="5">Slot 5</option>
+                </select>
+            </div>
             <textarea id="envConfigJson"></textarea>
         </div>
         <button class="apply-btn" onclick="applyInjectedConfig()">Apply Configuration</button>
@@ -276,22 +291,27 @@
             • <strong>M</strong> to switch ordinal notation<br>
             • <strong>Ctrl</strong>/<strong>Shift</strong> to adjust sensivity of arrow key controls<br>
             • Open Config Menu for further configurations<br>
-            <b style="color:red;">For code injection, please read <a href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md"target="_blank">How to Inject code</a></b>
+            <b style="color:red;">For code injection, please read <a
+                    href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject
+                    code</a></b>
         </div>
 
-        <button id="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'" onmouseout="this.style.background='#007acc'">
+        <button id="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
+            onmouseout="this.style.background='#007acc'">
             I understand
         </button>
     </div>
-  <div id="notationControls" style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff; font-family: serif; pointer-events: auto;">
+    <div id="notationControls"
+        style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff; font-family: serif; pointer-events: auto;">
         <div id="notationSelectContainer"></div>
-        <button onclick="addNotationSelector()" style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+ Add notation</button>
+        <button onclick="addNotationSelector()"
+            style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+
+            Add notation</button>
     </div>
 
     <!-- Load the initial library script with an ID -->
     <script id="notation-script" src="Libs/BMS.js"></script>
     <script src="plot.js"></script>
-    <script src="controls.js"></script>
     <script src="ui.js"></script>
 </body>
 

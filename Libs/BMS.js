@@ -159,6 +159,7 @@ window.notation = (() => {
 
     function classifyOrdinal(M) {
         if (!M.length) return "#808080"; 
+        if (M=='Limit') return "#808080"; 
 
         let j = M.findLastIndex(x => !x[0]);
 
