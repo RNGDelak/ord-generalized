@@ -214,7 +214,7 @@ function tickmark(x0, x1, o0, width) {
 }
 
 function tickmarkLabel(x0, x1, o0, width) {
-    if (x0 < -150 || x0 >= width + 150) return;
+    if (x0 < 0 || x0 >= width) return;
     let idx = Math.max(0, Math.min(cam.impor.length - 1, Math.floor(x0)));
     cam.labelsToDraw.push({ x: x0, ord: o0, impor: cam.impor[idx] || 0 });
 }
@@ -358,7 +358,7 @@ function drawHUD() {
     let py = 40;
     let px = canvas.width - 7;
     createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "bold 30px Serif");
-    
+
     notation.ordinalTypes.forEach(([name, color]) => {
         createTextLabel(name, color, px, py, "right", "top", "26px Serif");
         py += 30;
@@ -388,10 +388,10 @@ function render() {
     for (let n = 0; n < cam.ticks.length; n++) {
         if (cam.ticks[n]) {
             let x = n;
-            let y = config.DiagonalTickArrangement 
-                ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w) 
+            let y = config.DiagonalTickArrangement
+                ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w)
                 : cam.h / 2;
-                
+
             let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
             let blendedColor = config.ColorTick ? blendColorWithBrightness(cam.ticks[n].color, b) : blendColorWithBrightness(config.DefaultTickColor, b);
             let currentTickHeight = config.MathstickMode ? cam.tHeight * cam.impor[n] : cam.tHeight;
