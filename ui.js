@@ -17,7 +17,7 @@ function saveConfigToSlot() {
         const jsonTextArea = document.getElementById("envConfigJson");
         let dataToSave = config;
         
-        if (jsonTextArea && jsonTextArea.value.trim()) {
+        if (jsonTextArea.value.trim()) {
             dataToSave = JSON.parse(jsonTextArea.value.trim());
         }
 
@@ -90,10 +90,11 @@ function resetNotationsForSystem() {
 }
 
 function adjustDepth(amount) {
+    if(window.isSettingsOpen) return;
     if (amount < 0) {
-        cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
+        config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
     } else {
-        cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
+        config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
     }
     updateDepthDisplay();
     render();
@@ -134,6 +135,7 @@ window.applyInjectedConfig = function () {
         config = { ...config, ...parsedConfig };
 
         render();
+        if (config.SlowMode) alert('Slow Mode Enabled')
     } catch (err) {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
@@ -198,6 +200,7 @@ function executeCustomScript(codeString) {
         render();
         init();
         updateNotationConfigUI();
+        if (config.SlowMode) alert('Slow Mode Enabled')
 
     } catch (e) {
         alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
@@ -259,7 +262,7 @@ function updateNotationConfigUI() {
         removeBtn.style.marginLeft = "8px";
 
         removeBtn.onclick = () => {
-            if (config.modes.length > 1) {
+            if (config.modes.length > 1 && !window.isSettingsOpen) {
                 config.modes.splice(index, 1);
                 updateNotationConfigUI();
                 render();
@@ -273,7 +276,7 @@ function updateNotationConfigUI() {
 }
 
 function addNotationSelector() {
-    if (window.notation && window.notation.DisplayName) {
+    if (!window.isSettingsOpen) {
         const nextMode = (config.modes.length > 0) ? (config.modes[0] + 1) % window.notation.DisplayName.length : 0;
         config.modes.unshift(nextMode);
         updateNotationConfigUI();
@@ -282,12 +285,7 @@ function addNotationSelector() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    if (typeof config !== 'undefined' && !initialConfigBackup) {
-        initialConfigBackup = JSON.parse(JSON.stringify(config));
-    }
-    if (typeof config !== 'undefined' && (!config.modes || !Array.isArray(config.modes))) {
-        config.modes = [0];
-    }
+    initialConfigBackup = JSON.parse(JSON.stringify(config));
     loadPresetNotation('Libs/BMS.js');
     
     const presetSelect = document.getElementById('presetSelect');

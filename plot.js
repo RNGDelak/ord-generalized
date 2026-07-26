@@ -3,9 +3,13 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let ui = document.getElementById("textOverlay");
 let dynamicContainer = document.getElementById("dynamicLabels");
+let displayElem = document.getElementById("depthDisplay");
+let sampleElem = document.getElementById("sampleLabel");
+let fpsElem = document.getElementById("fpsCounter");
 
 // Selection Box Setup
 let selectionBox = document.createElement("div");
+
 Object.assign(selectionBox.style, {
     position: "absolute",
     background: "rgba(0, 150, 255, 0.2)",
@@ -45,6 +49,7 @@ let config = {
     TimelineLabelColor: "#808080",
 
     SlowMode: false,
+    HarmonicInvtervalSpacing: false,
 
     TickSpacing: 1,
     Tickheight: 0.05,
@@ -58,7 +63,10 @@ let config = {
     ColorSample: false,
     ColorLabel: false,
 
-    fpsPrecision: 1
+    fpsPrecision: 1,
+    MaxIntervalsDivision: -1,
+    MaxIntervalDepth: -1,
+    BigIntPrecisionMantissa: 8
 };
 
 let cam = {
@@ -73,7 +81,6 @@ let cam = {
     view: {
         x0: 0n,
         x1: 0n,
-        maxDepth: -1,
         mouse: { x: 0, y: 0, isDown: false, lastX: 0, lastY: 0 }
     },
     ticks: [],
@@ -110,7 +117,7 @@ function updateAdaptivePrecisionScale() {
 
     let zoomMagnitude = Number(PRECISION_SCALE) / currentWidth;
     let log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
-    let requiredDigits = Math.max(10, Math.floor(log10Zoom) + 8);
+    let requiredDigits = Math.max(10, Math.floor(log10Zoom) + config.BigIntPrecisionMantissa);
     let nextScale = 10n ** BigInt(requiredDigits);
 
     if (nextScale !== PRECISION_SCALE) {
@@ -227,13 +234,13 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
     let x1Num = toNum(x1);
     importanceSeg(x0Num, x1Num, widthNum);
 
-    if ((x1 - x0) < epsBI || (cam.view.maxDepth >= 0 && depth >= cam.view.maxDepth)) {
+    if ((x1 - x0) < epsBI || (config.MaxIntervalDepth >= 0 && depth >= config.MaxIntervalDepth)) {
         callback(x0Num, x1Num, o0, widthNum);
         return;
     }
 
     if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
-        let rescale = 2.0 / (lefts + 2);
+        let rescale = config.HarmonicInvtervalSpacing? 1 : 2.0 / (lefts + 2);
         let top = x1 - epsBI;
         let s_x0 = x0, s_x1 = x0;
         let n = 0;
@@ -241,6 +248,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
+            if (n > config.MaxIntervalsDivision &&  config.MaxIntervalsDivision > -1) break;
         }
 
         let m = n + 2;
@@ -301,9 +309,6 @@ function samplerCallback(x0, x1, o0, xmax) {
 }
 
 function sampleHighPrecision(x, width) {
-    let sampleElem = document.getElementById("sampleLabel");
-    if (!sampleElem) return;
-
     cam.samplerBd = 1e20;
     cam.samplerOrd = null;
     sampleElem.innerHTML = `<div></div>`;
@@ -438,11 +443,7 @@ function refreshLoop() {
         let deltaTime = now - lastFrameTime;
         lastFrameTime = now;
         cam.fps = 1000 / deltaTime;
-
-        let fpsElem = document.getElementById("fpsCounter");
-        if (fpsElem) {
-            fpsElem.innerText = cam.fps.toFixed(config.fpsPrecision) + 'fps';
-        }
+        fpsElem.innerText = cam.fps.toFixed(config.fpsPrecision) + 'fps';
         refreshLoop();
     });
 }
@@ -515,15 +516,9 @@ function applySelectionZoom() {
     }
 }
 
-function updateDepthDisplay() {
-    let displayElem = document.getElementById("depthDisplay");
-    if (displayElem) {
-        displayElem.innerText = cam.view.maxDepth === -1 ? "Depth: Infinite" : `Depth: ${cam.view.maxDepth}`;
-    }
-}
-
 function undoViewport() {
-    if (config.SlowMode && cam.history?.length > 0) {
+    if(window.isSettingsOpen) return;
+    if (cam.history?.length > 0) {
         let prevState = cam.history.pop();
         cam.view.x0 = prevState.x0;
         cam.view.x1 = prevState.x1;
@@ -682,12 +677,12 @@ window.addEventListener("keydown", (e) => {
         config.modes[0] = (config.modes[0] + 1) % notation.DisplayName.length;
         actionTriggered = true;
     } else if (key === "a") {
-        cam.view.maxDepth = Math.max(-1, cam.view.maxDepth - 1);
-        updateDepthDisplay();
+        config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
+        displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
     } else if (key === "s") {
-        cam.view.maxDepth = cam.view.maxDepth === -1 ? 0 : cam.view.maxDepth + 1;
-        updateDepthDisplay();
+        config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
+        displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
     }
 

@@ -216,7 +216,7 @@
 <body>
     <!-- Placed Revert Button directly above Config Toggle -->
     <button id="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
-    <button id="configToggleBtn" onclick="toggleConfigMenu()">Config Menu</button>
+    <button id="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config Menu</button>
 
 
     <div id="configMenu" style="width: 400px;">
