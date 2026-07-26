@@ -315,13 +315,12 @@ function findOrdinalPathBigInt(targetOrd, precisionDigits) {
     let o1 = notation.Limit;
     let lefts = 0;
     
-    // First, try exact structural descent
     for (let depth = 0; depth < Infinity; depth++) {
         if (notation.cmp(o0, targetOrd) === 0) {
             return { x: X0, width: X1 - X0, scale: SCALE };
         }
         if (notation.cmp(targetOrd, o0) < 0 || notation.cmp(targetOrd, o1) >= 0) {
-            break; // Out of bounds for this branch, drop to binary approximation
+            break;
         }
         
         if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
@@ -368,19 +367,6 @@ function findOrdinalPathBigInt(targetOrd, precisionDigits) {
     }
 }
 
-function evaluateOrdinalAtPosition(posBI, scaleBI) {
-    try {
-        let ratio = Number(posBI) / Number(scaleBI);
-        if (ratio <= 0.0) return notation.Zero;
-        if (ratio >= 1.0) return notation.Limit;
-        // Sample standard fundamental expansion approximation index based on ratio
-        let idx = Math.floor(ratio * 30);
-        return notation.fs(notation.Limit, idx);
-    } catch (e) {
-        return null;
-    }
-}
-
 function findAndZoomToOrdinal() {
     let inputStr = document.getElementById("ordinalInput").value.trim();
     if (!inputStr) return;
@@ -416,3 +402,8 @@ function findAndZoomToOrdinal() {
         alert("Ordinal parsed, but could not be located on the timeline (too deep or not a rendered component).");
     }
 }
+
+const finder = document.getElementById('ordinalFinderContainer');
+
+finder.addEventListener('keydown', (e) => e.stopPropagation());
+finder.addEventListener('keyup', (e) => e.stopPropagation());

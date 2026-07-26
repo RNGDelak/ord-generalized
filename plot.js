@@ -43,9 +43,9 @@ let config = {
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
 
-    LabelBetweenTimelineSpacing: 5,
+    LabelBetweenTimelineSpacing: 25,
     LabelBetweenTickSpacing: 5,
-    LabelBetweenLabelSpacing: 27,
+    LabelBetweenLabelSpacing: 2,
     TickBetweenLabelXoffest: -5,
     TimelineLabelColor: "#808080",
 
@@ -348,7 +348,6 @@ function sampleHighPrecision(x, width) {
     }
 }
 
-// --- Drawing HUD & Overlay ---
 function drawTimelineLabels() {
     let h = canvas.height;
 
@@ -361,6 +360,25 @@ function drawTimelineLabels() {
             : cam.h / 2 - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
         let totalModes = config.modes.length;
+        let totalStackHeight = (totalModes - 1) * config.LabelBetweenLabelSpacing;
+
+        // 1. Check if THIS specific label has an alias
+        let aliasName = null;
+        notation.Aliases.forEach(([name, defStr]) => {
+            if (notation.cmp(lbl.ord, defStr) === 0) {
+                aliasName = name;
+            }
+        });
+
+        let topLimit = totalStackHeight + 22; 
+        if (aliasName) {
+            topLimit += config.LabelBetweenTimelineSpacing; 
+        }
+
+        if (py < topLimit && config.MathstickMode) {
+            py = topLimit;
+        }
+
         config.modes.forEach((modeIdx, i) => {
             let mode = window.notation.DisplayName[modeIdx];
             let labelString = notation.display(lbl.ord, mode);
@@ -370,13 +388,10 @@ function drawTimelineLabels() {
             createTextLabel(labelString, color, px + config.TickBetweenLabelXoffest, currentY, "left", "bottom", "22px Serif");
         });
 
-        notation.Aliases.forEach(([name, defStr]) => {
-            if (notation.cmp(lbl.ord, defStr) === 0) {
-                let totalStackHeight = totalModes * config.LabelBetweenLabelSpacing;
-                let aliasY = py - totalStackHeight - config.LabelBetweenTimelineSpacing;
-                createTextLabel(name, config.TimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
-            }
-        });
+        if (aliasName) {
+            let aliasY = py - totalStackHeight - config.LabelBetweenTimelineSpacing;
+            createTextLabel(aliasName, config.TimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
+        }
     });
 }
 
@@ -395,7 +410,6 @@ function drawHUD() {
     }
 }
 
-// --- Main Render Loop ---
 function render() {
     updateAdaptivePrecisionScale();
     clearCanvas();
@@ -411,6 +425,10 @@ function render() {
     cam.tHeight = cam.h * config.Tickheight;
     cam.ilxw = 1.0 / Math.log(cam.w);
 
+    // Define a safe maximum height for the canvas (e.g., twice the screen height)
+    // This prevents graphics engine crashes while still making the line look like it goes off-screen
+    const MAX_SAFE_HEIGHT = cam.h * 2;
+
     for (let n = 0; n < cam.ticks.length; n++) {
         if (cam.ticks[n]) {
             let x = n;
@@ -418,9 +436,24 @@ function render() {
                 ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w)
                 : cam.h / 2;
 
+            // 1. Calculate and sanitize brightness
             let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
-            let blendedColor = config.ColorTick ? blendColorWithBrightness(cam.ticks[n].color, b) : blendColorWithBrightness(config.DefaultTickColor, b);
+            if (!isFinite(b)) b = 255; // Fallback if math results in Infinity/NaN
+            b = Math.max(0, Math.min(b, 255)); // Clamp between 0 and 255
+
+            let blendedColor = config.ColorTick 
+                ? blendColorWithBrightness(cam.ticks[n].color, b) 
+                : blendColorWithBrightness(config.DefaultTickColor, b);
+
+            // 2. Calculate and clamp the tick height
             let currentTickHeight = config.MathstickMode ? cam.tHeight * cam.impor[n] : cam.tHeight;
+            
+            // Fallback for Infinity or NaN
+            if (!isFinite(currentTickHeight)) {
+                currentTickHeight = MAX_SAFE_HEIGHT; 
+            }
+            // Clamp to our safe maximum to prevent canvas floating point breakage
+            currentTickHeight = Math.min(currentTickHeight, MAX_SAFE_HEIGHT);
 
             ctx.globalAlpha = 1.0;
             drawLine(
@@ -674,17 +707,34 @@ window.addEventListener("keydown", (e) => {
 
     if (key === "z" && (e.ctrlKey || e.metaKey)) {
         actionTriggered = undoViewport();
-    } else if (key === "m") {
-        config.modes[0] = (config.modes[0] + 1) % notation.DisplayName.length;
-        actionTriggered = true;
     } else if (key === "a") {
         config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
-    } else if (key === "s") {
+    } else if (key === "s" && !(e.shiftKey || e.metaKey)) {
         config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
+    } else if (key === "f") {
+        config.EnableOrdinalFinder = !(config.EnableOrdinalFinder)
+        checkAndInitOrdinalFinder();
+    } else if (key === "m") {
+        config.MathstickMode = !(config.MathstickMode)
+        render();
+    } else if (key === "h") {
+        config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
+        render();
+    } else if (key === "s" && (e.shiftKey || e.metaKey)) {
+        config.SlowMode = !(config.SlowMode)
+        alert((config.SlowMode? "Enabled" : "Disabled") + " Slow Mode");
+        render();
+    } else if (key === "d") {
+        config.DiagonalTickArrangement = !(config.DiagonalTickArrangement)
+        render();
+    } else if (key === "z" && !(e.ctrlKey || e.metaKey)) {
+        config.ZoomIntoMouse = !(config.ZoomIntoMouse)
+        alert((config.ZoomIntoMouse? "Enabled" : "Disabled") + " Zoom into Mouse");
+        render();
     }
 
     if (actionTriggered) render();
