@@ -721,7 +721,7 @@ window.addEventListener("keydown", (e) => {
     } else if (key === "m") {
         config.MathstickMode = !(config.MathstickMode)
         config.TickBetweenLabelXoffest = config.MathstickMode? 5 : -5
-        config.Tickheight = config.MathstickMode? 0.05 : 0.0035
+        config.Tickheight = config.MathstickMode? 0.0035 : 0.05
         render();
     } else if (key === "h") {
         config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
