@@ -720,6 +720,8 @@ window.addEventListener("keydown", (e) => {
         checkAndInitOrdinalFinder();
     } else if (key === "m") {
         config.MathstickMode = !(config.MathstickMode)
+        config.TickBetweenLabelXoffest = config.MathstickMode? 5 : -5
+        config.Tickheight = config.MathstickMode? 0.05 : 0.0035
         render();
     } else if (key === "h") {
         config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
