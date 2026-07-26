@@ -136,6 +136,7 @@ window.applyInjectedConfig = function () {
 
         render();
         if (config.SlowMode) alert('Slow Mode Enabled')
+        checkAndInitOrdinalFinder();
     } catch (err) {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
@@ -201,6 +202,7 @@ function executeCustomScript(codeString) {
         init();
         updateNotationConfigUI();
         if (config.SlowMode) alert('Slow Mode Enabled')
+        checkAndInitOrdinalFinder();
 
     } catch (e) {
         alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
@@ -284,6 +286,16 @@ function addNotationSelector() {
     }
 }
 
+function checkAndInitOrdinalFinder() {
+    let finderUI = document.getElementById("ordinalFinderContainer");
+    if (typeof window.notation !== 'undefined' && typeof window.notation.parse === 'function' && config.EnableOrdinalFinder) {
+        finderUI.style.display = "flex";
+    } else {
+        finderUI.style.display = "none";
+    }
+}
+
+
 window.addEventListener('DOMContentLoaded', () => {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
     loadPresetNotation('Libs/BMS.js');
@@ -292,4 +304,117 @@ window.addEventListener('DOMContentLoaded', () => {
     if (presetSelect) presetSelect.value = 'Libs/BMS.js';
     
     updateNotationConfigUI();
+    checkAndInitOrdinalFinder();
 });
+
+function findOrdinalPathBigInt(targetOrd, precisionDigits) {
+    let SCALE = 10n ** BigInt(document.getElementById('precisionInput').valueAsNumber); 
+    let X0 = 0n;
+    let X1 = SCALE;
+    let o0 = notation.Zero;
+    let o1 = notation.Limit;
+    let lefts = 0;
+    
+    // First, try exact structural descent
+    for (let depth = 0; depth < Infinity; depth++) {
+        if (notation.cmp(o0, targetOrd) === 0) {
+            return { x: X0, width: X1 - X0, scale: SCALE };
+        }
+        if (notation.cmp(targetOrd, o0) < 0 || notation.cmp(targetOrd, o1) >= 0) {
+            break; // Out of bounds for this branch, drop to binary approximation
+        }
+        
+        if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
+            let rescaleNum = config.HarmonicInvtervalSpacing ? 1.0 : 2.0 / (lefts + 2);
+            let m = 2;
+            let seq = Array.from({ length: m }, (_, idx) => notation.fs(o1, idx));
+            let ofs = 0;
+            for (ofs = 0; ofs < m && notation.cmp(seq[ofs], o0) <= 0; ofs++);
+            
+            let n = 0;
+            let foundSub = false;
+            while (true) {
+                if (ofs + n >= m) {
+                    m = ofs + n + 5;
+                    seq = Array.from({ length: m }, (_, idx) => notation.fs(o1, idx));
+                }
+                let next_o0 = (n === 0) ? o0 : seq[ofs + n - 1];
+                let next_o1 = seq[ofs + n];
+                
+                if (notation.cmp(targetOrd, next_o0) >= 0 && notation.cmp(targetOrd, next_o1) < 0) {
+                    let isZeroEnd = (ofs < m && seq[ofs].length > 0 && seq[ofs][seq[ofs].length - 1] === 0);
+                    let actualRescaleNum = isZeroEnd ? 1.0 : rescaleNum;
+                    let s_x0 = X0, s_x1 = X0;
+                    
+                    for (let step = 0; step <= n; step++) {
+                        if (step > 0) s_x0 = s_x1;
+                        let rNum = step ? 1.0 : actualRescaleNum;
+                        let factor = BigInt(Math.round(rNum * config.aspectratio * 1e6)); 
+                        s_x1 = X1 + (s_x0 - X1) * factor / 1000000n;
+                    }
+                    X0 = s_x0;
+                    X1 = s_x1;
+                    o0 = next_o0;
+                    o1 = next_o1;
+                    lefts = n === 0 ? lefts + 1 : 0;
+                    foundSub = true;
+                    break;
+                }
+                n++;
+            }
+            if (foundSub) continue;
+        }
+        break;
+    }
+}
+
+// Helper simulation to approximate ordinal value at a specific coordinate ratio
+function evaluateOrdinalAtPosition(posBI, scaleBI) {
+    // Quick estimation fallback returning null if out of scope
+    try {
+        let ratio = Number(posBI) / Number(scaleBI);
+        if (ratio <= 0.0) return notation.Zero;
+        if (ratio >= 1.0) return notation.Limit;
+        // Sample standard fundamental expansion approximation index based on ratio
+        let idx = Math.floor(ratio * 30);
+        return notation.fs(notation.Limit, idx);
+    } catch (e) {
+        return null;
+    }
+}
+
+function findAndZoomToOrdinal() {
+    let inputStr = document.getElementById("ordinalInput").value.trim();
+    if (!inputStr) return;
+
+    if (typeof notation.parse === 'undefined') {
+        alert("The current notation system does not support parsing.");
+        return;
+    }
+
+    let targetOrd;
+    try {
+        targetOrd = notation.parse(inputStr);
+    } catch (e) {
+        alert("Failed to parse ordinal: " + e.message);
+        return;
+    }
+    let P = findOrdinalPathBigInt(targetOrd);
+
+    if (P !== null) {
+        cam.history.push({ x0: cam.view.x0, x1: cam.view.x1 });
+        let pWidth = P.width <= 0n ? 1n : P.width;
+        let targetPixelWidthBI = toBigInt(canvas.width * 0.1); 
+        let totalWidth_BI = (targetPixelWidthBI * P.scale) / pWidth;
+        let centerOffsetBI = toBigInt(canvas.width / 2);
+        cam.view.x0 = centerOffsetBI - (totalWidth_BI * P.x) / P.scale;
+        cam.view.x1 = cam.view.x0 + totalWidth_BI;
+        config.MaxIntervalDepth = -1;
+        if (displayElem) displayElem.innerText = "Depth: Infinite";
+
+        clampViewportBounds();
+        render();
+    } else {
+        alert("Ordinal parsed, but could not be located on the timeline (too deep or not a rendered component).");
+    }
+}

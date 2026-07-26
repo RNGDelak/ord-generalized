@@ -210,6 +210,56 @@
             min-width: 70px;
             text-align: center;
         }
+
+        #ordinalFinderContainer {
+            position: absolute;
+            bottom: 55px;
+            /* Placed exactly above mobileDepthControls which is at 15px */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: none;
+            /* Will be shown dynamically via JS if parse is available */
+            align-items: center;
+            gap: 8px;
+            background: rgba(20, 20, 20, 0.8);
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        #ordinalFinderContainer input[type="text"] {
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            width: 150px;
+        }
+
+        #ordinalFinderContainer input[type="number"] {
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        #ordinalFinderContainer button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #ordinalFinderContainer button:hover {
+            background: #0098ff;
+        }
     </style>
 </head>
 
@@ -277,7 +327,12 @@
         </div>
     </div>
 
-    <!-- Center-Bottom Mobile Depth Adjuster UI (Revert Button Removed From Here) -->
+    <div id="ordinalFinderContainer">
+        <label style="color:white">Ordinal: </label><input type="text" id="ordinalInput" placeholder="Enter ordinal..." />
+        <label style="color:white">Depth: </label><input type="number" id="precisionInput" value="40" title="Precision Digits (Mantissa)" style="width: 55px;">
+        <button id="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
+    </div>
+
     <div id="mobileDepthControls">
         <button onclick="adjustDepth(-1)">-</button>
         <span id="depthDisplay">Depth: Infinite</span>

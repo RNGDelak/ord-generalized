@@ -148,9 +148,9 @@ window.notation = (() => {
     const ZERO = []
 
     function display(ord, mode) {
-        if (ord.length == 0) return '0' 
+        if (ord.length == 0) return '0'
         if (cmp(ord, 'Limit') == 0) return 'Lim(BMS)'
-        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) > -1) 
+        if (mode == "normal" || cmp(ord, [[0, 0, 0], [1, 1, 1], [2, 2, 0]]) > -1)
             return ord.map(p => `(${p.join(',')})`).join('')
 
         if (mode == "2 shifted-OCF")
@@ -158,41 +158,53 @@ window.notation = (() => {
     }
 
     function classifyOrdinal(M) {
-        if (!M.length) return "#808080"; 
-        if (M=='Limit') return "#808080"; 
+        if (!M.length) return "#808080";
+        if (M == 'Limit') return "#808080";
 
         let j = M.findLastIndex(x => !x[0]);
 
         if (j != 0) {
-            if (j == M.length - 1) return "#d40000"; 
-            return "#ff8000"; 
+            if (j == M.length - 1) return "#d40000";
+            return "#ff8000";
         }
 
-        if (M.length == 1) return "#d40000"; 
+        if (M.length == 1) return "#d40000";
 
         j = M.slice(j).findLastIndex(x => x[0] == 1);
 
         const N = M.slice(j);
 
-        if (cmp(N, [[1, 1, 1]]) >= 0) return "#3f3f3f"; 
-        if (cmp(N, [[1, 1], [2, 2]]) >= 0) return "#000fff"; 
-        if (cmp(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff"; 
-        if (cmp(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0"; 
-        if (cmp(N, [[1, 1]]) >= 0) return "#00FF00"; 
+        if (cmp(N, [[1, 1, 1]]) >= 0) return "#3f3f3f";
+        if (cmp(N, [[1, 1], [2, 2]]) >= 0) return "#000fff";
+        if (cmp(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff";
+        if (cmp(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0";
+        if (cmp(N, [[1, 1]]) >= 0) return "#00FF00";
 
-        if (M.at(-1)[0] == M.length - 1) return "#ffffff"; 
+        if (M.at(-1)[0] == M.length - 1) return "#ffffff";
 
-        return "#ffff00"; 
+        return "#ffff00";
+    }
+
+    function processMatrix(M,min) {
+        const width = Math.max(min, ...M.map(row => row.length));
+
+        return M.map(row => {
+            const r = row.slice();
+            while (r.length < width) {
+                r.push(0);
+            }
+            return r;
+        });
     }
 
     function parse(str) {
-        return str;
+        return processMatrix(str.match(/\(([^()]*)\)/g).map(x => x.slice(1, -1).split(",").map(Number)),0);
     }
 
-    const Zero = [] 
-    const Limit = 'Limit' 
+    const Zero = []
+    const Limit = 'Limit'
 
-    const DisplayName = ["normal", "2 shifted-OCF"] 
+    const DisplayName = ["normal", "2 shifted-OCF"]
     const ordinalTypes = [
         ["Zero", "#808080"],
         ["Successor Ordinal", "#d40000"],
@@ -204,10 +216,10 @@ window.notation = (() => {
         ["Feferman–Schütte Ordinal", "#f00fff"],
         ["Bachmann–Howard Ordinal", "#000fff"],
         ["Buchholz Ordinal", "#3f3f3f"]
-    ]; 
+    ];
 
     const Aliases = [
-        ["First 67 Ordinal", fs([[0], [1]], 66)], 
+        ["First 67 Ordinal", fs([[0], [1]], 66)],
         ["First Transfinite Ordinal", [[0], [1]]],
         ["Small Cantor Ordinal", [[0, 0], [1, 1]]],
         ["Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 0]]],
@@ -232,10 +244,10 @@ window.notation = (() => {
         ["Lim(TSS)", [[0, 0, 0, 0], [1, 1, 1, 1]]],
         ["Lim(QSS)", [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]]],
         ["Lim(BMS) / ω-Y(1,3)", 'Limit'],
-    ]; 
+    ];
 
-    const config = {} 
-    const title = 'BMS transfinite number line' 
+    const config = {}
+    const title = 'BMS transfinite number line'
 
     function Conv_BMS_OCF(matrix) {
         function eq(a, b) {
@@ -321,12 +333,12 @@ window.notation = (() => {
             return m;
         }
 
-        function div(a, b) { 
+        function div(a, b) {
             if (lt(a, b)) { return '0'; }
             return add(exp(sub(log(a), log(b))), div(firstTerm(a)[1], b));
         }
 
-        function mul(a, b) { 
+        function mul(a, b) {
             if (b == '0') { return '0'; }
             return add(exp(add(log(a), log(b))), mul(a, firstTerm(b)[1]))
         }
@@ -338,7 +350,7 @@ window.notation = (() => {
             return [add(firstTerm(a)[0], split(firstTerm(a)[1], x)[0]), split(firstTerm(a)[1], x)[1]];
         }
 
-        function op(x) { 
+        function op(x) {
             if (lt(x, 'p(p(0))')) { return false; }
             let f = (x[0] == 'p') ? `p(${sua(arg(x))[0]})` : 'P(0)';
             let g = null;
@@ -418,7 +430,7 @@ window.notation = (() => {
             return X;
         }
 
-        function CR(M, n) { 
+        function CR(M, n) {
             let X = [];
             for (let i = 0; i < M.length; i++) {
                 if (P_func(M, 0, i) == n) {
@@ -447,12 +459,12 @@ window.notation = (() => {
             return [0, null];
         }
 
-        function mv(M, n, k) { 
+        function mv(M, n, k) {
             if (k) {
                 let A = [k];
-                while (A.at(-1) != n) { 
+                while (A.at(-1) != n) {
                     A.push(P_func(M, 0, A.at(-1)));
-                    if (!M[A.at(-1)][0]) { break; } 
+                    if (!M[A.at(-1)][0]) { break; }
                 }
                 if (A.includes(n)) {
                     for (let i of A.toReversed()) {
@@ -475,11 +487,11 @@ window.notation = (() => {
             let p;
             if (!X.length) { p = 1; }
             else { p = M[CR(M, X.at(-1)).at(-1)][2]; }
-            if (lt(sua(S)[1], 'p(p(0))') && p && !k) { S = add(S, 'p(0)'); } 
+            if (lt(sua(S)[1], 'p(p(0))') && p && !k) { S = add(S, 'p(0)'); }
             return exp(S);
         }
 
-        function ov(M, n, k) { 
+        function ov(M, n, k) {
             if (n == k) { return 'P(0)'; }
             if (M[n][2] == 0) { return o(M, n, k); }
             let S = '0';
@@ -490,7 +502,7 @@ window.notation = (() => {
             return `P(${S})`;
         }
 
-        function v(M, n, k) { 
+        function v(M, n, k) {
             if (M[n][1] == 0) { return '0'; }
             if (M[n][2] == 0) {
                 let u = U(M, n);
@@ -500,7 +512,7 @@ window.notation = (() => {
             return add(v(M, P_func(M, 2, n), k), mv(M, n, k));
         }
 
-        function o(M, n, k) { 
+        function o(M, n, k) {
             let S = '0';
             for (let i of C(M, n)) {
                 if (i > k && k) { break; }
@@ -514,11 +526,11 @@ window.notation = (() => {
             let S = [];
             let u = [...Array(M.length).keys()].map(x => (U(M, x)[0] == 1 ? U(M, x)[1] : null));
             for (let i of C(M, n)) {
-                S = S.concat(skipped(M, i)); 
+                S = S.concat(skipped(M, i));
                 if (M[i][2] && M[n][2]) { S.push(i); continue; }
                 if (u.includes(i)) {
                     let c = C(M, i);
-                    if (c.length) { 
+                    if (c.length) {
                         let j = c.at(-1);
                         if (eq(M[j], [M[i][0] + 1, M[i][1], 1])) { S.push(i); }
                         else if (eq(U(M, j - 1), [2, i]) && eq(M[j], [M[i][0] + 1, 0, 0]) && !C(M, j).length) { S.push(i); }
@@ -563,16 +575,7 @@ window.notation = (() => {
             return sf(S);
         }
 
-        function processMatrix(M) {
-            return M.map(row => {
-                let r = row.slice();
-                while (r.length < 3) {
-                    r.push(0);
-                }
-                return r;
-            });
-        }
-        return displayOCF(_o(processMatrix(matrix)))
+        return displayOCF(_o(processMatrix(matrix,3)))
     }
 
     return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };

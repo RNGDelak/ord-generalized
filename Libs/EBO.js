@@ -546,7 +546,6 @@ function pretty(ord) {
     isSuccessor,
     display,
     classifyOrdinal,
-    parse,
     Zero,
     Limit,
     DisplayName,

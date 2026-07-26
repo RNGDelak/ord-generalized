@@ -215,7 +215,6 @@ window.notation = (() => {
     isSuccessor,
     display,
     classifyOrdinal,
-    parse,
     Zero,
     Limit,
     DisplayName,
