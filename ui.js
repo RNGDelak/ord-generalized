@@ -56,7 +56,7 @@ function loadConfigFromSlot() {
         updateNotationConfigUI();
         render();
 
-        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!`);
+        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!` + (config.SlowMode? "Slow Mode Enabled":""));
     } catch (err) {
         alert("Failed to load config: " + err.message);
     }
