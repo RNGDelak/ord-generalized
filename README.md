@@ -92,6 +92,11 @@ window.notation = (() => {
 
   }
 
+  //optional : let user find ordinal
+  function parse(ord) {
+  }
+
+
   // -------------------------
   // Display Settings
   // -------------------------
@@ -127,7 +132,7 @@ window.notation = (() => {
     isSuccessor,
     display,
     classifyOrdinal,
-    parse,
+    parse, // if you have a parser, put it here, else dont
     Zero,
     Limit,
     DisplayName,
