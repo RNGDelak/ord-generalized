@@ -368,9 +368,7 @@ function findOrdinalPathBigInt(targetOrd, precisionDigits) {
     }
 }
 
-// Helper simulation to approximate ordinal value at a specific coordinate ratio
 function evaluateOrdinalAtPosition(posBI, scaleBI) {
-    // Quick estimation fallback returning null if out of scope
     try {
         let ratio = Number(posBI) / Number(scaleBI);
         if (ratio <= 0.0) return notation.Zero;
