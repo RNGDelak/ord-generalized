@@ -36,6 +36,7 @@ let config = {
     MathstickMode: false,
     DiagonalTickArrangement: true,
     ZoomIntoMouse: false,
+    MultipleNotationOnSample: false,
 
     LabelBetweenTimelineSpacing: 5,
     LabelBetweenTickSpacing: 5,
@@ -303,22 +304,41 @@ function sampleHighPrecision(x, width) {
     let sampleElem = document.getElementById("sampleLabel");
     if (!sampleElem) return;
 
-    sampleElem.innerHTML = `<div></div>`;
     cam.samplerBd = 1e20;
     cam.samplerOrd = null;
+    sampleElem.innerHTML = `<div></div>`;
 
-    segmentBigInt(
-        cam.view.x0, cam.view.x1,
-        notation.Zero, notation.Limit,
-        toBigInt(1), toBigInt(x), toBigInt(x + 1),
-        0, 0, samplerCallback, width
-    );
+    let xBI = toBigInt(x);
+    if (xBI <= cam.view.x0) {
+        cam.samplerOrd = notation.Zero;
+        cam.samplerBd = 0; 
+    } else if (xBI >= cam.view.x1) {
+        cam.samplerOrd = notation.Limit;
+        cam.samplerBd = 0;
+    } else {
+        segmentBigInt(
+            cam.view.x0, cam.view.x1,
+            notation.Zero, notation.Limit,
+            toBigInt(1), xBI, toBigInt(x + 1),
+            0, 0, samplerCallback, width
+        );
+    }
 
-    if (cam.samplerBd < 1e20) {
-        let mode = notation.DisplayName[config.modes[0]];
-        sampleElem.innerHTML = notation.display(cam.samplerOrd, mode);
-        if (config.ColorSample) sampleElem.style.color = notation.classifyOrdinal(cam.samplerOrd);
-        else sampleElem.style.color = config.DefaultSampleColor
+    if (cam.samplerBd < 1e20 && cam.samplerOrd !== null) {
+        let htmlContent = "";
+        if (config.MultipleNotationOnSample) {
+            config.modes.forEach(modeIdx => {
+                const mode = notation.DisplayName[modeIdx];
+                const ordStr = notation.display(cam.samplerOrd, mode);
+                htmlContent += `<div>${ordStr}</div>`;
+            });
+        } else {
+            const mode = notation.DisplayName[config.modes[0]];
+            const ordStr = notation.display(cam.samplerOrd, mode);
+            htmlContent = `<div>${ordStr}</div>`;
+        }
+        sampleElem.innerHTML = htmlContent;
+        sampleElem.style.color = config.ColorSample ? notation.classifyOrdinal(cam.samplerOrd) : config.DefaultSampleColor;
     }
 }
 
@@ -346,9 +366,9 @@ function drawTimelineLabels() {
 
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
-                let totalStackHeight = totalModes * 22 + (totalModes - 1) * config.LabelBetweenLabelSpacing;
+                let totalStackHeight = totalModes * config.LabelBetweenLabelSpacing;
                 let aliasY = py - totalStackHeight - config.LabelBetweenTimelineSpacing;
-                createTextLabel(name, config.TimelineLabelColor, px - 7, aliasY, "left", "bottom", "italic 20px Serif");
+                createTextLabel(name, config.TimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
             }
         });
     });
