@@ -59,7 +59,7 @@ let config = {
     ColorLabel: false,
 
     fpsPrecision: 1,
-    MaxIntervalsDivision : 1000
+    MaxIntervalsDivision : 1e308
 };
 
 let cam = {
