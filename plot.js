@@ -43,9 +43,9 @@ let config = {
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
 
-    LabelBetweenTimelineSpacing: 25,
+    LabelBetweenTimelineSpacing: 30,
     LabelBetweenTickSpacing: 5,
-    LabelBetweenLabelSpacing: 2,
+    LabelBetweenLabelSpacing: 25,
     TickBetweenLabelXoffest: -5,
     TimelineLabelColor: "#808080",
 
