@@ -96,7 +96,7 @@ function adjustDepth(amount) {
     } else {
         config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
     }
-    updateDepthDisplay();
+    displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
     render();
 }
 
