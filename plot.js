@@ -41,7 +41,7 @@ let config = {
     DiagonalTickArrangement: true,
     ZoomIntoMouse: false,
     MultipleNotationOnSample: false,
-    EnableOrdinalFinder: true,
+    EnableOrdinalFinder: false,
 
     LabelBetweenTimelineSpacing: 5,
     LabelBetweenTickSpacing: 5,
