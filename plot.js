@@ -46,6 +46,7 @@ let config = {
     ShowOrdinalNotationConfigGui: true,
     AlwaysShowDivisionOnIdle: false,
     AlwaysShowDivisionOnInteraction: true,
+    //AlwaysShowMiddleNumberLineDivision: false,
 
     // --- Element Toggles (Show / Hide) ---
     ShowTick: true,
@@ -71,6 +72,7 @@ let config = {
     //AddNotationBtnColor: "#"
     //RemoveNotationBtnColor: "#"
     //SelectNotationBoxColor: "#"
+    //MiddleNumberLineDivisionColor: "#"
 
     // --- Ticks Properties ---
     TickSpacing: 1,
