@@ -170,22 +170,21 @@
 
         /* Center-bottom mobile depth adjuster styling */
         #mobileDepthControls {
+            white-space: nowrap;
             position: absolute;
-            bottom: 15px;
+            bottom: 5px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
             display: flex;
             align-items: center;
-            gap: 10px;
             background: rgba(20, 20, 20, 0);
-            padding: 8px 14px;
             border-radius: 30px;
             pointer-events: auto;
             user-select: none;
         }
 
-        #mobileDepthControls button {
+        .mobileDepthControlsbtn{
             background: rgba(20, 20, 20, 0);
             color: white;
             border: none;
@@ -198,10 +197,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        #mobileDepthControls button:active {
-            background: rgba(20, 20, 20, 0);
         }
 
         #depthDisplay {
@@ -260,6 +255,30 @@
         #ordinalFinderContainer button:hover {
             background: #0098ff;
         }
+
+        #fpsCounter {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: #9083ff;
+            font: 24px Serif;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        #sampleLabel {
+            position: absolute;
+            left: 10%;
+            top: 83.5%;
+            color: #ffffff;
+            font: 30px Serif;
+            user-select: none;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transform: translateY(-80%);
+            max-width: 80%;
+        }
     </style>
 </head>
 
@@ -314,29 +333,25 @@
         <button class="apply-btn" onclick="applyInjectedConfig();updateNotationConfigUI();">Apply Configuration</button>
     </div>
 
+    <div id="mobileDepthControls">
+        <button onclick="adjustDepth(-1)" class = "mobileDepthControlsbtn">-</button>
+        <span id="depthDisplay">Depth: Infinite</span>
+        <button onclick="adjustDepth(1)" class = "mobileDepthControlsbtn">+</button>
+    </div>
+
     <canvas id="canvas"></canvas>
     <div id="textOverlay">
         <div id="dynamicLabels"></div>
-
-
-        <div id="fpsCounter"
-            style="position: absolute; left: 10px; bottom: 10px; color: #9083ff; font: 24px Serif; user-select: none; pointer-events: none;">
-            60fps</div>
-        <div id="sampleLabel"
-            style="position: absolute; left: 10%; top: 83.5%; color: #ffffff; font: 30px Serif; user-select: none; pointer-events: none; white-space: pre-wrap; word-break: break-word; transform: translateY(-80%); max-width: 80%;">
-        </div>
+        <div id="fpsCounter">60fps</div>
+        <div id="sampleLabel"></div>
     </div>
 
     <div id="ordinalFinderContainer">
-        <label style="color:white">Ordinal: </label><input type="text" id="ordinalInput" placeholder="Enter ordinal..." />
-        <label style="color:white">Depth: </label><input type="number" id="precisionInput" value="40" title="Precision Digits (Mantissa)" style="width: 55px;">
+        <label style="color:white">Ordinal: </label><input type="text" id="ordinalInput"
+            placeholder="Enter ordinal..." />
+        <label style="color:white">Depth: </label><input type="number" id="precisionInput" value="40"
+            title="Precision Digits (Mantissa)" style="width: 55px;">
         <button id="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
-    </div>
-
-    <div id="mobileDepthControls">
-        <button onclick="adjustDepth(-1)">-</button>
-        <span id="depthDisplay">Depth: Infinite</span>
-        <button onclick="adjustDepth(1)">+</button>
     </div>
 
     <div id="hint">

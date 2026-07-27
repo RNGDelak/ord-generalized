@@ -2,6 +2,13 @@ window.isSettingsOpen = false;
 
 let initialConfigBackup = null;
 
+const container = document.getElementById("notationSelectContainer");
+const notationControls = document.getElementById("notationControls");
+const fpsCounter = document.getElementById("fpsCounter");
+const mobileDepthControls = document.getElementById("mobileDepthControls");
+const mobileDepthControlsbtn = document.getElementsByClassName("mobileDepthControlsbtn");
+const depthDisplay = document.getElementById("depthDisplay");
+
 // ==========================================
 // CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
 // ==========================================
@@ -121,6 +128,16 @@ function syncConfigToTextArea() {
     }
 }
 
+function applyingCSSUpdate() {
+    notationControls.style.visibility = config.ShowOrdinalNotationConfigGui? "visible" : "hidden"
+    fpsCounter.style.visibility = config.ShowFPS? "visible" : "hidden"
+    fpsCounter.style.color = config.FPSLabelColor
+    mobileDepthControls.style.visibility = config.ShowDepthAdjustGui? "visible" : "hidden"
+    mobileDepthControlsbtn[0].style.color = config.DepthAdjustGuiColor
+    mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor
+    depthDisplay.style.color = config.DepthAdjustGuiColor
+}
+
 window.applyInjectedConfig = function () {
     try {
         const jsonInput = document.getElementById('envConfigJson').value.trim();
@@ -137,6 +154,7 @@ window.applyInjectedConfig = function () {
         render();
         if (config.SlowMode) alert('Slow Mode Enabled')
         checkAndInitOrdinalFinder();
+        applyingCSSUpdate();
     } catch (err) {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
@@ -219,8 +237,6 @@ function dismissHint() {
 }
 
 function updateNotationConfigUI() {
-    const container = document.getElementById("notationSelectContainer");
-    if (!container) return;
     container.innerHTML = "";
 
     if (!config.modes || !Array.isArray(config.modes)) {

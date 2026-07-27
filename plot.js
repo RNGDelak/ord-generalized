@@ -7,63 +7,81 @@ let displayElem = document.getElementById("depthDisplay");
 let sampleElem = document.getElementById("sampleLabel");
 let fpsElem = document.getElementById("fpsCounter");
 
-// Selection Box Setup
-let selectionBox = document.createElement("div");
-
-Object.assign(selectionBox.style, {
-    position: "absolute",
-    background: "rgba(0, 150, 255, 0.2)",
-    border: "1px solid rgba(0, 150, 255, 0.8)",
-    pointerEvents: "none",
-    display: "none",
-    zIndex: "100"
-});
-document.body.appendChild(selectionBox);
-
 // --- State & Configurations ---
 let PRECISION_SCALE = 10n ** 10n;
 let lastFrameTime = performance.now();
+let isInteracting = false;
 
 let config = {
+    // --- Canvas & Layout ---
     aspectratio: 2 / 3,
+    BackgroundColor: "#000000",
+    maxAllowedWidthFactor: 0.5,
+
+    // --- Controls & Navigation ---
     panSpeedBaseFactor: 0.5,
     zoomSpeedBase: 10.0,
     zoomDragFactor: 0.01,
-    shiftMultiplier: 3.0,
-    ctrlMultiplier: 0.25,
     wheelZoomIn: 1.5,
     wheelZoomOut: 2 / 3,
-    maxAllowedWidthFactor: 0.5,
-    labelscount: 8,
+    shiftMultiplier: 3.0,
+    ctrlMultiplier: 0.25,
+    ZoomIntoMouse: false,
 
+    // --- Interactive & Rendering Modes ---
     modes: [0],
     MathstickMode: false,
     DiagonalTickArrangement: true,
-    ZoomIntoMouse: false,
+    HarmonicInvtervalSpacing: false,
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
-
-    LabelBetweenTimelineSpacing: 30,
-    LabelBetweenTickSpacing: 5,
-    LabelBetweenLabelSpacing: 25,
-    TickBetweenLabelXoffest: -5,
-    TimelineLabelColor: "#808080",
-
     SlowMode: false,
-    HarmonicInvtervalSpacing: false,
 
+    // --- UI & HUD Visibility ---
+    ShowHUD: true,
+    ShowLegends: true,
+    ShowTitle: true,
+    ShowFPS: true,
+    ShowDepthAdjustGui: true,
+    ShowOrdinalNotationConfigGui: true,
+    AlwaysShowDivisionOnIdle: false,
+    AlwaysShowDivisionOnInteraction: true,
+
+    // --- Element Toggles (Show / Hide) ---
+    ShowTick: true,
+    ShowSample: true,
+    ShowLabel: true,
+    ShowTimelineLabel: true,
+
+    // --- Element Coloring Toggles ---
+    ColorTick: true,
+    ColorSample: false,
+    ColorLabel: false,
+    ColorTimelineLabel: false,
+
+    // --- Color Palette ---
+    DefaultTickColor: '#a0a0a0',
+    DefaultTimelineLabelColor: "#808080",
+    DefaultSampleColor: '#ffffff',
+    DefaultLabelColor: '#ffffff',
+    ScreenDivisionLineColor: "#0000ff",
+    FPSLabelColor: "#9083ff",
+    DepthAdjustGuiColor: "#ffffff",
+
+    // --- Ticks Properties ---
     TickSpacing: 1,
     Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0.5,
 
-    DefaultTickColor: '#a0a0a0',
-    DefaultSampleColor: '#ffffff',
-    DefaultLabelColor: '#ffffff',
-    ColorTick: true,
-    ColorSample: false,
-    ColorLabel: false,
+    // --- Labels & Spacing ---
+    labelscount: 8,
+    LabelBetweenTimelineSpacing: 30,
+    LabelBetweenTickSpacing: 5,
+    LabelBetweenLabelSpacing: 25,
+    TickBetweenLabelXoffest: -5,
 
+    // --- Computation & Performance Limits ---
     fpsPrecision: 1,
     MaxIntervalsDivision: -1,
     MaxIntervalDepth: -1,
@@ -93,6 +111,50 @@ let cam = {
     history: [],
     selection: { active: false, startX: 0, currentX: 0, startY: 0, currentY: 0 }
 };
+
+// Selection Box Setup
+let selectionBox = document.createElement("div");
+
+Object.assign(selectionBox.style, {
+    position: "absolute",
+    background: "rgba(0, 150, 255, 0.2)",
+    border: "1px solid rgba(0, 150, 255, 0.8)",
+    pointerEvents: "none",
+    display: "none",
+    zIndex: "100"
+});
+document.body.appendChild(selectionBox);
+
+// Division Line Setup
+let divisionLine = document.createElement("div");
+Object.assign(divisionLine.style, {
+    position: "absolute",
+    top: "0",
+    left: "50%",
+    width: "2px",
+    height: "100%",
+    backgroundColor: config.ScreenDivisionLineColor,
+    transform: "translateX(-50%)",
+    pointerEvents: "none",
+    zIndex: "90",
+    display: "none"
+});
+document.body.appendChild(divisionLine);
+
+function updateDivisionLine() {
+    // Check if mouse is down or navigation keys are held
+    let isInteracting = cam.view.mouse.isDown ||
+        cam.activeKeys["arrowleft"] ||
+        cam.activeKeys["arrowright"] ||
+        cam.activeKeys["arrowup"] ||
+        cam.activeKeys["arrowdown"];
+
+    let shouldShow = (isInteracting && config.AlwaysShowDivisionOnInteraction) ||
+        (!isInteracting && config.AlwaysShowDivisionOnIdle);
+
+    divisionLine.style.display = shouldShow ? "block" : "none";
+    divisionLine.style.backgroundColor = config.ScreenDivisionLineColor;
+}
 
 // --- Math & BigInt Conversion Helpers ---
 function toBigInt(num) {
@@ -131,7 +193,7 @@ function updateAdaptivePrecisionScale() {
 
 // --- Canvas & Rendering Helpers ---
 function clearCanvas() {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = config.BackgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -241,7 +303,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
     }
 
     if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
-        let rescale = config.HarmonicInvtervalSpacing? 1 : 2.0 / (lefts + 2);
+        let rescale = config.HarmonicInvtervalSpacing ? 1 : 2.0 / (lefts + 2);
         let top = x1 - epsBI;
         let s_x0 = x0, s_x1 = x0;
         let n = 0;
@@ -249,7 +311,7 @@ function segmentBigInt(x0, x1, o0, o1, epsBI, xminBI, xmaxBI, depth, lefts, call
         for (n = 0; s_x0 < top && s_x0 < xmaxBI; n++) {
             if (n > 0) s_x0 = s_x1;
             s_x1 = converge1BigInt(s_x0, x1, 1);
-            if (n > config.MaxIntervalsDivision &&  config.MaxIntervalsDivision > -1) break;
+            if (n > config.MaxIntervalsDivision && config.MaxIntervalsDivision > -1) break;
         }
 
         let m = n + 2;
@@ -310,6 +372,7 @@ function samplerCallback(x0, x1, o0, xmax) {
 }
 
 function sampleHighPrecision(x, width) {
+    if (!config.ShowSample) {sampleElem.innerHTML = '';return;}
     cam.samplerBd = 1e20;
     cam.samplerOrd = null;
     sampleElem.innerHTML = `<div></div>`;
@@ -317,7 +380,7 @@ function sampleHighPrecision(x, width) {
     let xBI = toBigInt(x);
     if (xBI <= cam.view.x0) {
         cam.samplerOrd = notation.Zero;
-        cam.samplerBd = 0; 
+        cam.samplerBd = 0;
     } else if (xBI >= cam.view.x1) {
         cam.samplerOrd = notation.Limit;
         cam.samplerBd = 0;
@@ -370,43 +433,46 @@ function drawTimelineLabels() {
             }
         });
 
-        let topLimit = totalStackHeight + 22; 
-        if (aliasName) {
-            topLimit += config.LabelBetweenTimelineSpacing; 
+        let topLimit = totalStackHeight + 22;
+        if (config.ShowTimelineLabel && aliasName) {
+            topLimit += config.LabelBetweenTimelineSpacing;
         }
 
         if (py < topLimit && config.MathstickMode) {
             py = topLimit;
         }
 
-        config.modes.forEach((modeIdx, i) => {
-            let mode = window.notation.DisplayName[modeIdx];
-            let labelString = notation.display(lbl.ord, mode);
-            let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
-            let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
+        if (config.ShowLabel) {
+            config.modes.forEach((modeIdx, i) => {
+                let mode = window.notation.DisplayName[modeIdx];
+                let labelString = notation.display(lbl.ord, mode);
+                let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
+                let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
 
-            createTextLabel(labelString, color, px + config.TickBetweenLabelXoffest, currentY, "left", "bottom", "22px Serif");
-        });
+                createTextLabel(labelString, color, px + config.TickBetweenLabelXoffest, currentY, "left", "bottom", "22px Serif");
+            });
+        }
 
-        if (aliasName) {
+        if (config.ShowTimelineLabel && aliasName) {
             let aliasY = py - totalStackHeight - config.LabelBetweenTimelineSpacing;
-            createTextLabel(aliasName, config.TimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
+            createTextLabel(aliasName, config.DefaultTimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
         }
     });
 }
 
 function drawHUD() {
-    let py = 40;
+    let py = 0;
     let px = canvas.width - 7;
-    createTextLabel(notation.title, "rgb(255,255,255)", px, 7, "right", "top", "bold 30px Serif");
+    if (config.ShowTitle) { createTextLabel(notation.title, "rgb(255,255,255)", px, 0, "right", "top", "bold 30px Serif"); py = 30 }
 
-    notation.ordinalTypes.forEach(([name, color]) => {
-        createTextLabel(name, color, px, py, "right", "top", "26px Serif");
-        py += 30;
-    });
+    if (config.ShowLegends) notation.ordinalTypes.forEach(([name, color]) => { createTextLabel(name, color, px, py, "right", "top", "26px Serif"); py += 26; });
 
-    if (config.SlowMode) {
-        createTextLabel('Slow Mode Enabled', 'rgb(255,0,0)', 0, 0, "left", "top", "20px Serif");
+    if (config.ShowHUD) {
+        let hudItems = [];
+        if (config.SlowMode) { hudItems.push({ text: 'Slow Mode Enabled', color: 'rgb(255, 0, 0)' }); }
+        if (config.ZoomIntoMouse) { hudItems.push({ text: 'Zoom Into Mouse Enabled', color: 'rgb(0, 255, 0)' }); }
+        let lineHeight = 20;
+        hudItems.forEach((item, index) => { createTextLabel(item.text, item.color, 0, index * lineHeight, "left", "top", "20px Serif"); });
     }
 }
 
@@ -429,44 +495,45 @@ function render() {
     // This prevents graphics engine crashes while still making the line look like it goes off-screen
     const MAX_SAFE_HEIGHT = cam.h * 2;
 
-    for (let n = 0; n < cam.ticks.length; n++) {
-        if (cam.ticks[n]) {
-            let x = n;
-            let y = config.DiagonalTickArrangement
-                ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w)
-                : cam.h / 2;
+    if (config.ShowTick) {
+        for (let n = 0; n < cam.ticks.length; n++) {
+            if (cam.ticks[n]) {
+                let x = n;
+                let y = config.DiagonalTickArrangement
+                    ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w)
+                    : cam.h / 2;
 
-            // 1. Calculate and sanitize brightness
-            let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
-            if (!isFinite(b)) b = 255; // Fallback if math results in Infinity/NaN
-            b = Math.max(0, Math.min(b, 255)); // Clamp between 0 and 255
+                // 1. Calculate and sanitize brightness
+                let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
+                if (!isFinite(b)) b = 255; // Fallback if math results in Infinity/NaN
+                b = Math.max(0, Math.min(b, 255)); // Clamp between 0 and 255
 
-            let blendedColor = config.ColorTick 
-                ? blendColorWithBrightness(cam.ticks[n].color, b) 
-                : blendColorWithBrightness(config.DefaultTickColor, b);
+                let blendedColor = config.ColorTick
+                    ? blendColorWithBrightness(cam.ticks[n].color, b)
+                    : blendColorWithBrightness(config.DefaultTickColor, b);
 
-            // 2. Calculate and clamp the tick height
-            let currentTickHeight = config.MathstickMode ? cam.tHeight * cam.impor[n] : cam.tHeight;
-            
-            // Fallback for Infinity or NaN
-            if (!isFinite(currentTickHeight)) {
-                currentTickHeight = MAX_SAFE_HEIGHT; 
+                // 2. Calculate and clamp the tick height
+                let currentTickHeight = config.MathstickMode ? cam.tHeight * cam.impor[n] : cam.tHeight;
+
+                // Fallback for Infinity or NaN
+                if (!isFinite(currentTickHeight)) {
+                    currentTickHeight = MAX_SAFE_HEIGHT;
+                }
+                // Clamp to our safe maximum to prevent canvas floating point breakage
+                currentTickHeight = Math.min(currentTickHeight, MAX_SAFE_HEIGHT);
+
+                ctx.globalAlpha = 1.0;
+                drawLine(
+                    x, y - currentTickHeight * (1 - config.TickAnchorPoint),
+                    x, y + currentTickHeight * config.TickAnchorPoint,
+                    blendedColor, config.TickWidth
+                );
             }
-            // Clamp to our safe maximum to prevent canvas floating point breakage
-            currentTickHeight = Math.min(currentTickHeight, MAX_SAFE_HEIGHT);
-
-            ctx.globalAlpha = 1.0;
-            drawLine(
-                x, y - currentTickHeight * (1 - config.TickAnchorPoint),
-                x, y + currentTickHeight * config.TickAnchorPoint,
-                blendedColor, config.TickWidth
-            );
         }
     }
 
     ctx.globalAlpha = 1.0;
     drawTimelineLabels();
-    drawLine(cam.w / 2, 0, cam.w / 2, cam.h, "rgb(0, 0, 255)", 2);
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
 }
@@ -478,6 +545,9 @@ function refreshLoop() {
         lastFrameTime = now;
         cam.fps = 1000 / deltaTime;
         fpsElem.innerText = cam.fps.toFixed(config.fpsPrecision) + 'fps';
+
+        updateDivisionLine()
+
         refreshLoop();
     });
 }
@@ -551,7 +621,7 @@ function applySelectionZoom() {
 }
 
 function undoViewport() {
-    if(window.isSettingsOpen) return;
+    if (window.isSettingsOpen) return;
     if (cam.history?.length > 0) {
         let prevState = cam.history.pop();
         cam.view.x0 = prevState.x0;
@@ -720,22 +790,22 @@ window.addEventListener("keydown", (e) => {
         checkAndInitOrdinalFinder();
     } else if (key === "m") {
         config.MathstickMode = !(config.MathstickMode)
-        config.TickBetweenLabelXoffest = config.MathstickMode? 5 : -5
-        config.Tickheight = config.MathstickMode? 0.0035 : 0.05
+        config.TickBetweenLabelXoffest = config.MathstickMode ? 5 : -5
+        config.Tickheight = config.MathstickMode ? 0.0035 : 0.05
         render();
     } else if (key === "h") {
         config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
         render();
     } else if (key === "s" && (e.shiftKey || e.metaKey)) {
         config.SlowMode = !(config.SlowMode)
-        alert((config.SlowMode? "Enabled" : "Disabled") + " Slow Mode");
+        alert((config.SlowMode ? "Enabled" : "Disabled") + " Slow Mode");
         render();
     } else if (key === "d") {
         config.DiagonalTickArrangement = !(config.DiagonalTickArrangement)
         render();
     } else if (key === "z" && !(e.ctrlKey || e.metaKey)) {
         config.ZoomIntoMouse = !(config.ZoomIntoMouse)
-        alert((config.ZoomIntoMouse? "Enabled" : "Disabled") + " Zoom into Mouse");
+        alert((config.ZoomIntoMouse ? "Enabled" : "Disabled") + " Zoom into Mouse");
         render();
     }
 
