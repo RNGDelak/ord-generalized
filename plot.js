@@ -16,7 +16,7 @@ let config = {
     // --- Canvas & Layout ---
     aspectratio: 2 / 3,
     BackgroundColor: "#000000",
-    maxAllowedWidthFactor: 0.5,
+    maxAllowedWidthFactor: 0.1,
 
     // --- Controls & Navigation ---
     panSpeedBaseFactor: 0.5,
@@ -67,6 +67,10 @@ let config = {
     ScreenDivisionLineColor: "#0000ff",
     FPSLabelColor: "#9083ff",
     DepthAdjustGuiColor: "#ffffff",
+    //TitleColor: "#ffffff",
+    //AddNotationBtnColor: "#"
+    //RemoveNotationBtnColor: "#"
+    //SelectNotationBoxColor: "#"
 
     // --- Ticks Properties ---
     TickSpacing: 1,
