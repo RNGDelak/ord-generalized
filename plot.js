@@ -31,6 +31,8 @@ let config = {
     // --- Interactive & Rendering Modes ---
     modes: [0],
     MathstickMode: false,
+    //MathStick_UseLogarithmLength: false,
+    //MathStick_LogarithmBase: 2,
     DiagonalTickArrangement: true,
     HarmonicInvtervalSpacing: false,
     MultipleNotationOnSample: false,
@@ -46,7 +48,7 @@ let config = {
     ShowOrdinalNotationConfigGui: true,
     AlwaysShowDivisionOnIdle: false,
     AlwaysShowDivisionOnInteraction: true,
-    //AlwaysShowMiddleNumberLineDivision: false,
+    //ShowMiddleNumberLineDivision: false,
 
     // --- Element Toggles (Show / Hide) ---
     ShowTick: true,
@@ -72,7 +74,11 @@ let config = {
     //AddNotationBtnColor: "#"
     //RemoveNotationBtnColor: "#"
     //SelectNotationBoxColor: "#"
-    //MiddleNumberLineDivisionColor: "#"
+    //MiddleNumberLineDivisionColor: "#",
+    //ZoomSelectionFillColor: "rgba"
+    //ZoomSelectionBorderColor: "rgba"
+    //RevertBtnColor: "#"
+    //ConfigMenuBtnColor: "#"
 
     // --- Ticks Properties ---
     TickSpacing: 1,
