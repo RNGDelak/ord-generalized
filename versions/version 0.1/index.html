@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #textOverlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            /* clicks pass through */
+        }
+
+        .textLabel {
+            position: absolute;
+            color: white;
+            font: 16px Arial;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="textOverlay"></div>
+
+    <script src="decimal.js"></script>
+    <script src="core.js"></script>
+    <script src="render.js"></script>
+
+</body>
+
+</html>
