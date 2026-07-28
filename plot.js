@@ -82,6 +82,7 @@ let config = {
     ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
     RevertBtnColor: "#0098ff",
     ConfigMenuBtnColor: "#ffffff",
+    //CurrentPositionStateTextColor: "#ffffff"
 
     // --- Ticks Properties ---
     TickSpacing: 1,
