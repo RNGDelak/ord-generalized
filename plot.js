@@ -38,6 +38,7 @@ let config = {
     HarmonicInvtervalSpacing: false,
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
+    //EnableSetViewPort: false,
     SlowMode: false,
     //ZoomOutFencing: true,
     //PanOutFencing: true,
