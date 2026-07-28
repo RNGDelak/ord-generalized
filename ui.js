@@ -8,6 +8,10 @@ const fpsCounter = document.getElementById("fpsCounter");
 const mobileDepthControls = document.getElementById("mobileDepthControls");
 const mobileDepthControlsbtn = document.getElementsByClassName("mobileDepthControlsbtn");
 const depthDisplay = document.getElementById("depthDisplay");
+const AddNotationBtn = document.getElementById("AddNotationBtn");
+const revertBtn = document.getElementById("revertBtn");
+const configToggleBtn = document.getElementById("configToggleBtn");
+
 
 // ==========================================
 // CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
@@ -16,14 +20,14 @@ const depthDisplay = document.getElementById("depthDisplay");
 function saveConfigToSlot() {
     const slotSelect = document.getElementById("slotSelect");
     if (!slotSelect) return;
-    
+
     const slotKey = `user_config_slot_${slotSelect.value}`;
-    
+
     try {
         // Read directly from UI or fallback to global config object
         const jsonTextArea = document.getElementById("envConfigJson");
         let dataToSave = config;
-        
+
         if (jsonTextArea.value.trim()) {
             dataToSave = JSON.parse(jsonTextArea.value.trim());
         }
@@ -49,7 +53,7 @@ function loadConfigFromSlot() {
 
     try {
         const parsedConfig = JSON.parse(savedData);
-        
+
         // Merge saved data into global config
         config = { ...config, ...parsedConfig };
 
@@ -63,7 +67,7 @@ function loadConfigFromSlot() {
         updateNotationConfigUI();
         render();
 
-        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!` + (config.SlowMode? "Slow Mode Enabled":""));
+        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!` + (config.SlowMode ? "Slow Mode Enabled" : ""));
     } catch (err) {
         alert("Failed to load config: " + err.message);
     }
@@ -97,7 +101,7 @@ function resetNotationsForSystem() {
 }
 
 function adjustDepth(amount) {
-    if(window.isSettingsOpen) return;
+    if (window.isSettingsOpen) return;
     if (amount < 0) {
         config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
     } else {
@@ -129,13 +133,16 @@ function syncConfigToTextArea() {
 }
 
 function applyingCSSUpdate() {
-    notationControls.style.visibility = config.ShowOrdinalNotationConfigGui? "visible" : "hidden"
-    fpsCounter.style.visibility = config.ShowFPS? "visible" : "hidden"
+    notationControls.style.visibility = config.ShowOrdinalNotationConfigGui ? "visible" : "hidden"
+    fpsCounter.style.visibility = config.ShowFPS ? "visible" : "hidden"
     fpsCounter.style.color = config.FPSLabelColor
-    mobileDepthControls.style.visibility = config.ShowDepthAdjustGui? "visible" : "hidden"
+    mobileDepthControls.style.visibility = config.ShowDepthAdjustGui ? "visible" : "hidden"
     mobileDepthControlsbtn[0].style.color = config.DepthAdjustGuiColor
     mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor
     depthDisplay.style.color = config.DepthAdjustGuiColor
+    revertBtn.style.color = config.RevertBtnColor
+    configToggleBtn.style.color = config.configToggleBtn
+    AddNotationBtn.style.color = config.AddNotationBtnColor
 }
 
 window.applyInjectedConfig = function () {
@@ -232,7 +239,7 @@ function dismissHint() {
     if (hintElement) {
         hintElement.style.opacity = "0";
         hintElement.style.visibility = "hidden";
-        setTimeout(() => hintElement.remove(), 400); 
+        setTimeout(() => hintElement.remove(), 400);
     }
 }
 
@@ -249,7 +256,7 @@ function updateNotationConfigUI() {
 
         const select = document.createElement("select");
         select.style.background = "transparent";
-        select.style.color = "#fff";
+        select.style.color = config.SelectNotationBoxColor
         select.style.border = "none";
         select.style.outline = "none";
         select.style.cursor = "pointer";
@@ -260,7 +267,8 @@ function updateNotationConfigUI() {
                 const opt = document.createElement("option");
                 opt.value = idx;
                 opt.innerText = name;
-                opt.style.background = "#111";
+                opt.style.background = "#000000";
+                opt.style.color = "#ffffff"
                 if (idx === modeVal) opt.selected = true;
                 select.appendChild(opt);
             });
@@ -274,7 +282,7 @@ function updateNotationConfigUI() {
         const removeBtn = document.createElement("button");
         removeBtn.innerText = "Remove notation";
         removeBtn.style.background = "transparent";
-        removeBtn.style.color = "#ff4444";
+        removeBtn.style.color = config.RemoveNotationBtnColor;
         removeBtn.style.border = "none";
         removeBtn.style.cursor = "pointer";
         removeBtn.style.marginLeft = "8px";
@@ -315,22 +323,22 @@ function checkAndInitOrdinalFinder() {
 window.addEventListener('DOMContentLoaded', () => {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
     loadPresetNotation('Libs/BMS.js');
-    
+
     const presetSelect = document.getElementById('presetSelect');
     if (presetSelect) presetSelect.value = 'Libs/BMS.js';
-    
+
     updateNotationConfigUI();
     checkAndInitOrdinalFinder();
 });
 
 function findOrdinalPathBigInt(targetOrd, precisionDigits) {
-    let SCALE = 10n ** BigInt(document.getElementById('precisionInput').valueAsNumber); 
+    let SCALE = 10n ** BigInt(document.getElementById('precisionInput').valueAsNumber);
     let X0 = 0n;
     let X1 = SCALE;
     let o0 = notation.Zero;
     let o1 = notation.Limit;
     let lefts = 0;
-    
+
     for (let depth = 0; depth < Infinity; depth++) {
         if (notation.cmp(o0, targetOrd) === 0) {
             return { x: X0, width: X1 - X0, scale: SCALE };
@@ -338,14 +346,14 @@ function findOrdinalPathBigInt(targetOrd, precisionDigits) {
         if (notation.cmp(targetOrd, o0) < 0 || notation.cmp(targetOrd, o1) >= 0) {
             break;
         }
-        
+
         if (notation.cmp(o1, notation.Limit) === 0 || (!notation.isSuccessor(o1) && notation.cmp(o1, notation.Zero) !== 0)) {
             let rescaleNum = config.HarmonicInvtervalSpacing ? 1.0 : 2.0 / (lefts + 2);
             let m = 2;
             let seq = Array.from({ length: m }, (_, idx) => notation.fs(o1, idx));
             let ofs = 0;
             for (ofs = 0; ofs < m && notation.cmp(seq[ofs], o0) <= 0; ofs++);
-            
+
             let n = 0;
             let foundSub = false;
             while (true) {
@@ -355,16 +363,16 @@ function findOrdinalPathBigInt(targetOrd, precisionDigits) {
                 }
                 let next_o0 = (n === 0) ? o0 : seq[ofs + n - 1];
                 let next_o1 = seq[ofs + n];
-                
+
                 if (notation.cmp(targetOrd, next_o0) >= 0 && notation.cmp(targetOrd, next_o1) < 0) {
                     let isZeroEnd = (ofs < m && seq[ofs].length > 0 && seq[ofs][seq[ofs].length - 1] === 0);
                     let actualRescaleNum = isZeroEnd ? 1.0 : rescaleNum;
                     let s_x0 = X0, s_x1 = X0;
-                    
+
                     for (let step = 0; step <= n; step++) {
                         if (step > 0) s_x0 = s_x1;
                         let rNum = step ? 1.0 : actualRescaleNum;
-                        let factor = BigInt(Math.round(rNum * config.aspectratio * 1e6)); 
+                        let factor = BigInt(Math.round(rNum * config.aspectratio * 1e6));
                         s_x1 = X1 + (s_x0 - X1) * factor / 1000000n;
                     }
                     X0 = s_x0;
@@ -404,7 +412,7 @@ function findAndZoomToOrdinal() {
     if (P !== null) {
         cam.history.push({ x0: cam.view.x0, x1: cam.view.x1 });
         let pWidth = P.width <= 0n ? 1n : P.width;
-        let targetPixelWidthBI = toBigInt(canvas.width * 0.1); 
+        let targetPixelWidthBI = toBigInt(canvas.width * 0.1);
         let totalWidth_BI = (targetPixelWidthBI * P.scale) / pWidth;
         let centerOffsetBI = toBigInt(canvas.width / 2);
         cam.view.x0 = centerOffsetBI - (totalWidth_BI * P.x) / P.scale;

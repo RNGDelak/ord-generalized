@@ -31,8 +31,8 @@ let config = {
     // --- Interactive & Rendering Modes ---
     modes: [0],
     MathstickMode: false,
-    //MathStick_UseLogarithmLength: false,
-    //MathStick_LogarithmBase: 2,
+    MathStick_UseLogarithmLength: false,
+    MathStick_LogarithmBase: 2,
     DiagonalTickArrangement: true,
     HarmonicInvtervalSpacing: false,
     MultipleNotationOnSample: false,
@@ -48,7 +48,7 @@ let config = {
     ShowOrdinalNotationConfigGui: true,
     AlwaysShowDivisionOnIdle: false,
     AlwaysShowDivisionOnInteraction: true,
-    //ShowMiddleNumberLineDivision: false,
+    ShowMiddleNumberLineDivision: false,
 
     // --- Element Toggles (Show / Hide) ---
     ShowTick: true,
@@ -70,15 +70,15 @@ let config = {
     ScreenDivisionLineColor: "#0000ff",
     FPSLabelColor: "#9083ff",
     DepthAdjustGuiColor: "#ffffff",
-    //TitleColor: "#ffffff",
-    //AddNotationBtnColor: "#"
-    //RemoveNotationBtnColor: "#"
-    //SelectNotationBoxColor: "#"
-    //MiddleNumberLineDivisionColor: "#",
-    //ZoomSelectionFillColor: "rgba"
-    //ZoomSelectionBorderColor: "rgba"
-    //RevertBtnColor: "#"
-    //ConfigMenuBtnColor: "#"
+    TitleColor: "#ffffff",
+    AddNotationBtnColor: "#0098ff",
+    RemoveNotationBtnColor: "#ff4444",
+    SelectNotationBoxColor: "#ffffff",
+    MiddleNumberLineDivisionColor: "rgba(255,0,0,0.5)",
+    ZoomSelectionFillColor: "rgba(0, 150, 255, 0.2)",
+    ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
+    RevertBtnColor: "#0098ff",
+    ConfigMenuBtnColor: "#ffffff",
 
     // --- Ticks Properties ---
     TickSpacing: 1,
@@ -129,8 +129,8 @@ let selectionBox = document.createElement("div");
 
 Object.assign(selectionBox.style, {
     position: "absolute",
-    background: "rgba(0, 150, 255, 0.2)",
-    border: "1px solid rgba(0, 150, 255, 0.8)",
+    background: config.ZoomSelectionFillColor,
+    border: config.ZoomSelectionBorder,
     pointerEvents: "none",
     display: "none",
     zIndex: "100"
@@ -384,7 +384,7 @@ function samplerCallback(x0, x1, o0, xmax) {
 }
 
 function sampleHighPrecision(x, width) {
-    if (!config.ShowSample) {sampleElem.innerHTML = '';return;}
+    if (!config.ShowSample) { sampleElem.innerHTML = ''; return; }
     cam.samplerBd = 1e20;
     cam.samplerOrd = null;
     sampleElem.innerHTML = `<div></div>`;
@@ -428,7 +428,7 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
-        let tH = config.MathstickMode ? cam.tHeight * lbl.impor : cam.tHeight;
+        let tH = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength? Math.log(lbl.impor+1)/Math.log(config.MathStick_LogarithmBase) : lbl.impor) : cam.tHeight;
 
         let py = config.DiagonalTickArrangement
             ? h * px / canvas.width - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing
@@ -475,7 +475,7 @@ function drawTimelineLabels() {
 function drawHUD() {
     let py = 0;
     let px = canvas.width - 7;
-    if (config.ShowTitle) { createTextLabel(notation.title, "rgb(255,255,255)", px, 0, "right", "top", "bold 30px Serif"); py = 30 }
+    if (config.ShowTitle) { createTextLabel(notation.title, config.TitleColor, px, 0, "right", "top", "bold 30px Serif"); py = 30 }
 
     if (config.ShowLegends) notation.ordinalTypes.forEach(([name, color]) => { createTextLabel(name, color, px, py, "right", "top", "26px Serif"); py += 26; });
 
@@ -507,6 +507,14 @@ function render() {
     // This prevents graphics engine crashes while still making the line look like it goes off-screen
     const MAX_SAFE_HEIGHT = cam.h * 2;
 
+    if (config.ShowMiddleNumberLineDivision) {
+        if (config.DiagonalTickArrangement) {
+            drawLine(0, 0, cam.w, cam.h, config.MiddleNumberLineDivisionColor, 2);
+        } else {
+            drawLine(0, cam.h / 2, cam.w, cam.h / 2, config.MiddleNumberLineDivisionColor, 2);
+        }
+    }
+
     if (config.ShowTick) {
         for (let n = 0; n < cam.ticks.length; n++) {
             if (cam.ticks[n]) {
@@ -525,7 +533,7 @@ function render() {
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
                 // 2. Calculate and clamp the tick height
-                let currentTickHeight = config.MathstickMode ? cam.tHeight * cam.impor[n] : cam.tHeight;
+                let currentTickHeight = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength? Math.log(cam.impor[n]+1)/Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) : cam.tHeight;
 
                 // Fallback for Infinity or NaN
                 if (!isFinite(currentTickHeight)) {
@@ -671,7 +679,9 @@ function handlePointerDown(e) {
             top: `${y}px`,
             width: "0px",
             height: "0px",
-            display: "block"
+            display: "block",
+            background : config.ZoomSelectionFillColor,
+            border : config.ZoomSelectionBorder
         });
     }
 }
@@ -693,7 +703,9 @@ function handlePointerMove(e) {
             left: `${x}px`,
             top: `${y}px`,
             width: `${w}px`,
-            height: `${h}px`
+            height: `${h}px`,
+            background : config.ZoomSelectionFillColor,
+            border : config.ZoomSelectionBorder
         });
         return;
     }
