@@ -6,6 +6,8 @@ let dynamicContainer = document.getElementById("dynamicLabels");
 let displayElem = document.getElementById("depthDisplay");
 let sampleElem = document.getElementById("sampleLabel");
 let fpsElem = document.getElementById("fpsCounter");
+let zoomElem = document.getElementById("zoomDisplay");
+let posElem = document.getElementById("posDisplay");
 
 // --- State & Configurations ---
 let PRECISION_SCALE = 10n ** 10n;
@@ -15,7 +17,6 @@ let isInteracting = false;
 let config = {
     // --- Canvas & Layout ---
     aspectratio: 2 / 3,
-    BackgroundColor: "#000000",
     maxAllowedWidthFactor: 0.1,
 
     // --- Controls & Navigation ---
@@ -55,6 +56,7 @@ let config = {
     ShowSample: true,
     ShowLabel: true,
     ShowTimelineLabel: true,
+    ShowCurrentPositionState: false,
 
     // --- Element Coloring Toggles ---
     ColorTick: true,
@@ -63,6 +65,7 @@ let config = {
     ColorTimelineLabel: false,
 
     // --- Color Palette ---
+    BackgroundColor: "#000000",
     DefaultTickColor: '#a0a0a0',
     DefaultTimelineLabelColor: "#808080",
     DefaultSampleColor: '#ffffff',
@@ -428,7 +431,7 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
-        let tH = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength? Math.log(lbl.impor+1)/Math.log(config.MathStick_LogarithmBase) : lbl.impor) : cam.tHeight;
+        let tH = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(lbl.impor + 1) / Math.log(config.MathStick_LogarithmBase) : lbl.impor) : cam.tHeight;
 
         let py = config.DiagonalTickArrangement
             ? h * px / canvas.width - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing
@@ -488,6 +491,75 @@ function drawHUD() {
     }
 }
 
+// --- 1. Fast, Overflow-Safe BigInt Zoom Formatter ---
+function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
+    if (!currentWidthBI || currentWidthBI <= 0n || !canvasWidthBI) return "1.00x";
+
+    let sNum = currentWidthBI.toString();
+    let sDen = canvasWidthBI.toString();
+
+    let len1 = sNum.length;
+    let len2 = sDen.length;
+
+    // Normalize top 15 digits into standard mantissas [1.0, 10.0)
+    let mant1 = Number(sNum.slice(0, 15)) / Math.pow(10, Math.min(15, len1) - 1);
+    let mant2 = Number(sDen.slice(0, 15)) / Math.pow(10, Math.min(15, len2) - 1);
+
+    let mantissa = mant1 / mant2;
+    let exp = len1 - len2;
+
+    if (mantissa >= 10) {
+        mantissa /= 10;
+        exp += 1;
+    } else if (mantissa < 1 && mantissa > 0) {
+        mantissa *= 10;
+        exp -= 1;
+    }
+
+    if (exp >= -2 && exp <= 4) {
+        let val = mantissa * Math.pow(10, exp);
+        return val.toFixed(2) + "x";
+    } else {
+        return `${mantissa.toFixed(2)}e+${exp}x`;
+    }
+}
+
+// --- 2. High-Performance Fixed Decimal Formatter ---
+function formatBigIntFraction(numerator, denominator, decimals) {
+    let isNegative = (numerator < 0n) !== (denominator < 0n);
+    let num = numerator < 0n ? -numerator : numerator;
+    let den = denominator < 0n ? -denominator : denominator;
+    let maxDecimals = Math.max(4, decimals)
+    let scale = 10n ** BigInt(maxDecimals);
+    let scaledNum = (num * scale) / den;
+    let str = scaledNum.toString().padStart(maxDecimals + 1, "0");
+    let intPart = str.slice(0, -maxDecimals) || "0";
+    let fracPart = str.slice(-maxDecimals);
+
+    let sign = (isNegative && (intPart !== "0" || /[1-9]/.test(fracPart))) ? "-" : "";
+    return `${sign}${intPart}.${fracPart}`;
+}
+
+// --- 3. Camera Stats Controller ---
+function updateCameraStats() {
+    let currentWidthBI = cam.view.x1 - cam.view.x0;
+    let canvasWidthBI = toBigInt(canvas.width);
+    zoomElem.innerText = "Zoom: "+formatBigIntZoom(currentWidthBI, canvasWidthBI);
+
+    let sNum = currentWidthBI.toString();
+    let sDen = canvasWidthBI.toString();
+    let expDiff = sNum.length - sDen.length;
+    let log10Zoom = Math.max(0, expDiff);
+
+    let decimalPlaces = Math.max(4, log10Zoom + (config.BigIntPrecisionMantissa || 8));
+
+    let centerScreenBI = toBigInt(canvas.width / 2);
+    let numBI = centerScreenBI - cam.view.x0;
+    let denBI = currentWidthBI;
+
+    posElem.innerText = "World Position: "+formatBigIntFraction(numBI, denBI, decimalPlaces);
+}
+
 function render() {
     updateAdaptivePrecisionScale();
     clearCanvas();
@@ -533,7 +605,7 @@ function render() {
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
                 // 2. Calculate and clamp the tick height
-                let currentTickHeight = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength? Math.log(cam.impor[n]+1)/Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) : cam.tHeight;
+                let currentTickHeight = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) : cam.tHeight;
 
                 // Fallback for Infinity or NaN
                 if (!isFinite(currentTickHeight)) {
@@ -556,6 +628,8 @@ function render() {
     drawTimelineLabels();
     sampleHighPrecision(cam.w / 2, cam.w);
     drawHUD();
+
+    if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
 }
 
 function refreshLoop() {
@@ -680,8 +754,8 @@ function handlePointerDown(e) {
             width: "0px",
             height: "0px",
             display: "block",
-            background : config.ZoomSelectionFillColor,
-            border : config.ZoomSelectionBorder
+            background: config.ZoomSelectionFillColor,
+            border: config.ZoomSelectionBorder
         });
     }
 }
@@ -704,8 +778,8 @@ function handlePointerMove(e) {
             top: `${y}px`,
             width: `${w}px`,
             height: `${h}px`,
-            background : config.ZoomSelectionFillColor,
-            border : config.ZoomSelectionBorder
+            background: config.ZoomSelectionFillColor,
+            border: config.ZoomSelectionBorder
         });
         return;
     }

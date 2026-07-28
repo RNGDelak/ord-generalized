@@ -141,7 +141,7 @@ function applyingCSSUpdate() {
     mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor
     depthDisplay.style.color = config.DepthAdjustGuiColor
     revertBtn.style.color = config.RevertBtnColor
-    configToggleBtn.style.color = config.configToggleBtn
+    configToggleBtn.style.color = config.ConfigMenuBtnColor
     AddNotationBtn.style.color = config.AddNotationBtnColor
 }
 

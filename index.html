@@ -57,10 +57,6 @@
             pointer-events: auto;
         }
 
-        #revertBtn:hover {
-            background: #333;
-        }
-
         /* Floating configuration panel styling */
         #configToggleBtn {
             position: absolute;
@@ -73,10 +69,6 @@
             padding: 8px 14px;
             cursor: pointer;
             border-radius: 4px;
-        }
-
-        #configToggleBtn:hover {
-            background: #333;
         }
 
         #configMenu {
@@ -184,7 +176,7 @@
             user-select: none;
         }
 
-        .mobileDepthControlsbtn{
+        .mobileDepthControlsbtn {
             background: rgba(20, 20, 20, 0);
             color: white;
             border: none;
@@ -334,9 +326,9 @@
     </div>
 
     <div id="mobileDepthControls">
-        <button onclick="adjustDepth(-1)" class = "mobileDepthControlsbtn">-</button>
+        <button onclick="adjustDepth(-1)" class="mobileDepthControlsbtn">-</button>
         <span id="depthDisplay">Depth: Infinite</span>
-        <button onclick="adjustDepth(1)" class = "mobileDepthControlsbtn">+</button>
+        <button onclick="adjustDepth(1)" class="mobileDepthControlsbtn">+</button>
     </div>
 
     <canvas id="canvas"></canvas>
@@ -379,11 +371,17 @@
         </button>
     </div>
     <div id="notationControls"
-        style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff; font-family: serif; pointer-events: auto;">
+        style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff;pointer-events: auto;">
         <div id="notationSelectContainer"></div>
         <button onclick="addNotationSelector()" id="AddNotationBtn"
             style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+
             Add notation</button>
+    </div>
+
+    <div id="hudStats"
+        style="position: absolute; left: 12.5%; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 17px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
+        <div><span id="zoomDisplay">1.00x</span></div>
+        <div><span id="posDisplay">0</span></div>
     </div>
 
     <!-- Load the initial library script with an ID -->
