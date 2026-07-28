@@ -39,6 +39,8 @@ let config = {
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
     SlowMode: false,
+    //ZoomOutFencing: true,
+    //PanOutFencing: true,
 
     // --- UI & HUD Visibility ---
     ShowHUD: true,
