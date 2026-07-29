@@ -11,8 +11,17 @@ const depthDisplay = document.getElementById("depthDisplay");
 const AddNotationBtn = document.getElementById("AddNotationBtn");
 const revertBtn = document.getElementById("revertBtn");
 const configToggleBtn = document.getElementById("configToggleBtn");
+const hudStats = document.getElementById("hudStats");
 
+const finderUI = document.getElementById('ordinalFinderContainer');
 
+finderUI.addEventListener('keydown', (e) => e.stopPropagation());
+finderUI.addEventListener('keyup', (e) => e.stopPropagation());
+
+const setUI = document.getElementById("viewportZoomContainer");
+
+setUI.addEventListener('keydown', (e) => e.stopPropagation());
+setUI.addEventListener('keyup', (e) => e.stopPropagation());
 // ==========================================
 // CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
 // ==========================================
@@ -65,6 +74,7 @@ function loadConfigFromSlot() {
         // Update UI Textarea and Notation UI
         syncConfigToTextArea();
         updateNotationConfigUI();
+        checkAndInitFloatingGui()
         render();
 
         alert(`Configuration loaded successfully from Slot ${slotSelect.value}!` + (config.SlowMode ? "Slow Mode Enabled" : ""));
@@ -143,6 +153,7 @@ function applyingCSSUpdate() {
     revertBtn.style.color = config.RevertBtnColor
     configToggleBtn.style.color = config.ConfigMenuBtnColor
     AddNotationBtn.style.color = config.AddNotationBtnColor
+    hudStats.style.color = config.CurrentPositionStateTextColor
 }
 
 window.applyInjectedConfig = function () {
@@ -160,7 +171,7 @@ window.applyInjectedConfig = function () {
 
         render();
         if (config.SlowMode) alert('Slow Mode Enabled')
-        checkAndInitOrdinalFinder();
+        checkAndInitFloatingGui();
         applyingCSSUpdate();
     } catch (err) {
         alert("Malformed configuration injection script. Error: " + err.message);
@@ -227,7 +238,7 @@ function executeCustomScript(codeString) {
         init();
         updateNotationConfigUI();
         if (config.SlowMode) alert('Slow Mode Enabled')
-        checkAndInitOrdinalFinder();
+        checkAndInitFloatingGui();
 
     } catch (e) {
         alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
@@ -255,6 +266,7 @@ function updateNotationConfigUI() {
         row.style.marginBottom = "4px";
 
         const select = document.createElement("select");
+        select.id = `selectnotationbox_${index}`;
         select.style.background = "transparent";
         select.style.color = config.SelectNotationBoxColor
         select.style.border = "none";
@@ -310,15 +322,124 @@ function addNotationSelector() {
     }
 }
 
-function checkAndInitOrdinalFinder() {
-    let finderUI = document.getElementById("ordinalFinderContainer");
-    if (typeof window.notation !== 'undefined' && typeof window.notation.parse === 'function' && config.EnableOrdinalFinder) {
+function checkAndInitFloatingGui() {
+    let isshowordfinder = (typeof window.notation !== 'undefined' && typeof window.notation.parse === 'function' && config.EnableOrdinalFinder)
+    if (isshowordfinder) {
         finderUI.style.display = "flex";
     } else {
         finderUI.style.display = "none";
     }
+
+    if (config.EnableSetViewPort) {
+        setUI.style.display = "flex";
+    } else {
+        setUI.style.display = "none";
+    }
+
+    if (!config.EnableSetViewPort) {
+        finderUI.style.top = '15px'; // Shift up
+    } else {
+        finderUI.style.top = '65px'; // Reset position below zoom panel
+    }
 }
 
+// --- Fully BigInt-native String Parser for Arbitrary Digits & Exponents ---
+function parseToBigIntScaled(str, scale) {
+    if (!str || typeof str !== "string") throw new Error("Invalid string");
+    str = str.trim().toLowerCase();
+
+    let isNegative = false;
+    if (str.startsWith("-")) {
+        isNegative = true;
+        str = str.slice(1);
+    } else if (str.startsWith("+")) {
+        str = str.slice(1);
+    }
+
+    let parts = str.split("e");
+    let coeff = parts[0];
+    let expBI = parts.length > 1 ? BigInt(parts[1]) : 0n;
+
+    let [intPart, fracPart = ""] = coeff.split(".");
+    let combinedDigits = (intPart + fracPart).replace(/^0+/, "") || "0";
+    let netExponent = expBI - BigInt(fracPart.length);
+
+    let baseBI = BigInt(combinedDigits);
+    let result;
+
+    if (netExponent >= 0n) {
+        result = baseBI * (10n ** netExponent) * scale;
+    } else {
+        let divisor = 10n ** (-netExponent);
+        result = (baseBI * scale) / divisor;
+    }
+
+    return isNegative ? -result : result;
+}
+
+// --- High-Precision Viewport Trigger (Supports >300 Digits / e+3000+ Exponents) ---
+function triggerViewportZoom() {
+    let posStr = document.getElementById("viewportPosInput").value.trim();
+    let zoomStr = document.getElementById("viewportZoomInput").value.trim();
+
+    if (!posStr || !zoomStr) {
+        alert("Invalid position or zoom");
+        return;
+    }
+
+    // 1. Extract base 10 exponent directly from string to determine scale without parseFloat
+    let parts = zoomStr.trim().toLowerCase().split("e");
+    let expVal = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+    if (isNaN(expVal)) expVal = 0;
+
+    // Digits calculation without precision truncation
+    let requiredDigits = Math.max(
+        35,
+        Math.abs(expVal) + (config.BigIntPrecisionMantissa || 8) + 50
+    );
+
+    let nextScale = 10n ** BigInt(requiredDigits);
+
+    // 2. Expand PRECISION_SCALE and adjust existing history/viewport coordinates FIRST
+    if (nextScale > PRECISION_SCALE) {
+        let oldScale = PRECISION_SCALE;
+        cam.view.x0 = (cam.view.x0 * nextScale) / oldScale;
+        cam.view.x1 = (cam.view.x1 * nextScale) / oldScale;
+        PRECISION_SCALE = nextScale;
+    }
+
+    // 3. Parse inputs with full BigInt precision
+    let pos, zoom;
+    try {
+        pos = parseToBigIntScaled(posStr, PRECISION_SCALE);
+        zoom = parseToBigIntScaled(zoomStr, PRECISION_SCALE);
+    } catch (e) {
+        alert("Invalid position or zoom");
+        return;
+    }
+
+    if (zoom <= 0n) {
+        alert("Invalid position or zoom");
+        return;
+    }
+
+    cam.history.push({
+        x0: cam.view.x0,
+        x1: cam.view.x1
+    });
+
+    // 4. Viewport calculation purely in BigInt
+    let canvasWidthBI = toBigInt(canvas.width);
+    let widthBI = (canvasWidthBI * zoom) / PRECISION_SCALE;
+    let centerScreenBI = toBigInt(canvas.width / 2);
+
+    let x0 = centerScreenBI - (widthBI * pos) / PRECISION_SCALE;
+    let x1 = x0 + widthBI;
+
+    cam.view.x0 = x0;
+    cam.view.x1 = x1;
+    render();
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
@@ -328,7 +449,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (presetSelect) presetSelect.value = 'Libs/BMS.js';
 
     updateNotationConfigUI();
-    checkAndInitOrdinalFinder();
+    checkAndInitFloatingGui();
 });
 
 function findOrdinalPathBigInt(targetOrd, precisionDigits) {
@@ -426,8 +547,3 @@ function findAndZoomToOrdinal() {
         alert("Ordinal parsed, but could not be located on the timeline (too deep or not a rendered component).");
     }
 }
-
-const finder = document.getElementById('ordinalFinderContainer');
-
-finder.addEventListener('keydown', (e) => e.stopPropagation());
-finder.addEventListener('keyup', (e) => e.stopPropagation());

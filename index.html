@@ -198,52 +198,86 @@
             text-align: center;
         }
 
+        /* Unified style for both top panels */
+        #viewportZoomContainer,
         #ordinalFinderContainer {
             position: absolute;
-            bottom: 55px;
-            /* Placed exactly above mobileDepthControls which is at 15px */
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            display: none;
-            /* Will be shown dynamically via JS if parse is available */
+            display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(20, 20, 20, 0.8);
-            padding: 8px 14px;
+            justify-content: space-between;
+            width: 380px;
+            /* Fixed equal width for both GUIs */
+            height: 42px;
+            /* Fixed equal height */
+            box-sizing: border-box;
+            background: rgba(20, 20, 20, 0.85);
+            padding: 6px 12px;
             border-radius: 6px;
             border: 1px solid #444;
+            font-size: 14px;
+            transition: top 0.2s ease;
         }
 
-        #ordinalFinderContainer input[type="text"] {
-            background: #111;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            width: 150px;
+        #ordinalFinderContainer {
+            top: 65px;
+            /* Sits below viewportZoomContainer by default */
         }
 
+        /* Label styling inside containers */
+        #viewportZoomContainer label,
+        #ordinalFinderContainer label {
+            color: #ffffff;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        /* Input fields */
+        #viewportZoomContainer input[type="text"],
+        #ordinalFinderContainer input[type="text"],
         #ordinalFinderContainer input[type="number"] {
             background: #111;
             color: #fff;
             border: 1px solid #444;
-            padding: 6px;
+            padding: 4px 6px;
             border-radius: 4px;
             font-family: monospace;
+            font-size: 13px;
+            height: 28px;
+            box-sizing: border-box;
         }
 
+        #viewportZoomContainer input[type="text"] {
+            width: 65px;
+        }
+
+        #ordinalFinderContainer input[type="text"] {
+            width: 120px;
+        }
+
+        #ordinalFinderContainer input[type="number"] {
+            width: 45px;
+        }
+
+        /* Buttons */
+        #viewportZoomContainer button,
         #ordinalFinderContainer button {
             background: #007acc;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 0 14px;
+            height: 28px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 13px;
+            line-height: 28px;
         }
 
+        #viewportZoomContainer button:hover,
         #ordinalFinderContainer button:hover {
             background: #0098ff;
         }
@@ -276,14 +310,14 @@
 
 <body>
     <!-- Placed Revert Button directly above Config Toggle -->
-    <button id="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
-    <button id="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config Menu</button>
+    <button id="revertBtn" name="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
+    <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config Menu</button>
 
 
     <div id="configMenu" style="width: 400px;">
         <div class="menu-group">
             <label for="presetSelect">Tutorial Presets (Notation System)</label>
-            <select id="presetSelect" onchange="loadPresetNotation(this.value)">
+            <select id="presetSelect" name="presetSelect" onchange="loadPresetNotation(this.value)">
                 <option value="Libs/BMS.js">BMS (Default)</option>
                 <option value="Libs/HPrSS.js">HPrSS</option>
                 <option value="Libs/LPrSS.js">LPrSS</option>
@@ -292,7 +326,6 @@
                 <option value="Libs/cOCF.js">Experimental -- cOCF</option>
                 <option value="Libs/TON.js">Experimental -- TON</option>
                 <option value="Libs/n-shifted-OCF.js">Experimental -- n-shifted OCF</option>
-
             </select>
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
@@ -300,7 +333,7 @@
                 <div style="color:red; margin-bottom:8px;"><strong>For code injections, please read</strong> <a
                         href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to
                         Inject code</a></div>
-                <textarea id="codeInject" placeholder="" style="height: 120px;"></textarea>
+                <textarea id="codeInject" name="codeInject" placeholder="" style="height: 120px;"></textarea>
             </div>
             <button class="apply-btn" style="background: #28a745; margin-top: 5px;"
                 onclick="applyInjectedCode()">Execute Code Script</button>
@@ -312,7 +345,8 @@
                 <button onclick="saveConfigToSlot()">Save</button>
                 <button onclick="loadConfigFromSlot()">Load</button>
 
-                <select id="slotSelect" style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
+                <label for="slotSelect" style="display:none;">Config Slot</label>
+                <select id="slotSelect" name="slotSelect" style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
                     <option value="1">Slot 1</option>
                     <option value="2">Slot 2</option>
                     <option value="3">Slot 3</option>
@@ -320,15 +354,15 @@
                     <option value="5">Slot 5</option>
                 </select>
             </div>
-            <textarea id="envConfigJson"></textarea>
+            <textarea id="envConfigJson" name="envConfigJson"></textarea>
         </div>
         <button class="apply-btn" onclick="applyInjectedConfig();updateNotationConfigUI();">Apply Configuration</button>
     </div>
 
     <div id="mobileDepthControls">
-        <button onclick="adjustDepth(-1)" class="mobileDepthControlsbtn">-</button>
+        <button onclick="adjustDepth(-1)" class="mobileDepthControlsbtn" aria-label="Decrease Depth">-</button>
         <span id="depthDisplay">Depth: Infinite</span>
-        <button onclick="adjustDepth(1)" class="mobileDepthControlsbtn">+</button>
+        <button onclick="adjustDepth(1)" class="mobileDepthControlsbtn" aria-label="Increase Depth">+</button>
     </div>
 
     <canvas id="canvas"></canvas>
@@ -336,14 +370,6 @@
         <div id="dynamicLabels"></div>
         <div id="fpsCounter">60fps</div>
         <div id="sampleLabel"></div>
-    </div>
-
-    <div id="ordinalFinderContainer">
-        <label style="color:white">Ordinal: </label><input type="text" id="ordinalInput"
-            placeholder="Enter ordinal..." />
-        <label style="color:white">Depth: </label><input type="number" id="precisionInput" value="40"
-            title="Precision Digits (Mantissa)" style="width: 55px;">
-        <button id="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
     </div>
 
     <div id="hint">
@@ -355,6 +381,8 @@
             • <strong>D</strong> to toggle diagonal tick arrangement<br>
             • <strong>H</strong> to toggle harmonic interval spacing (lag fixes)<br>
             • <strong>F</strong> to toggle ordinal finder (for some notation wih a parser)<br>
+            • <strong>G</strong> to toggle set viewport state<br>
+            • <strong>I</strong> to show viewport state <br>
             <br>
             • <strong>Ctrl</strong>/<strong>Shift</strong> to adjust sensivity of arrow key controls<br>
             • <strong>Shift</strong>+<strong>S</strong> to Enter/Exit <b>Slow Mode</b><br>
@@ -365,7 +393,7 @@
                     code</a></b>
         </div>
 
-        <button id="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
+        <button id="closehint" name="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
             onmouseout="this.style.background='#007acc'">
             I understand
         </button>
@@ -373,15 +401,37 @@
     <div id="notationControls"
         style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff;pointer-events: auto;">
         <div id="notationSelectContainer"></div>
-        <button onclick="addNotationSelector()" id="AddNotationBtn"
+        <button onclick="addNotationSelector()" id="AddNotationBtn" name="AddNotationBtn"
             style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+
             Add notation</button>
     </div>
 
     <div id="hudStats"
-        style="position: absolute; left: 12.5%; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 17px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
+        style="position: absolute; left: 135px; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 16px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
         <div><span id="zoomDisplay">1.00x</span></div>
         <div><span id="posDisplay">0</span></div>
+    </div>
+
+    <!-- Viewport Zoom Input Panel -->
+    <div id="viewportZoomContainer">
+        <label for="viewportPosInput">Position:</label>
+        <input type="text" id="viewportPosInput" name="viewportPosInput" placeholder="0.5" value="0.5" />
+
+        <label for="viewportZoomInput">Zoom:</label>
+        <input type="text" id="viewportZoomInput" name="viewportZoomInput" placeholder="1.0" value="1.0" />
+
+        <button onclick="triggerViewportZoom()">Apply</button>
+    </div>
+
+    <!-- Ordinal Finder Panel -->
+    <div id="ordinalFinderContainer">
+        <label for="ordinalInput">Ordinal:</label>
+        <input type="text" id="ordinalInput" name="ordinalInput" placeholder="Enter ordinal..." />
+
+        <label for="precisionInput">Depth:</label>
+        <input type="number" id="precisionInput" name="precisionInput" value="40" title="Precision Digits (Mantissa)">
+
+        <button id="findOrdinalBtn" name="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
     </div>
 
     <!-- Load the initial library script with an ID -->

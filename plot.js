@@ -18,6 +18,7 @@ let config = {
     // --- Canvas & Layout ---
     aspectratio: 2 / 3,
     maxAllowedWidthFactor: 0.1,
+    panFenceOverlap: 0.1,
 
     // --- Controls & Navigation ---
     panSpeedBaseFactor: 0.5,
@@ -38,10 +39,10 @@ let config = {
     HarmonicInvtervalSpacing: false,
     MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
-    //EnableSetViewPort: false,
+    EnableSetViewPort: false,
     SlowMode: false,
-    //ZoomOutFencing: true,
-    //PanOutFencing: true,
+    ZoomOutFencing: true,
+    PanOutFencing: true,
 
     // --- UI & HUD Visibility ---
     ShowHUD: true,
@@ -85,7 +86,7 @@ let config = {
     ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
     RevertBtnColor: "#0098ff",
     ConfigMenuBtnColor: "#ffffff",
-    //CurrentPositionStateTextColor: "#ffffff"
+    CurrentPositionStateTextColor: "#ffffff",
 
     // --- Ticks Properties ---
     TickSpacing: 1,
@@ -190,16 +191,18 @@ function converge1BigInt(a, b, rescale = 1) {
 }
 
 function updateAdaptivePrecisionScale() {
-    let currentWidth = Number(cam.view.x1 - cam.view.x0);
+    let currentWidthBI = cam.view.x1 - cam.view.x0;
 
-    if (!currentWidth || currentWidth <= 0) {
+    if (currentWidthBI <= 0n) {
         PRECISION_SCALE = 10n ** 10n;
         return;
     }
+    let scaleStr = PRECISION_SCALE.toString();
+    let widthStr = currentWidthBI.toString();
+    let log10Zoom = scaleStr.length - widthStr.length;
+    if (log10Zoom < 0) log10Zoom = 0;
 
-    let zoomMagnitude = Number(PRECISION_SCALE) / currentWidth;
-    let log10Zoom = Math.log10(Math.max(1, zoomMagnitude));
-    let requiredDigits = Math.max(10, Math.floor(log10Zoom) + config.BigIntPrecisionMantissa);
+    let requiredDigits = Math.max(10, log10Zoom + (config.BigIntPrecisionMantissa || 8) + 10);
     let nextScale = 10n ** BigInt(requiredDigits);
 
     if (nextScale !== PRECISION_SCALE) {
@@ -435,16 +438,16 @@ function drawTimelineLabels() {
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
-        let tH = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(lbl.impor + 1) / Math.log(config.MathStick_LogarithmBase) : lbl.impor) : cam.tHeight;
+        let tH = config.MathstickMode
+            ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(lbl.impor + 1) / Math.log(config.MathStick_LogarithmBase) : lbl.impor)
+            : cam.tHeight;
 
         let py = config.DiagonalTickArrangement
             ? h * px / canvas.width - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing
             : cam.h / 2 - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
         let totalModes = config.modes.length;
-        let totalStackHeight = (totalModes - 1) * config.LabelBetweenLabelSpacing;
 
-        // 1. Check if THIS specific label has an alias
         let aliasName = null;
         notation.Aliases.forEach(([name, defStr]) => {
             if (notation.cmp(lbl.ord, defStr) === 0) {
@@ -452,10 +455,17 @@ function drawTimelineLabels() {
             }
         });
 
-        let topLimit = totalStackHeight + 22;
-        if (config.ShowTimelineLabel && aliasName) {
-            topLimit += config.LabelBetweenTimelineSpacing;
-        }
+        let modeStackHeight = (config.ShowLabel && totalModes > 0)
+            ? (totalModes - 1) * config.LabelBetweenLabelSpacing
+            : 0;
+
+        let spacingBelowAlias = (config.ShowLabel && config.ShowTimelineLabel && aliasName)
+            ? config.LabelBetweenTimelineSpacing
+            : 0;
+
+        let totalHeaderHeight = modeStackHeight + spacingBelowAlias;
+        let minTopMargin = 22;
+        let topLimit = totalHeaderHeight + minTopMargin;
 
         if (py < topLimit && config.MathstickMode) {
             py = topLimit;
@@ -473,7 +483,7 @@ function drawTimelineLabels() {
         }
 
         if (config.ShowTimelineLabel && aliasName) {
-            let aliasY = py - totalStackHeight - config.LabelBetweenTimelineSpacing;
+            let aliasY = py - modeStackHeight - spacingBelowAlias;
             createTextLabel(aliasName, config.DefaultTimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
         }
     });
@@ -528,7 +538,6 @@ function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
     }
 }
 
-// --- 2. High-Performance Fixed Decimal Formatter ---
 function formatBigIntFraction(numerator, denominator, decimals) {
     let isNegative = (numerator < 0n) !== (denominator < 0n);
     let num = numerator < 0n ? -numerator : numerator;
@@ -544,11 +553,10 @@ function formatBigIntFraction(numerator, denominator, decimals) {
     return `${sign}${intPart}.${fracPart}`;
 }
 
-// --- 3. Camera Stats Controller ---
 function updateCameraStats() {
     let currentWidthBI = cam.view.x1 - cam.view.x0;
     let canvasWidthBI = toBigInt(canvas.width);
-    zoomElem.innerText = "Zoom: "+formatBigIntZoom(currentWidthBI, canvasWidthBI);
+    zoomElem.innerText = "Zoom: " + formatBigIntZoom(currentWidthBI, canvasWidthBI);
 
     let sNum = currentWidthBI.toString();
     let sDen = canvasWidthBI.toString();
@@ -561,7 +569,7 @@ function updateCameraStats() {
     let numBI = centerScreenBI - cam.view.x0;
     let denBI = currentWidthBI;
 
-    posElem.innerText = "World Position: "+formatBigIntFraction(numBI, denBI, decimalPlaces);
+    posElem.innerText = "World Position: " + formatBigIntFraction(numBI, denBI, decimalPlaces);
 }
 
 function render() {
@@ -579,8 +587,6 @@ function render() {
     cam.tHeight = cam.h * config.Tickheight;
     cam.ilxw = 1.0 / Math.log(cam.w);
 
-    // Define a safe maximum height for the canvas (e.g., twice the screen height)
-    // This prevents graphics engine crashes while still making the line look like it goes off-screen
     const MAX_SAFE_HEIGHT = cam.h * 2;
 
     if (config.ShowMiddleNumberLineDivision) {
@@ -681,7 +687,9 @@ function init() {
 }
 
 function clampViewportBounds() {
-    let minOverlap = toBigInt(canvas.width * 0.1);
+    if (!config.PanOutFencing) return;
+
+    const minOverlap = toBigInt(canvas.width * config.panFenceOverlap);
     let currentWidth = cam.view.x1 - cam.view.x0;
     let canvasWidthBI = toBigInt(canvas.width);
 
@@ -804,7 +812,7 @@ function handlePointerMove(e) {
         let nextX1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorBI / PRECISION_SCALE);
         let maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
 
-        if ((nextX1 - nextX0) >= maxAllowedWidthBI) {
+        if (!config.ZoomOutFencing || ((nextX1 - nextX0) >= maxAllowedWidthBI)) {
             cam.view.x0 = nextX0;
             cam.view.x1 = nextX1;
         } else {
@@ -861,7 +869,7 @@ window.addEventListener("wheel", (e) => {
     let mxBI = toBigInt(e.clientX);
     let maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
 
-    if ((cam.view.x1 - cam.view.x0) >= maxAllowedWidthBI || e.deltaY < 0) {
+    if (!config.ZoomOutFencing || ((cam.view.x1 - cam.view.x0) >= maxAllowedWidthBI || e.deltaY < 0)) {
         cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorBI / PRECISION_SCALE);
         cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorBI / PRECISION_SCALE);
     }
@@ -889,7 +897,13 @@ window.addEventListener("keydown", (e) => {
         actionTriggered = true;
     } else if (key === "f") {
         config.EnableOrdinalFinder = !(config.EnableOrdinalFinder)
-        checkAndInitOrdinalFinder();
+        checkAndInitFloatingGui();
+    } else if (key === "g") {
+        config.EnableSetViewPort = !(config.EnableSetViewPort)
+        checkAndInitFloatingGui();
+    } else if (key === "i") {
+        config.ShowCurrentPositionState = !(config.ShowCurrentPositionState)
+        if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
     } else if (key === "m") {
         config.MathstickMode = !(config.MathstickMode)
         config.TickBetweenLabelXoffest = config.MathstickMode ? 5 : -5
@@ -964,7 +978,7 @@ function updateKeyboardInput() {
             let maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
             let targetWidth = currentWidth * zoomFactorOutBI / PRECISION_SCALE;
 
-            if (targetWidth >= maxAllowedWidthBI) {
+            if (!config.ZoomOutFencing || targetWidth >= maxAllowedWidthBI) {
                 cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
                 cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
             } else if (currentWidth > 0n) {
