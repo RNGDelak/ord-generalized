@@ -241,6 +241,7 @@ function executeCustomScript(codeString) {
         render();
         init();
         updateNotationConfigUI();
+        applyingCSSUpdate();
         if (config.SlowMode) alert('Slow Mode Enabled')
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         checkAndInitFloatingGui();
