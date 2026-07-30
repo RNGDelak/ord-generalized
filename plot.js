@@ -32,6 +32,7 @@ let config = {
 
     // --- Interactive & Rendering Modes ---
     modes: [0],
+    LockScreen: false,
     MathstickMode: false,
     MathStick_UseLogarithmLength: false,
     MathStick_LogarithmBase: 2,
@@ -500,6 +501,7 @@ function drawHUD() {
         let hudItems = [];
         if (config.SlowMode) { hudItems.push({ text: 'Slow Mode Enabled', color: 'rgb(255, 0, 0)' }); }
         if (config.ZoomIntoMouse) { hudItems.push({ text: 'Zoom Into Mouse Enabled', color: 'rgb(0, 255, 0)' }); }
+        if (config.LockScreen) { hudItems.push({ text: 'Screen Locked', color: 'rgb(255, 0, 0)' }); }
         let lineHeight = 20;
         hudItems.forEach((item, index) => { createTextLabel(item.text, item.color, 0, index * lineHeight, "left", "top", "20px Serif"); });
     }
@@ -746,6 +748,7 @@ function getEventCoords(e) {
 }
 
 function handlePointerDown(e) {
+    if (config.LockScreen) {return;}
     if (window.isSettingsOpen) return;
     let { x, y } = getEventCoords(e);
 
@@ -773,6 +776,7 @@ function handlePointerDown(e) {
 }
 
 function handlePointerMove(e) {
+    if (config.LockScreen) { return; }
     if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
     let { x: clientX, y: clientY } = getEventCoords(e);
 
@@ -861,6 +865,7 @@ window.addEventListener("touchend", handlePointerUp);
 window.addEventListener("touchcancel", handlePointerUp);
 
 window.addEventListener("wheel", (e) => {
+    if (config.LockScreen) { return; }
     if (window.isSettingsOpen || config.SlowMode) return;
     e.preventDefault();
 
@@ -912,6 +917,9 @@ window.addEventListener("keydown", (e) => {
     } else if (key === "h") {
         config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
         render();
+    } else if (key === "l") {
+        config.LockScreen = !(config.LockScreen)
+        render()
     } else if (key === "s" && (e.shiftKey || e.metaKey)) {
         config.SlowMode = !(config.SlowMode)
         alert((config.SlowMode ? "Enabled" : "Disabled") + " Slow Mode");
@@ -921,7 +929,6 @@ window.addEventListener("keydown", (e) => {
         render();
     } else if (key === "z" && !(e.ctrlKey || e.metaKey)) {
         config.ZoomIntoMouse = !(config.ZoomIntoMouse)
-        alert((config.ZoomIntoMouse ? "Enabled" : "Disabled") + " Zoom into Mouse");
         render();
     }
 
@@ -935,7 +942,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 function updateKeyboardInput() {
-    if (window.isSettingsOpen) {
+    if (window.isSettingsOpen || config.LockScreen) {
         requestAnimationFrame(updateKeyboardInput);
         return;
     }

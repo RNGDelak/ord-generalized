@@ -22,6 +22,7 @@ const setUI = document.getElementById("viewportZoomContainer");
 
 setUI.addEventListener('keydown', (e) => e.stopPropagation());
 setUI.addEventListener('keyup', (e) => e.stopPropagation());
+
 // ==========================================
 // CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
 // ==========================================
@@ -75,9 +76,11 @@ function loadConfigFromSlot() {
         syncConfigToTextArea();
         updateNotationConfigUI();
         checkAndInitFloatingGui()
+        applyingCSSUpdate()
+        displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         render();
 
-        alert(`Configuration loaded successfully from Slot ${slotSelect.value}!` + (config.SlowMode ? "Slow Mode Enabled" : ""));
+        alert(`Configuration loaded successfully from Slot ${slotSelect.value}! ` + (config.SlowMode ? "Slow Mode Enabled" : ""));
     } catch (err) {
         alert("Failed to load config: " + err.message);
     }
@@ -173,6 +176,7 @@ window.applyInjectedConfig = function () {
         if (config.SlowMode) alert('Slow Mode Enabled')
         checkAndInitFloatingGui();
         applyingCSSUpdate();
+        displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
     } catch (err) {
         alert("Malformed configuration injection script. Error: " + err.message);
     }
@@ -238,6 +242,7 @@ function executeCustomScript(codeString) {
         init();
         updateNotationConfigUI();
         if (config.SlowMode) alert('Slow Mode Enabled')
+        displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         checkAndInitFloatingGui();
 
     } catch (e) {
