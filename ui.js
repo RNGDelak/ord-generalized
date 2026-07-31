@@ -24,6 +24,125 @@ setUI.addEventListener('keydown', (e) => e.stopPropagation());
 setUI.addEventListener('keyup', (e) => e.stopPropagation());
 
 // ==========================================
+// IMPORT / EXPORT & LINK MANAGEMENT
+// Uniform tags: source & href
+// ==========================================
+
+// Import custom .tnls or script file
+function importTNLSFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const content = e.target.result;
+        document.getElementById('codeInject').value = content;
+        resetNotationsForSystem();
+        executeCustomScript(content);
+        alert(`Successfully imported: ${file.name}`);
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+// 1. Export inline compressed script payload link using "source"
+function exportToCodeLink() {
+    const code = document.getElementById('codeInject').value.trim();
+    if (!code) {
+        alert("No script code found to export!");
+        return;
+    }
+
+    if (typeof LZString === "undefined") {
+        alert("LZString compression library not loaded yet.");
+        return;
+    }
+
+    const compressed = LZString.compressToEncodedURIComponent(code);
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const shareableLink = `${baseUrl}#source=${compressed}`;
+
+    navigator.clipboard.writeText(shareableLink).then(() => {
+        alert("Inline script shareable link copied to clipboard!\n\nTag: source");
+    }).catch(() => {
+        prompt("Copy your link below:", shareableLink);
+    });
+}
+
+// 2. Export external script URL link using "href"
+function exportToUrlLink() {
+    const defaultUrl = "https://raw.githubusercontent.com/.../script.js";
+    const userScriptUrl = prompt("Enter the raw URL of the script to load:", defaultUrl);
+
+    if (!userScriptUrl || !userScriptUrl.trim()) return;
+
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    const shareableLink = `${baseUrl}#href=${encodeURIComponent(userScriptUrl.trim())}`;
+
+    navigator.clipboard.writeText(shareableLink).then(() => {
+        alert("Script URL link copied to clipboard!\n\nTag: href");
+    }).catch(() => {
+        prompt("Copy your link below:", shareableLink);
+    });
+}
+
+// Parse URL hash or search parameters for uniform tags: "source" and "href"
+async function handleUrlParameters() {
+    let rawQuery = window.location.hash ? window.location.hash.substring(1) : window.location.search.substring(1);
+    const urlParams = new URLSearchParams(rawQuery);
+
+    const sourceParam = urlParams.get('source');
+    const hrefParam = urlParams.get('href');
+
+    if (sourceParam) {
+        try {
+            const decompressed = LZString.decompressFromEncodedURIComponent(sourceParam);
+            if (decompressed) {
+                document.getElementById('codeInject').value = decompressed;
+                resetNotationsForSystem();
+                executeCustomScript(decompressed);
+                return true;
+            }
+        } catch (e) {
+            console.error("Failed to decompress source link payload:", e);
+        }
+    }
+
+    if (hrefParam) {
+        try {
+            // Check if hrefParam matches a preset selection option
+            const presetSelect = document.getElementById('presetSelect');
+            if (presetSelect) {
+                for (let option of presetSelect.options) {
+                    if (option.value === hrefParam) {
+                        presetSelect.value = hrefParam;
+                        break;
+                    }
+                }
+            }
+
+            const response = await fetch(hrefParam);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const fetchedScript = await response.text();
+            document.getElementById('codeInject').value = fetchedScript;
+            resetNotationsForSystem();
+            executeCustomScript(fetchedScript);
+            return true;
+        } catch (e) {
+            alert(`Failed to load script from href link: ${e.message}`);
+        }
+    }
+
+    return false;
+}
+
+// Update active URL parameter to keep URL clean using only "href"
+function updateUrlHrefParam(scriptPath) {
+    const baseUrl = `${window.location.origin}${window.location.pathname}`;
+    window.history.replaceState(null, '', `${baseUrl}#href=${encodeURIComponent(scriptPath)}`);
+}
+
+// ==========================================
 // CONFIG SLOT SAVING & LOADING (SLOTS 1-5)
 // ==========================================
 
@@ -34,7 +153,6 @@ function saveConfigToSlot() {
     const slotKey = `user_config_slot_${slotSelect.value}`;
 
     try {
-        // Read directly from UI or fallback to global config object
         const jsonTextArea = document.getElementById("envConfigJson");
         let dataToSave = config;
 
@@ -63,20 +181,16 @@ function loadConfigFromSlot() {
 
     try {
         const parsedConfig = JSON.parse(savedData);
-
-        // Merge saved data into global config
         config = { ...config, ...parsedConfig };
 
-        // Ensure modes array remains valid
         if (!config.modes || !Array.isArray(config.modes) || config.modes.length === 0) {
             config.modes = [0];
         }
 
-        // Update UI Textarea and Notation UI
         syncConfigToTextArea();
         updateNotationConfigUI();
-        checkAndInitFloatingGui()
-        applyingCSSUpdate()
+        checkAndInitFloatingGui();
+        applyingCSSUpdate();
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         render();
 
@@ -133,6 +247,9 @@ async function loadPresetNotation(scriptPath) {
         document.getElementById('codeInject').value = scriptCode;
         resetNotationsForSystem();
         executeCustomScript(scriptCode);
+        
+        // Update URL parameter using uniform "href" tag
+        updateUrlHrefParam(scriptPath);
     } catch (err) {
         alert("Could not load preset text: " + err.message);
     }
@@ -146,17 +263,17 @@ function syncConfigToTextArea() {
 }
 
 function applyingCSSUpdate() {
-    notationControls.style.visibility = config.ShowOrdinalNotationConfigGui ? "visible" : "hidden"
-    fpsCounter.style.visibility = config.ShowFPS ? "visible" : "hidden"
-    fpsCounter.style.color = config.FPSLabelColor
-    mobileDepthControls.style.visibility = config.ShowDepthAdjustGui ? "visible" : "hidden"
-    mobileDepthControlsbtn[0].style.color = config.DepthAdjustGuiColor
-    mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor
-    depthDisplay.style.color = config.DepthAdjustGuiColor
-    revertBtn.style.color = config.RevertBtnColor
-    configToggleBtn.style.color = config.ConfigMenuBtnColor
-    AddNotationBtn.style.color = config.AddNotationBtnColor
-    hudStats.style.color = config.CurrentPositionStateTextColor
+    notationControls.style.visibility = config.ShowOrdinalNotationConfigGui ? "visible" : "hidden";
+    fpsCounter.style.visibility = config.ShowFPS ? "visible" : "hidden";
+    fpsCounter.style.color = config.FPSLabelColor;
+    mobileDepthControls.style.visibility = config.ShowDepthAdjustGui ? "visible" : "hidden";
+    mobileDepthControlsbtn[0].style.color = config.DepthAdjustGuiColor;
+    mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor;
+    depthDisplay.style.color = config.DepthAdjustGuiColor;
+    revertBtn.style.color = config.RevertBtnColor;
+    configToggleBtn.style.color = config.ConfigMenuBtnColor;
+    AddNotationBtn.style.color = config.AddNotationBtnColor;
+    hudStats.style.color = config.CurrentPositionStateTextColor;
 }
 
 window.applyInjectedConfig = function () {
@@ -173,7 +290,7 @@ window.applyInjectedConfig = function () {
         config = { ...config, ...parsedConfig };
 
         render();
-        if (config.SlowMode) alert('Slow Mode Enabled')
+        if (config.SlowMode) alert('Slow Mode Enabled');
         checkAndInitFloatingGui();
         applyingCSSUpdate();
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
@@ -242,7 +359,7 @@ function executeCustomScript(codeString) {
         init();
         updateNotationConfigUI();
         applyingCSSUpdate();
-        if (config.SlowMode) alert('Slow Mode Enabled')
+        if (config.SlowMode) alert('Slow Mode Enabled');
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         checkAndInitFloatingGui();
 
@@ -274,7 +391,7 @@ function updateNotationConfigUI() {
         const select = document.createElement("select");
         select.id = `selectnotationbox_${index}`;
         select.style.background = "transparent";
-        select.style.color = config.SelectNotationBoxColor
+        select.style.color = config.SelectNotationBoxColor;
         select.style.border = "none";
         select.style.outline = "none";
         select.style.cursor = "pointer";
@@ -286,7 +403,7 @@ function updateNotationConfigUI() {
                 opt.value = idx;
                 opt.innerText = name;
                 opt.style.background = "#000000";
-                opt.style.color = "#ffffff"
+                opt.style.color = "#ffffff";
                 if (idx === modeVal) opt.selected = true;
                 select.appendChild(opt);
             });
@@ -329,7 +446,7 @@ function addNotationSelector() {
 }
 
 function checkAndInitFloatingGui() {
-    let isshowordfinder = (typeof window.notation !== 'undefined' && typeof window.notation.parse === 'function' && config.EnableOrdinalFinder)
+    let isshowordfinder = (typeof window.notation !== 'undefined' && typeof window.notation.parse === 'function' && config.EnableOrdinalFinder);
     if (isshowordfinder) {
         finderUI.style.display = "flex";
     } else {
@@ -343,13 +460,12 @@ function checkAndInitFloatingGui() {
     }
 
     if (!config.EnableSetViewPort) {
-        finderUI.style.top = '15px'; // Shift up
+        finderUI.style.top = '15px';
     } else {
-        finderUI.style.top = '65px'; // Reset position below zoom panel
+        finderUI.style.top = '65px';
     }
 }
 
-// --- Fully BigInt-native String Parser for Arbitrary Digits & Exponents ---
 function parseToBigIntScaled(str, scale) {
     if (!str || typeof str !== "string") throw new Error("Invalid string");
     str = str.trim().toLowerCase();
@@ -383,7 +499,6 @@ function parseToBigIntScaled(str, scale) {
     return isNegative ? -result : result;
 }
 
-// --- High-Precision Viewport Trigger (Supports >300 Digits / e+3000+ Exponents) ---
 function triggerViewportZoom() {
     let posStr = document.getElementById("viewportPosInput").value.trim();
     let zoomStr = document.getElementById("viewportZoomInput").value.trim();
@@ -393,12 +508,10 @@ function triggerViewportZoom() {
         return;
     }
 
-    // 1. Extract base 10 exponent directly from string to determine scale without parseFloat
     let parts = zoomStr.trim().toLowerCase().split("e");
     let expVal = parts.length > 1 ? parseInt(parts[1], 10) : 0;
     if (isNaN(expVal)) expVal = 0;
 
-    // Digits calculation without precision truncation
     let requiredDigits = Math.max(
         35,
         Math.abs(expVal) + (config.BigIntPrecisionMantissa || 8) + 50
@@ -406,7 +519,6 @@ function triggerViewportZoom() {
 
     let nextScale = 10n ** BigInt(requiredDigits);
 
-    // 2. Expand PRECISION_SCALE and adjust existing history/viewport coordinates FIRST
     if (nextScale > PRECISION_SCALE) {
         let oldScale = PRECISION_SCALE;
         cam.view.x0 = (cam.view.x0 * nextScale) / oldScale;
@@ -414,7 +526,6 @@ function triggerViewportZoom() {
         PRECISION_SCALE = nextScale;
     }
 
-    // 3. Parse inputs with full BigInt precision
     let pos, zoom;
     try {
         pos = parseToBigIntScaled(posStr, PRECISION_SCALE);
@@ -434,7 +545,6 @@ function triggerViewportZoom() {
         x1: cam.view.x1
     });
 
-    // 4. Viewport calculation purely in BigInt
     let canvasWidthBI = toBigInt(canvas.width);
     let widthBI = (canvasWidthBI * zoom) / PRECISION_SCALE;
     let centerScreenBI = toBigInt(canvas.width / 2);
@@ -447,12 +557,16 @@ function triggerViewportZoom() {
     render();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     initialConfigBackup = JSON.parse(JSON.stringify(config));
-    loadPresetNotation('Libs/BMS.js');
 
-    const presetSelect = document.getElementById('presetSelect');
-    if (presetSelect) presetSelect.value = 'Libs/BMS.js';
+    // Handle URL parameters or default load
+    const handledByUrl = await handleUrlParameters();
+    if (!handledByUrl) {
+        loadPresetNotation('Libs/BMS.js');
+        const presetSelect = document.getElementById('presetSelect');
+        if (presetSelect) presetSelect.value = 'Libs/BMS.js';
+    }
 
     updateNotationConfigUI();
     checkAndInitFloatingGui();
