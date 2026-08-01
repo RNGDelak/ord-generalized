@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="Title"></title>
+    <!-- LZ-String library for compact URL encoding/decoding -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: Serif, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #textOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .textLabel {
+            position: absolute;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        /* Revert Button styling */
+        #revertBtn {
+            position: absolute;
+            bottom: 55px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #0098ff;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font: 16px Serif;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        /* Floating configuration panel styling */
+        #configToggleBtn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #fff;
+            border: 0px solid #444;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #configMenu {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            border: 1px solid #444;
+            padding: 15px;
+            width: 340px;
+            border-radius: 6px;
+            display: none;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .menu-group {
+            margin-bottom: 12px;
+        }
+
+        .menu-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .menu-group select,
+        .menu-group textarea {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        .menu-group textarea {
+            height: 150px;
+            resize: auto;
+            font-size: 11px;
+        }
+
+        .apply-btn {
+            width: 100%;
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .apply-btn:hover {
+            background: #0098ff;
+        }
+
+        .action-btn-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .action-btn-row button {
+            flex: 1;
+            padding: 6px 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        #hint {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.95);
+            color: #ffffff;
+            font: 18px Serif;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            line-height: 1.6;
+            user-select: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #closehint {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Center-bottom mobile depth adjuster styling */
+        #mobileDepthControls {
+            white-space: nowrap;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 20, 0);
+            border-radius: 30px;
+            pointer-events: auto;
+            user-select: none;
+        }
+
+        .mobileDepthControlsbtn {
+            background: rgba(20, 20, 20, 0);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #depthDisplay {
+            color: #fff;
+            font-size: 14px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        /* Unified style for both top panels */
+        #viewportZoomContainer,
+        #ordinalFinderContainer {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            align-items: center;
+            justify-content: space-between;
+            width: 380px;
+            height: 42px;
+            box-sizing: border-box;
+            background: rgba(20, 20, 20, 0.85);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            font-size: 14px;
+            transition: top 0.2s ease;
+        }
+
+        #ordinalFinderContainer {
+            top: 65px;
+        }
+
+        #viewportZoomContainer label,
+        #ordinalFinderContainer label {
+            color: #ffffff;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        #viewportZoomContainer input[type="text"],
+        #ordinalFinderContainer input[type="text"],
+        #ordinalFinderContainer input[type="number"] {
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        #viewportZoomContainer input[type="text"] {
+            width: 65px;
+        }
+
+        #ordinalFinderContainer input[type="text"] {
+            width: 120px;
+        }
+
+        #ordinalFinderContainer input[type="number"] {
+            width: 45px;
+        }
+
+        #viewportZoomContainer button,
+        #ordinalFinderContainer button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 0 14px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 28px;
+        }
+
+        #viewportZoomContainer button:hover,
+        #ordinalFinderContainer button:hover {
+            background: #0098ff;
+        }
+
+        #fpsCounter {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: #9083ff;
+            font: 24px Serif;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        #sampleLabel {
+            position: absolute;
+            left: 10%;
+            top: 83.5%;
+            color: #ffffff;
+            font: 30px Serif;
+            user-select: none;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transform: translateY(-80%);
+            max-width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="revertBtn" name="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
+    <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config Menu</button>
+
+    <div id="configMenu">
+        <div class="menu-group">
+            <label for="presetSelect">Tutorial Presets (Notation System)</label>
+            <select id="presetSelect" name="presetSelect" onchange="loadPresetNotation(this.value)">
+                <option value="Libs/BMS.js">BMS (Default)</option>
+                <option value="Libs/HPrSS.js">HPrSS</option>
+                <option value="Libs/LPrSS.js">LPrSS</option>
+                <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
+                <option value="Libs/EBO.js">Experimental -- EBOCF</option>
+                <option value="Libs/cOCF.js">Experimental -- cOCF</option>
+                <option value="Libs/TON.js">Experimental -- TON</option>
+                <option value="Libs/n-shifted-OCF.js">Experimental -- n-shifted OCF</option>
+            </select>
+            <hr style="border-color: #333; margin: 15px 0;">
+            <div class="menu-group">
+                <label for="codeInject">Inject Custom Script / Notation Code</label>
+                <div style="color:red; margin-bottom:8px;"><strong>For code injections, please read</strong> <a
+                        href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject code</a></div>
+                <textarea id="codeInject" name="codeInject" placeholder="" style="height: 120px;"></textarea>
+            </div>
+            
+            <button class="apply-btn" style="background: #28a745; margin-top: 5px;" onclick="applyInjectedCode()">Execute Code Script</button>
+
+            <!-- Import/Export controls -->
+            <div class="action-btn-row">
+                <button style="background: #6c757d;" onclick="document.getElementById('fileInput').click()">Import File</button>
+                <button style="background: #17a2b8;" onclick="exportToCodeLink()" title="Share inline script code link">Export Link</button>
+                <button style="background: #e83e8c;" onclick="exportToUrlLink()" title="Share external script URL link">Export URL</button>
+            </div>
+            <input type="file" id="fileInput" accept=".tnls,.js,.txt" style="display: none;" onchange="importTNLSFile(event)">
+        </div>
+        <hr style="border-color: #333; margin: 15px 0;">
+        <div class="menu-group">
+            <label for="envConfigJson">Inject Environment Config (JSON)</label>
+            <div class="slot-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+                <button onclick="saveConfigToSlot()">Save</button>
+                <button onclick="loadConfigFromSlot()">Load</button>
+
+                <label for="slotSelect" style="display:none;">Config Slot</label>
+                <select id="slotSelect" name="slotSelect" style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
+                    <option value="1">Slot 1</option>
+                    <option value="2">Slot 2</option>
+                    <option value="3">Slot 3</option>
+                    <option value="4">Slot 4</option>
+                    <option value="5">Slot 5</option>
+                </select>
+            </div>
+            <textarea id="envConfigJson" name="envConfigJson"></textarea>
+        </div>
+        <button class="apply-btn" onclick="applyInjectedConfig();updateNotationConfigUI();">Apply Configuration</button>
+    </div>
+
+    <div id="mobileDepthControls">
+        <button onclick="adjustDepth(-1)" class="mobileDepthControlsbtn" aria-label="Decrease Depth">-</button>
+        <span id="depthDisplay">Depth: Infinite</span>
+        <button onclick="adjustDepth(1)" class="mobileDepthControlsbtn" aria-label="Increase Depth">+</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div id="textOverlay">
+        <div id="dynamicLabels"></div>
+        <div id="fpsCounter">60fps</div>
+        <div id="sampleLabel"></div>
+    </div>
+
+    <div id="hint">
+        <div style="text-align: left; margin-bottom: 20px;">
+            • Arrow keys / mouse drag & wheel to control<br>
+            • <strong>A/S</strong> to adjust rendering depth<br>
+            • <strong>M</strong> to toggle Mathstick Mode<br>
+            • <strong>Z</strong> to toggle Zoom into Mouse<br>
+            • <strong>D</strong> to toggle diagonal tick arrangement<br>
+            • <strong>H</strong> to toggle harmonic interval spacing (lag fixes)<br>
+            • <strong>F</strong> to toggle ordinal finder (for some notation wih a parser)<br>
+            • <strong>G</strong> to toggle set viewport state<br>
+            • <strong>I</strong> to show viewport state <br>
+            • <strong>L</strong> to lock screen (disable interactions) <br>
+            <br>
+            • <strong>Ctrl</strong>/<strong>Shift</strong> to adjust sensivity of arrow key controls<br>
+            • <strong>Shift</strong>+<strong>S</strong> to Enter/Exit <b>Slow Mode</b><br>
+            • Open Config Menu for further configurations<br>
+            <br>
+            <b style="color:red;">For code injection, please read <a
+                    href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject code</a></b>
+        </div>
+
+        <button id="closehint" name="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
+            onmouseout="this.style.background='#007acc'">
+            I understand
+        </button>
+    </div>
+    <div id="notationControls"
+        style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff;pointer-events: auto;">
+        <div id="notationSelectContainer"></div>
+        <button onclick="addNotationSelector()" id="AddNotationBtn" name="AddNotationBtn"
+            style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+
+            Add notation</button>
+    </div>
+
+    <div id="hudStats" onclick="copyPositionAndZoom()"
+        style="position: absolute; left: 135px; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 16px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
+        <div><span id="zoomDisplay">1.00x</span></div>
+        <div><span id="posDisplay">0</span></div>
+    </div>
+
+    <div id="viewportZoomContainer">
+        <label for="viewportPosInput">Position:</label>
+        <input type="text" id="viewportPosInput" name="viewportPosInput" placeholder="0.5" value="0.5" />
+
+        <label for="viewportZoomInput">Zoom:</label>
+        <input type="text" id="viewportZoomInput" name="viewportZoomInput" placeholder="1.0" value="1.0" />
+
+        <button onclick="triggerViewportZoom()">Apply</button>
+    </div>
+
+    <div id="ordinalFinderContainer">
+        <label for="ordinalInput">Ordinal:</label>
+        <input type="text" id="ordinalInput" name="ordinalInput" placeholder="Enter ordinal..." />
+
+        <label for="precisionInput">Depth:</label>
+        <input type="number" id="precisionInput" name="precisionInput" value="40" title="Precision Digits (Mantissa)">
+
+        <button id="findOrdinalBtn" name="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
+    </div>
+
+    <script id="notation-script" src="Libs/BMS.js"></script>
+    <script src="plot.js"></script>
+    <script src="ui.js"></script>
+</body>
+
+</html>
