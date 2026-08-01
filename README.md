@@ -3,20 +3,38 @@
 
 ## How to use the transfinte number lines
 
-
-- Tap/Mouse Scroll/Arrow keys to zoom and pan
+- Arrow keys / mouse drag &amp; wheel to control
 
 - A/S to adjust rendering depth
 
-- M to switch notation
+- M to toggle Mathstick Mode
 
-- Shift/Cltr to slow and fasten the controls
+- Z to toggle Zoom into Mouse
+
+- D to toggle diagonal tick arrangement
+
+- H to toggle harmonic interval spacing (lag fixes)
+
+- F to toggle ordinal finder (for some notation wih a parser)
+
+- G to toggle set viewport state
+
+- I to show viewport state
+
+- L to lock screen (disable interactions) 
+
+
+- Ctrl/Shift to adjust sensivity of arrow key controls
+
+- Shift+S to Enter/Exit Slow Mode
+
+- Open Config Menu for further configurations
 
 ## How to inject custom notation
 
-importantly, you must have at least 4 functions and gettings all the constant ready
+importantly, you must have at least 4 functions : fs,cmp,isSuccessor and display
 
-**and apparently, YOU MUST WARP EVERYTHING INSIDE IIEF because if you expose it, some older modules have collision with yours and lead to unexcutable**
+**and apparently, for any error cases, try to warp everything into a single IIEF since overlapping name likely to cause the problem**
 
 and here a complete module (you can plug in and use)
 
@@ -28,7 +46,7 @@ Limit : ω^ω
 
 window.notation = (() => {
 
-//convert to readable ordinal
+//convert to readable ordinal. you should put your heper into there
 function pretty(ord) {
   if (ord.length == 0) return "0";
 
@@ -61,7 +79,7 @@ function pretty(ord) {
 }
 
 
-
+  //Impportant: without this the program wont be able to render the number line
   function fs(ord, n) {
     if (ord == Limit) return [n];
 
@@ -76,6 +94,8 @@ function pretty(ord) {
     return ord;
   }
 
+  //Important : etablish the well orderness of the number line.
+  //without this, the number line will rather messy(no broken)
   function cmp(a, b) {
     if (a == Limit && b == Limit) return 0;
     if (a == Limit) return 1;
@@ -92,10 +112,12 @@ function pretty(ord) {
     return 0;
   }
 
+  //Important : handle for successor ordinal or it will literally take the successor fs's
   function isSuccessor(ord) {
     return ord !== Limit && ord.at(-1) == 0;
   }
 
+  //Important : let the program display your ordinal in texts (you can add html tags too!)
   function display(ord, mode) {
     if (ord == Limit) return "Limit";
     if (ord.length == 0) return "0";
@@ -105,6 +127,7 @@ function pretty(ord) {
       return pretty(ord)
   }
 
+  //optional: if you can't implement this, just return return "#808080" or nay color you like
   function classifyOrdinal(ord) {
     if (ord == Limit) return "#ffffff";
     if (ord.length == 0) return "#808080";
@@ -113,6 +136,7 @@ function pretty(ord) {
     return "#ff8000";
   }
 
+  //optional: if you dont have this, just leave empty and dont return this in the end of IIEF (this will ler the program know you don't implement this)
   function parse(str) {
     str = str.trim();
     if (str == "" || str == "0") return [];
@@ -120,6 +144,7 @@ function pretty(ord) {
     return str.split(",").map(Number);
   }
 
+  //Required Constants
   const Zero = [];
   const Limit = "Limit";
 
