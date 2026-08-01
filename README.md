@@ -293,6 +293,6 @@ And in past year, i tried to firgure out myself , and thats it, i written a [doc
 
 Yeah, those project are stupidly slow. And then, i revised everything, try to optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way
 
-Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project source code](https://www.stephenbrooks.org/archive/ordinals), i was have everything to push this project to reality
+Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project source code](https://www.stephenbrooks.org/archive/ordinals), i had everything to push this project to reality
 
 Thats it, now i can finally take out the plan that i have written 4 month ago for this project, and possibly doesnt know when will i do that.
