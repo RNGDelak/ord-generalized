@@ -61,7 +61,7 @@ let config = {
     ShowSample: true,
     ShowLabel: true,
     ShowTimelineLabel: true,
-    ShowCurrentPositionState: false,
+    ShowCurrentPositionState: true,
 
     // --- Element Coloring Toggles ---
     ColorTick: true,

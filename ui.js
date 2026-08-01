@@ -667,3 +667,23 @@ function findAndZoomToOrdinal() {
         alert("Ordinal parsed, but could not be located on the timeline (too deep or not a rendered component).");
     }
 }
+
+function copyPositionAndZoom() {
+    let posText = posElem.innerText || "";
+    let zoomText = zoomElem.innerText || "";
+
+    let formattedText = `${posText}\n${zoomText}`;
+
+    navigator.clipboard.writeText(formattedText).then(() => {
+        alert("Copied to clipboard!\n\n" + formattedText);
+    }).catch(err => {
+        // Fallback for older browsers / strict security contexts
+        let textarea = document.createElement("textarea");
+        textarea.value = formattedText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Copied to clipboard!\n\n" + formattedText);
+    });
+}

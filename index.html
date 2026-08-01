@@ -227,7 +227,6 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            display: flex;
             align-items: center;
             justify-content: space-between;
             width: 380px;
@@ -426,7 +425,7 @@
             Add notation</button>
     </div>
 
-    <div id="hudStats"
+    <div id="hudStats" onclick="copyPositionAndZoom()"
         style="position: absolute; left: 135px; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 16px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
         <div><span id="zoomDisplay">1.00x</span></div>
         <div><span id="posDisplay">0</span></div>
