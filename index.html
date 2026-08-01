@@ -81,10 +81,15 @@
             color: #fff;
             border: 1px solid #444;
             padding: 15px;
-            width: 320px;
+            width: fit-content;
+            min-width: 320px;
+            max-height: 85vh;
+            overflow-y: auto; 
+            overflow-x: hidden;
             border-radius: 6px;
             display: none;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
         }
 
         .menu-group {
