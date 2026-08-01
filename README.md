@@ -188,3 +188,111 @@ function pretty(ord) {
 })();
 ```
 
+
+# Changelogs
+
+Current Version : https://rngdelak.github.io/ord-generalized
+
+## Version 0 Series (0.1 → 0.9)
+
+**Description: these version are testing, and moslty unsuable yet. Limited render capability and consists many bugs**
+
+***Major Update: firgured out an efficient way to render ordinal numbre line (v0.3)***
+
+v0.1: https://rngdelak.github.io/ord-generalized/versions/version%200.1/
+
+v0.2: https://rngdelak.github.io/ord-generalized/versions/version%200.2/
+
+v0.3: https://rngdelak.github.io/ord-generalized/versions/version%200.3/
+
+v0.4: https://rngdelak.github.io/ord-generalized/versions/version%200.4/
+
+v0.5: https://rngdelak.github.io/ord-generalized/versions/version%200.5/
+
+v0.6: https://rngdelak.github.io/ord-generalized/versions/version%200.6/
+
+v0.7: https://rngdelak.github.io/ord-generalized/versions/version%200.7/
+
+v0.8: https://rngdelak.github.io/ord-generalized/versions/version%200.8/
+
+v0.9: https://rngdelak.github.io/ord-generalized/versions/version%200.9/
+
+## Version 1 Series (1.0 → 1.12)
+
+**Description: these version started to have more guis and support widely across devices**
+
+***Major Update: added mathstick mode (v1.9)***
+
+v1.0: https://rngdelak.github.io/ord-generalized/versions/version%201.0/
+
+v1.1: https://rngdelak.github.io/ord-generalized/versions/version%201.1/
+
+v1.2: https://rngdelak.github.io/ord-generalized/versions/version%201.2/
+
+v1.3: https://rngdelak.github.io/ord-generalized/versions/version%201.3/
+
+v1.4: https://rngdelak.github.io/ord-generalized/versions/version%201.4/
+
+v1.5: https://rngdelak.github.io/ord-generalized/versions/version%201.5/
+
+v1.6: https://rngdelak.github.io/ord-generalized/versions/version%201.6/
+
+v1.7: https://rngdelak.github.io/ord-generalized/versions/version%201.7/
+
+v1.8: https://rngdelak.github.io/ord-generalized/versions/version%201.8/
+
+v1.9: https://rngdelak.github.io/ord-generalized/versions/version%201.9/
+
+v1.10: https://rngdelak.github.io/ord-generalized/versions/version%201.10/
+
+v1.11: https://rngdelak.github.io/ord-generalized/versions/version%201.11/
+
+v1.12: https://rngdelak.github.io/ord-generalized/versions/version%201.12/
+
+## Version 2 Series (2.0 → 2.12)
+
+**Description: these version are very complete, though there still some bugs but fixed overally after v2.9**
+
+***Major Update: formalized sharing transfinte number line notations (v2.10) , added find ordinal (v2.2) and set viewport state (v2.7)***
+
+v2.0: https://rngdelak.github.io/ord-generalized/versions/version%202.0/
+
+v2.1: https://rngdelak.github.io/ord-generalized/versions/version%202.1/
+
+v2.2: https://rngdelak.github.io/ord-generalized/versions/version%202.2/
+
+v2.3: https://rngdelak.github.io/ord-generalized/versions/version%202.3/
+
+v2.4: https://rngdelak.github.io/ord-generalized/versions/version%202.4/
+
+v2.5: https://rngdelak.github.io/ord-generalized/versions/version%202.5/
+
+v2.6: https://rngdelak.github.io/ord-generalized/versions/version%202.6/
+
+v2.7: https://rngdelak.github.io/ord-generalized/versions/version%202.7/
+
+v2.8: https://rngdelak.github.io/ord-generalized/versions/version%202.8/
+
+v2.9: https://rngdelak.github.io/ord-generalized/versions/version%202.9/
+
+v2.10: https://rngdelak.github.io/ord-generalized/versions/version%202.10/
+
+v2.11: https://rngdelak.github.io/ord-generalized/versions/version%202.11/
+
+v2.12: https://rngdelak.github.io/ord-generalized/versions/version%202.12/
+
+# Motivation
+
+It's a heartbreaking journeys which all starts 2 years ago, when i found myself [Stephen Brooks's](https://www.stephenbrooks.org/) Transfinite Number Lines.
+
+As a googology enthusiast, i was shocked of how complex, recursive and beatiful it was.
+
+So do i, i wanted to explore what inside, but sadly, there isn't any source code (and he shared it in 12/7/2026, after i emailed him)
+
+And in past year, i tried to firgure out myself , and thats it, i written a [document](https://github.com/RNGDelak/ord-limbms/blob/main/README.md), and making 3 transfinite number line which is [ord-w](https://rngdelak.github.io/ord-w/), [ord-ww](https://rngdelak.github.io/ord-ww/) and [ord-limbms](https://rngdelak.github.io/ord-limbms/) with vital help from [@solarzone1010](https://solarzone1010.github.io/).
+
+Yeah, those project are stupidly slow. And then, i revised everything, try to optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way
+
+Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project source code](https://www.stephenbrooks.org/archive/ordinals), i was have everything to push this project to reality
+
+Thats it, now i can finally take out the plan that i have written 4 month ago for this project, and possibly doesnt know when will i do that.
