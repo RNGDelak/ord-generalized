@@ -776,6 +776,8 @@ function updateConfigFromControls() {
     if (configTextArea) {
         configTextArea.value = JSON.stringify(config, null, 4);
     }
+
+    displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
     checkAndInitFloatingGui();
     render();
 }
