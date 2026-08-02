@@ -687,3 +687,153 @@ function copyPositionAndZoom() {
         alert("Copied to clipboard!\n\n" + formattedText);
     });
 }
+
+// Toggle between Interactive Sliders and JSON Editor View
+function toggleJsonEditorView() {
+    const interactivePanel = document.getElementById("interactiveControlsPanel");
+    const jsonPanel = document.getElementById("jsonEditorPanel");
+    const toggleBtn = document.getElementById("toggleJsonBtn");
+
+    if (interactivePanel.style.display === "none") {
+        interactivePanel.style.display = "flex";
+        jsonPanel.style.display = "none";
+        toggleBtn.innerText = "Use JSON Editor";
+        syncConfigToInteractiveControls();
+    } else {
+        interactivePanel.style.display = "none";
+        jsonPanel.style.display = "block";
+        toggleBtn.innerText = "Use Sliders Editor";
+        syncConfigToTextArea();
+    }
+}
+
+// Sync current JS config object to interactive controls
+function syncConfigToInteractiveControls() {
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = val;
+            const display = document.getElementById(`val_${id}`);
+            if (display) display.innerText = val;
+        }
+    };
+    const setCheck = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!val;
+    };
+
+    setVal("aspectratio", config.aspectratio ?? 0.66);
+    setVal("BackgroundColor", config.BackgroundColor ?? "#000000");
+    setVal("TickSpacing", config.TickSpacing ?? 1);
+    setVal("Tickheight", config.Tickheight ?? 0.05);
+    setVal("TickWidth", config.TickWidth ?? 2);
+    setVal("TickAnchorPoint", config.TickAnchorPoint ?? 0.5);
+    setVal("labelscount", config.labelscount ?? 8);
+    setVal("fpsPrecision", config.fpsPrecision ?? 1);
+    setVal("MaxIntervalsDivision", config.MaxIntervalsDivision ?? -1);
+    setVal("MaxIntervalDepth", config.MaxIntervalDepth ?? -1);
+
+    setCheck("MathstickMode", config.MathstickMode);
+    setCheck("DiagonalTickArrangement", config.DiagonalTickArrangement);
+    setCheck("HarmonicInvtervalSpacing", config.HarmonicInvtervalSpacing);
+    setCheck("EnableOrdinalFinder", config.EnableOrdinalFinder);
+    setCheck("EnableSetViewPort", config.EnableSetViewPort);
+    setCheck("SlowMode", config.SlowMode);
+    setCheck("ShowCurrentPositionState", config.ShowCurrentPositionState);
+}
+
+// Update config properties based on control changes
+function updateConfigFromControls() {
+    const getNum = (id) => parseFloat(document.getElementById(id).value);
+    const getCheck = (id) => document.getElementById(id).checked;
+
+    config.aspectratio = getNum("aspectratio");
+    config.BackgroundColor = document.getElementById("BackgroundColor").value;
+    config.TickSpacing = getNum("TickSpacing");
+    config.Tickheight = getNum("Tickheight");
+    config.TickWidth = getNum("TickWidth");
+    config.TickAnchorPoint = getNum("TickAnchorPoint");
+    config.labelscount = getNum("labelscount");
+    config.fpsPrecision = getNum("fpsPrecision");
+    config.MaxIntervalsDivision = getNum("MaxIntervalsDivision");
+    config.MaxIntervalDepth = getNum("MaxIntervalDepth");
+
+    config.MathstickMode = getCheck("MathstickMode");
+    config.DiagonalTickArrangement = getCheck("DiagonalTickArrangement");
+    config.HarmonicInvtervalSpacing = getCheck("HarmonicInvtervalSpacing");
+    config.EnableOrdinalFinder = getCheck("EnableOrdinalFinder");
+    config.EnableSetViewPort = getCheck("EnableSetViewPort");
+    config.SlowMode = getCheck("SlowMode");
+    config.ShowCurrentPositionState = getCheck("ShowCurrentPositionState");
+
+    // Update value displays
+    ["aspectratio", "TickSpacing", "Tickheight", "TickWidth", "TickAnchorPoint", "labelscount", "fpsPrecision", "MaxIntervalsDivision", "MaxIntervalDepth"].forEach(id => {
+        const display = document.getElementById(`val_${id}`);
+        if (display) display.innerText = document.getElementById(id).value;
+    });
+
+    const configTextArea = document.getElementById('envConfigJson');
+    if (configTextArea) {
+        configTextArea.value = JSON.stringify(config, null, 4);
+    }
+    checkAndInitFloatingGui();
+    render();
+}
+
+// Hook original config syncing to update both views
+const originalSyncConfigToTextArea = syncConfigToTextArea;
+syncConfigToTextArea = function () {
+    const configTextArea = document.getElementById('envConfigJson');
+    if (configTextArea) {
+        configTextArea.value = JSON.stringify(config, null, 4);
+    }
+    syncConfigToInteractiveControls();
+};
+
+// --- Mobile Touch-Resize Handler for Config Panel ---
+(function makeConfigPanelTouchResizable() {
+    const panel = document.getElementById("configMenu");
+    if (!panel) return;
+
+    let isResizing = false;
+    let startWidth, startHeight, startX, startY;
+
+    panel.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+
+        const rect = panel.getBoundingClientRect();
+        const touch = e.touches[0];
+        const cornerThreshold = 35; // Touch zone radius around bottom-right corner
+
+        // Check if touch target is near bottom-right corner
+        const nearRight = (touch.clientX >= rect.right - cornerThreshold);
+        const nearBottom = (touch.clientY >= rect.bottom - cornerThreshold);
+
+        if (nearRight && nearBottom) {
+            isResizing = true;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, { passive: false });
+
+    window.addEventListener("touchmove", (e) => {
+        if (!isResizing) return;
+
+        const touch = e.touches[0];
+        const newWidth = Math.max(260, Math.min(window.innerWidth * 0.9, startWidth + (touch.clientX - startX)));
+        const newHeight = Math.max(200, Math.min(window.innerHeight * 0.85, startHeight + (touch.clientY - startY)));
+
+        panel.style.width = `${newWidth}px`;
+        panel.style.height = `${newHeight}px`;
+
+        e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener("touchend", () => {
+        isResizing = false;
+    });
+})();

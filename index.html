@@ -84,12 +84,20 @@
             width: fit-content;
             min-width: 320px;
             max-height: 85vh;
-            overflow-y: auto; 
+            overflow-y: auto;
             overflow-x: hidden;
             border-radius: 6px;
             display: none;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
+            resize: both;
+            touch-action: none;
+        }
+
+        #configMenu::-webkit-resizer {
+            background-color: #007acc;
+            border-top-left-radius: 4px;
+            border: 2px solid #ffffff;
         }
 
         .menu-group {
@@ -170,9 +178,6 @@
             line-height: 1.6;
             user-select: none;
             transition: opacity 0.4s ease, visibility 0.4s ease;
-            max-height: 70vh;
-            overflow-y:auto;
-            overflow-x:hidden
         }
 
         #closehint {
@@ -330,8 +335,10 @@
 
 <body>
     <button id="revertBtn" name="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
-    <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config Menu</button>
+    <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config
+        Menu</button>
 
+    <!-- Replace the existing #configMenu block with this updated markup -->
     <div id="configMenu">
         <div class="menu-group">
             <label for="presetSelect">Tutorial Presets (Notation System)</label>
@@ -342,36 +349,53 @@
                 <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
                 <option value="Libs/EBO.js">Experimental -- EBOCF</option>
                 <option value="Libs/cOCF.js">Experimental -- cOCF</option>
+                <option value="Libs/EcOCF.js">Experimental -- EcOCF</option>
                 <option value="Libs/TON.js">Experimental -- TON</option>
                 <option value="Libs/n-shifted-OCF.js">Experimental -- n-shifted OCF</option>
             </select>
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
                 <label for="codeInject">Inject Custom Script / Notation Code</label>
-                <div style="color:red; margin-bottom:8px;"><strong>For code injections, please read</strong> <a
-                        href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject code</a></div>
+                <div style="color:red; margin-bottom:8px;">
+                    <strong>For code injections, please read</strong>
+                    <a href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to
+                        Inject code</a>
+                </div>
                 <textarea id="codeInject" name="codeInject" placeholder="" style="height: 120px;"></textarea>
             </div>
-            
-            <button class="apply-btn" style="background: #28a745; margin-top: 5px;" onclick="applyInjectedCode()">Execute Code Script</button>
+
+            <button class="apply-btn" style="background: #28a745; margin-top: 5px;"
+                onclick="applyInjectedCode()">Execute Code Script</button>
 
             <!-- Import/Export controls -->
             <div class="action-btn-row">
-                <button style="background: #6c757d;" onclick="document.getElementById('fileInput').click()">Import File</button>
-                <button style="background: #17a2b8;" onclick="exportToCodeLink()" title="Share inline script code link">Export Link</button>
-                <button style="background: #e83e8c;" onclick="exportToUrlLink()" title="Share external script URL link">Export URL</button>
+                <button style="background: #6c757d;" onclick="document.getElementById('fileInput').click()">Import
+                    File</button>
+                <button style="background: #17a2b8;" onclick="exportToCodeLink()"
+                    title="Share inline script code link">Export Link</button>
+                <button style="background: #e83e8c;" onclick="exportToUrlLink()"
+                    title="Share external script URL link">Export URL</button>
             </div>
-            <input type="file" id="fileInput" accept=".tnls,.js,.txt" style="display: none;" onchange="importTNLSFile(event)">
+            <input type="file" id="fileInput" accept=".tnls,.js,.txt" style="display: none;"
+                onchange="importTNLSFile(event)">
         </div>
         <hr style="border-color: #333; margin: 15px 0;">
+
         <div class="menu-group">
-            <label for="envConfigJson">Inject Environment Config (JSON)</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin:0;">Environment Configurations</label>
+                <button type="button" id="toggleJsonBtn" onclick="toggleJsonEditorView()"
+                    style="background:#444; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">Use
+                    JSON Editor</button>
+            </div>
+
             <div class="slot-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
                 <button onclick="saveConfigToSlot()">Save</button>
                 <button onclick="loadConfigFromSlot()">Load</button>
 
                 <label for="slotSelect" style="display:none;">Config Slot</label>
-                <select id="slotSelect" name="slotSelect" style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
+                <select id="slotSelect" name="slotSelect"
+                    style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
                     <option value="1">Slot 1</option>
                     <option value="2">Slot 2</option>
                     <option value="3">Slot 3</option>
@@ -379,7 +403,92 @@
                     <option value="5">Slot 5</option>
                 </select>
             </div>
-            <textarea id="envConfigJson" name="envConfigJson"></textarea>
+
+            <!-- Interactive Sliders / Controls Panel -->
+            <div id="interactiveControlsPanel"
+                style="display: flex; flex-direction: column; gap: 10px; background: #181818; padding: 10px; border-radius: 4px; border: 1px solid #333;">
+                <div>
+                    <label for="aspectratio">Aspect Ratio: <span id="val_aspectratio"></span></label>
+                    <input type="range" id="aspectratio" min="0.1" max="0.9" step="0.01"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <label><input type="checkbox" id="MathstickMode" onchange="updateConfigFromControls()"> Mathstick
+                        Mode</label>
+                    <label><input type="checkbox" id="DiagonalTickArrangement" onchange="updateConfigFromControls()">
+                        Diagonal Ticks</label>
+                    <label><input type="checkbox" id="HarmonicInvtervalSpacing" onchange="updateConfigFromControls()">
+                        Harmonic Spacing</label>
+                    <label><input type="checkbox" id="EnableOrdinalFinder" onchange="updateConfigFromControls()">
+                        Ordinal Finder</label>
+                    <label><input type="checkbox" id="EnableSetViewPort" onchange="updateConfigFromControls()"> Set
+                        ViewPort</label>
+                    <label><input type="checkbox" id="SlowMode" onchange="updateConfigFromControls()"> Slow Mode</label>
+                    <label><input type="checkbox" id="ShowCurrentPositionState" onchange="updateConfigFromControls()">
+                        Current Pos State</label>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <label for="BackgroundColor" style="margin:0;">Background Color:</label>
+                    <input type="color" id="BackgroundColor"
+                        style="background:none; border:none; height:28px; width:40px; cursor:pointer;"
+                        onchange="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="TickSpacing">Tick Spacing: <span id="val_TickSpacing"></span></label>
+                    <input type="range" id="TickSpacing" min="1" max="15" step="0.01"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="Tickheight">Tick Height: <span id="val_Tickheight"></span></label>
+                    <input type="range" id="Tickheight" min="0.001" max="0.1" step="0.0001"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="TickWidth">Tick Width: <span id="val_TickWidth"></span></label>
+                    <input type="range" id="TickWidth" min="1" max="5" step="0.01" oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="TickAnchorPoint">Tick Anchor Point: <span id="val_TickAnchorPoint"></span></label>
+                    <input type="range" id="TickAnchorPoint" min="0" max="1" step="0.01"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="labelscount">Labels Count: <span id="val_labelscount"></span></label>
+                    <input type="range" id="labelscount" min="1" max="25" step="0.01"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="fpsPrecision">FPS Precision: <span id="val_fpsPrecision"></span></label>
+                    <input type="range" id="fpsPrecision" min="1" max="5" step="1" oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <label for="MaxIntervalsDivision">Max Intervals Division: <span
+                            id="val_MaxIntervalsDivision"></span></label>
+                    <input type="range" id="MaxIntervalsDivision" min="-1" max="100" step="1"
+                        oninput="updateConfigFromControls()">
+                </div>
+
+                <div>
+                    <!-- Displayed as requested: Max Interval Depth -->
+                    <label for="MaxIntervalDepth">Max Interval Depth: <span id="val_MaxIntervalDepth"></span></label>
+                    <input type="range" id="MaxIntervalDepth" min="-1" max="100" step="1"
+                        oninput="updateConfigFromControls()">
+                </div>
+            </div>
+
+            <!-- Raw JSON Textarea (Hidden by default) -->
+            <div id="jsonEditorPanel" style="display:none;">
+                <textarea id="envConfigJson" name="envConfigJson"></textarea>
+            </div>
         </div>
         <button class="apply-btn" onclick="applyInjectedConfig();updateNotationConfigUI();">Apply Configuration</button>
     </div>
@@ -415,7 +524,8 @@
             • Open Config Menu for further configurations<br>
             <br>
             <b style="color:red;">For code injection, please read <a
-                    href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject code</a></b>
+                    href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject
+                    code</a></b>
         </div>
 
         <button id="closehint" name="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
