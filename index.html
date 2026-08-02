@@ -41,6 +41,22 @@
             user-select: none;
         }
 
+        #resetBtn {
+            position: absolute;
+            bottom: 95px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #ff0000;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font: 16px Serif;
+            user-select: none;
+            pointer-events: auto;
+        }
+
         /* Revert Button styling */
         #revertBtn {
             position: absolute;
@@ -179,6 +195,12 @@
             line-height: 1.6;
             user-select: none;
             transition: opacity 0.4s ease, visibility 0.4s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            pointer-events: auto;
+            touch-action: pan-y;
+            box-sizing: border-box;
         }
 
         #closehint {
@@ -335,6 +357,7 @@
 </head>
 
 <body>
+    <button id="resetBtn" name="resetBtn" onclick="resetViewport()">Reset</button>
     <button id="revertBtn" name="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
     <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config
         Menu</button>
@@ -530,6 +553,7 @@
             • <strong>G</strong> to toggle set viewport state<br>
             • <strong>I</strong> to show viewport state <br>
             • <strong>L</strong> to lock screen (disable interactions) <br>
+            • <strong>R</strong> to <b style="color:red;">Reset Viewport</b> <br>
             <br>
             • <strong>Ctrl</strong>/<strong>Shift</strong> to adjust sensivity of arrow key controls<br>
             • <strong>Shift</strong>+<strong>S</strong> to Enter/Exit <b>Slow Mode</b><br>

@@ -10,6 +10,7 @@ const mobileDepthControlsbtn = document.getElementsByClassName("mobileDepthContr
 const depthDisplay = document.getElementById("depthDisplay");
 const AddNotationBtn = document.getElementById("AddNotationBtn");
 const revertBtn = document.getElementById("revertBtn");
+const resetBtn = document.getElementById("resetBtn");
 const configToggleBtn = document.getElementById("configToggleBtn");
 const hudStats = document.getElementById("hudStats");
 
@@ -22,6 +23,13 @@ const setUI = document.getElementById("viewportZoomContainer");
 
 setUI.addEventListener('keydown', (e) => e.stopPropagation());
 setUI.addEventListener('keyup', (e) => e.stopPropagation());
+
+const hintUI = document.getElementById('hint');
+['touchstart', 'touchmove', 'touchend','mousedown', 'mousemove', 'mouseup', 'wheel', 'click'].forEach((eventType) => {
+    hintUI.addEventListener(eventType, (e) => {
+        e.stopPropagation();
+    }, { passive: false });
+});
 
 // ==========================================
 // IMPORT / EXPORT & LINK MANAGEMENT
@@ -247,7 +255,7 @@ async function loadPresetNotation(scriptPath) {
         document.getElementById('codeInject').value = scriptCode;
         resetNotationsForSystem();
         executeCustomScript(scriptCode);
-        
+
         // Update URL parameter using uniform "href" tag
         updateUrlHrefParam(scriptPath);
     } catch (err) {
@@ -271,6 +279,7 @@ function applyingCSSUpdate() {
     mobileDepthControlsbtn[1].style.color = config.DepthAdjustGuiColor;
     depthDisplay.style.color = config.DepthAdjustGuiColor;
     revertBtn.style.color = config.RevertBtnColor;
+    resetBtn.style.color = config.ResetBtnColor;
     configToggleBtn.style.color = config.ConfigMenuBtnColor;
     AddNotationBtn.style.color = config.AddNotationBtnColor;
     hudStats.style.color = config.CurrentPositionStateTextColor;

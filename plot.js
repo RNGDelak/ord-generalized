@@ -86,6 +86,7 @@ let config = {
     ZoomSelectionFillColor: "rgba(0, 150, 255, 0.2)",
     ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
     RevertBtnColor: "#0098ff",
+    ResetBtnColor: "#ff0000",
     ConfigMenuBtnColor: "#ffffff",
     CurrentPositionStateTextColor: "#ffffff",
 
@@ -644,6 +645,17 @@ function render() {
     if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
 }
 
+function resetViewport() {
+    if (window.isSettingsOpen) return;
+    cam.history.push({ x0: cam.view.x0, x1: cam.view.x1 });
+
+    let minZoom = canvas.width * 0.8;
+    cam.view.x0 = toBigInt(0.5 * (canvas.width - minZoom));
+    cam.view.x1 = toBigInt(0.5 * (canvas.width + minZoom));
+
+    render();
+}
+
 function refreshLoop() {
     requestAnimationFrame(() => {
         let now = performance.now();
@@ -748,7 +760,7 @@ function getEventCoords(e) {
 }
 
 function handlePointerDown(e) {
-    if (config.LockScreen) {return;}
+    if (config.LockScreen) { return; }
     if (window.isSettingsOpen) return;
     let { x, y } = getEventCoords(e);
 
@@ -892,7 +904,7 @@ window.addEventListener("keydown", (e) => {
 
     if (key === "z" && (e.ctrlKey || e.metaKey)) {
         actionTriggered = undoViewport();
-    } else if (key === "a") {
+    } else if (key === "a" && !(e.ctrlKey || e.metaKey)) {
         config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
@@ -900,36 +912,38 @@ window.addEventListener("keydown", (e) => {
         config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
-    } else if (key === "f") {
+    } else if (key === "f" && !(e.ctrlKey || e.metaKey)) {
         config.EnableOrdinalFinder = !(config.EnableOrdinalFinder)
         checkAndInitFloatingGui();
-    } else if (key === "g") {
+    } else if (key === "g" && !(e.ctrlKey || e.metaKey)) {
         config.EnableSetViewPort = !(config.EnableSetViewPort)
         checkAndInitFloatingGui();
-    } else if (key === "i") {
+    } else if (key === "i" && !(e.ctrlKey || e.metaKey)) {
         config.ShowCurrentPositionState = !(config.ShowCurrentPositionState)
         if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
-    } else if (key === "m") {
+    } else if (key === "m" && !(e.ctrlKey || e.metaKey)) {
         config.MathstickMode = !(config.MathstickMode)
         config.TickBetweenLabelXoffest = config.MathstickMode ? 5 : -5
         config.Tickheight = config.MathstickMode ? 0.0035 : 0.05
         render();
-    } else if (key === "h") {
+    } else if (key === "h" && !(e.ctrlKey || e.metaKey)) {
         config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
         render();
-    } else if (key === "l") {
+    } else if (key === "l" && !(e.ctrlKey || e.metaKey)) {
         config.LockScreen = !(config.LockScreen)
         render()
     } else if (key === "s" && (e.shiftKey || e.metaKey)) {
         config.SlowMode = !(config.SlowMode)
         alert((config.SlowMode ? "Enabled" : "Disabled") + " Slow Mode");
         render();
-    } else if (key === "d") {
+    } else if (key === "d" && !(e.ctrlKey || e.metaKey)) {
         config.DiagonalTickArrangement = !(config.DiagonalTickArrangement)
         render();
     } else if (key === "z" && !(e.ctrlKey || e.metaKey)) {
         config.ZoomIntoMouse = !(config.ZoomIntoMouse)
         render();
+    } else if (key === "r" && !(e.ctrlKey || e.metaKey)) {
+        resetViewport();
     }
 
     if (actionTriggered) render();
