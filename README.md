@@ -20,6 +20,7 @@ Here's some "Landscapes"
 - MathStick Mode
 - Ordinal Finder
 - Rendering optimizations
+- Built-in slow mode for slow notation/deep rendering
 - Highly adaptive across devices
 
 
