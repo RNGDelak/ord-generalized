@@ -354,6 +354,8 @@ v2.11: https://rngdelak.github.io/ord-generalized/versions/version%202.11/
 
 v2.12: https://rngdelak.github.io/ord-generalized/versions/version%202.12/
 
+v2.13: https://rngdelak.github.io/ord-generalized/versions/version%202.13/
+
 # Motivation
 
 It's a heartbreaking journeys which all starts 2 years ago, when i found myself [Stephen Brooks's](https://www.stephenbrooks.org/) Transfinite Number Lines.
