@@ -8,13 +8,17 @@ Interactive transfinite number line where you can plug-in your own and play!
 Link: https://rngdelak.github.io/ord-generalized
 
 Here's some "Landscapes"
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4b539daa-c723-488d-85e4-6c2f2649d2c9" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/41d91047-bdcb-4889-b3d2-d42a2ec46bf4" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f260c790-20c1-49f0-b8cf-22c2b7cab144" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3ec67825-1aa2-456f-8dc7-df4b1cc895b3" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/11f3a876-8fc2-4cb4-a820-7cd6d6c83d12" />
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9a5950ac-e29e-49ce-bf0b-3de6e62ea6b4" />
+![Landscape 1](https://github.com/user-attachments/assets/4b539daa-c723-488d-85e4-6c2f2649d2c9)
 
+![Landscape 2](https://github.com/user-attachments/assets/41d91047-bdcb-4889-b3d2-d42a2ec46bf4)
+
+![Landscape 3](https://github.com/user-attachments/assets/f260c790-20c1-49f0-b8cf-22c2b7cab144)
+
+![Landscape 4](https://github.com/user-attachments/assets/3ec67825-1aa2-456f-8dc7-df4b1cc895b3)
+
+![Landscape 5](https://github.com/user-attachments/assets/11f3a876-8fc2-4cb4-a820-7cd6d6c83d12)
+
+![Landscape 6](https://github.com/user-attachments/assets/9a5950ac-e29e-49ce-bf0b-3de6e62ea6b4)
 
 ## Features
 
