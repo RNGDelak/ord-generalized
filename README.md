@@ -320,7 +320,7 @@ v1.11: https://rngdelak.github.io/ord-generalized/versions/version%201.11/
 
 v1.12: https://rngdelak.github.io/ord-generalized/versions/version%201.12/
 
-## Version 2 Series (2.0 → 2.14)
+## Version 2 Series (2.0 → 2.16)
 
 **Description: these version are very complete, though there still some bugs but fixed overally after v2.9**
 
@@ -357,6 +357,8 @@ v2.13: https://rngdelak.github.io/ord-generalized/versions/version%202.13/
 v2.14: https://rngdelak.github.io/ord-generalized/versions/version%202.14/
 
 v2.15: https://rngdelak.github.io/ord-generalized/versions/version%202.15/
+
+v2.16: https://rngdelak.github.io/ord-generalized/versions/version%202.16/
 
 # Motivation
 
