@@ -95,6 +95,11 @@ let config = {
     Tickheight: 0.05,
     TickWidth: 2,
     TickAnchorPoint: 0.5,
+    TickSlopeArrangement: 1,
+    TickColorMaxBrightness: 255,
+    TickColorBoostStart: 256,
+    TickColorMaxBoost: 0x80,
+    TickColorMaxChannel: 255,
 
     // --- Labels & Spacing ---
     labelscount: 8,
@@ -261,20 +266,23 @@ function clearTextLabels() {
 
 function blendColorWithBrightness(hexColor, b) {
     let cVal = parseInt(hexColor.replace("#", ""), 16);
+
     let r = (cVal >> 16) & 0xff;
     let g = (cVal >> 8) & 0xff;
     let bChan = cVal & 0xff;
 
-    if (b <= 255) {
-        let scale = b / 255;
+    if (b <= config.TickColorMaxBrightness) {
+        const scale = b / config.TickColorMaxBrightness;
+
         r = Math.floor(r * scale);
         g = Math.floor(g * scale);
         bChan = Math.floor(bChan * scale);
     } else {
-        let boost = Math.min(0x80, b - 256);
-        r = Math.min(255, r + boost);
-        g = Math.min(255, g + boost);
-        bChan = Math.min(255, bChan + boost);
+        const boost = Math.min(config.TickColorMaxBoost, b - config.TickColorBoostStart);
+
+        r = Math.min(config.TickColorMaxChannel, r + boost);
+        g = Math.min(config.TickColorMaxChannel, g + boost);
+        bChan = Math.min(config.TickColorMaxChannel, bChan + boost);
     }
 
     return `rgb(${r}, ${g}, ${bChan})`;
@@ -444,9 +452,8 @@ function drawTimelineLabels() {
             ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(lbl.impor + 1) / Math.log(config.MathStick_LogarithmBase) : lbl.impor)
             : cam.tHeight;
 
-        let py = config.DiagonalTickArrangement
-            ? h * px / canvas.width - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing
-            : cam.h / 2 - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
+        let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
+        let py = (h / 2) + (slope * h * (px / canvas.width - 0.5)) - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
         let totalModes = config.modes.length;
 
@@ -591,40 +598,38 @@ function render() {
     cam.ilxw = 1.0 / Math.log(cam.w);
 
     const MAX_SAFE_HEIGHT = cam.h * 2;
+    let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
 
     if (config.ShowMiddleNumberLineDivision) {
-        if (config.DiagonalTickArrangement) {
-            drawLine(0, 0, cam.w, cam.h, config.MiddleNumberLineDivisionColor, 2);
-        } else {
-            drawLine(0, cam.h / 2, cam.w, cam.h / 2, config.MiddleNumberLineDivisionColor, 2);
-        }
+        let y0 = (cam.h / 2) - (slope * cam.h * 0.5);
+        let y1 = (cam.h / 2) + (slope * cam.h * 0.5);
+        drawLine(0, y0, cam.w, y1, config.MiddleNumberLineDivisionColor, 2);
     }
 
     if (config.ShowTick) {
         for (let n = 0; n < cam.ticks.length; n++) {
             if (cam.ticks[n]) {
                 let x = n;
-                let y = config.DiagonalTickArrangement
-                    ? cam.yStart + (cam.yEnd - cam.yStart) * (n / cam.w)
-                    : cam.h / 2;
+                // Unclamped vertical slope position based on TickSlopeArrangement
+                let y = (cam.h / 2) + (slope * cam.h * (n / cam.w - 0.5));
 
                 // 1. Calculate and sanitize brightness
                 let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
-                if (!isFinite(b)) b = 255; // Fallback if math results in Infinity/NaN
-                b = Math.max(0, Math.min(b, 255)); // Clamp between 0 and 255
+                if (!isFinite(b)) b = 255;
+                b = Math.max(0, Math.min(b, 255));
 
                 let blendedColor = config.ColorTick
                     ? blendColorWithBrightness(cam.ticks[n].color, b)
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
                 // 2. Calculate and clamp the tick height
-                let currentTickHeight = config.MathstickMode ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) : cam.tHeight;
+                let currentTickHeight = config.MathstickMode 
+                    ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) 
+                    : cam.tHeight;
 
-                // Fallback for Infinity or NaN
                 if (!isFinite(currentTickHeight)) {
                     currentTickHeight = MAX_SAFE_HEIGHT;
                 }
-                // Clamp to our safe maximum to prevent canvas floating point breakage
                 currentTickHeight = Math.min(currentTickHeight, MAX_SAFE_HEIGHT);
 
                 ctx.globalAlpha = 1.0;
