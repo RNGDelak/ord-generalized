@@ -766,11 +766,11 @@ function undoViewport() {
 
 // --- Interaction Handlers ---
 function getEventCoords(e) {
-    if (e.touches && e.touches.length > 0) {
-        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-    return { x: e.clientX, y: e.clientY };
+    let t = (e.touches && e.touches.length > 0) ? e.touches[0] : 
+            (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
+    return { x: t.clientX, y: t.clientY };
 }
+
 
 function handlePointerDown(e) {
     if (config.LockScreen) { return; }
@@ -801,17 +801,20 @@ function handlePointerDown(e) {
 }
 
 function handlePointerMove(e) {
-    if (config.LockScreen) { return; }
-    if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
-    
-    let movementX = isMouseLocked ? e.movementX : (e.clientX - cam.view.mouse.lastX);
-    let movementY = isMouseLocked ? e.movementY : (e.clientY - cam.view.mouse.lastY);
+    if (config.LockScreen || window.isSettingsOpen || !cam.view.mouse.isDown) return;
 
     let { x: clientX, y: clientY } = getEventCoords(e);
+    let movementX = isMouseLocked ? e.movementX : (clientX - cam.view.mouse.lastX);
+    let movementY = isMouseLocked ? e.movementY : (clientY - cam.view.mouse.lastY);
+
+    // Save previous positions IMMEDIATELY so the next touchmove delta is correct
+    cam.view.mouse.lastX = clientX;
+    cam.view.mouse.lastY = clientY;
 
     if (config.SlowMode) {
         cam.selection.currentX = clientX;
         cam.selection.currentY = clientY;
+        // ... rest of SlowMode selection box code remains the same
 
         let x = Math.min(cam.selection.startX, cam.selection.currentX);
         let y = Math.min(cam.selection.startY, cam.selection.currentY);
