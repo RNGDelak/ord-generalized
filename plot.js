@@ -515,8 +515,9 @@ function drawHUD() {
     if (config.ShowHUD) {
         let hudItems = [];
         if (config.SlowMode) { hudItems.push({ text: 'Slow Mode Enabled', color: 'rgb(255, 0, 0)' }); }
-        if (config.ZoomIntoMouse) { hudItems.push({ text: 'Zoom Into Mouse Enabled', color: 'rgb(0, 255, 0)' }); }
         if (config.LockScreen) { hudItems.push({ text: 'Screen Locked', color: 'rgb(255, 0, 0)' }); }
+        if (config.ZoomIntoMouse) { hudItems.push({ text: 'Zoom Into Mouse Enabled', color: 'rgb(0, 255, 0)' }); }
+        if (config.HarmonicInvtervalSpacing) { hudItems.push({ text: 'Harmonic Interval Spacing Enabled', color: 'rgb(0, 255, 0)' }); }
         let lineHeight = 20;
         hudItems.forEach((item, index) => { createTextLabel(item.text, item.color, 0, index * lineHeight, "left", "top", "20px Serif"); });
     }
