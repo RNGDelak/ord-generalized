@@ -7,7 +7,7 @@ Interactive transfinite number line where you can plug-in your own and play!
 
 Link: https://rngdelak.github.io/ord-generalized
 
-Here's some "Landscapes"
+Here's some **"Landscapes"**
 ![Landscape 1](https://github.com/user-attachments/assets/4b539daa-c723-488d-85e4-6c2f2649d2c9)
 ![Landscape 2](https://github.com/user-attachments/assets/41d91047-bdcb-4889-b3d2-d42a2ec46bf4)
 ![Landscape 3](https://github.com/user-attachments/assets/11f3a876-8fc2-4cb4-a820-7cd6d6c83d12)
