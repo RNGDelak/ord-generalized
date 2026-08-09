@@ -168,6 +168,13 @@ Object.assign(divisionLine.style, {
 });
 document.body.appendChild(divisionLine);
 
+// --- Pointer Lock Setup ---
+let isMouseLocked = false;
+
+document.addEventListener("pointerlockchange", () => {
+    isMouseLocked = (document.pointerLockElement === canvas);
+});
+
 function updateDivisionLine() {
     // Check if mouse is down or navigation keys are held
     let isInteracting = cam.view.mouse.isDown ||
@@ -795,6 +802,10 @@ function handlePointerDown(e) {
 function handlePointerMove(e) {
     if (config.LockScreen) { return; }
     if (window.isSettingsOpen || !cam.view.mouse.isDown) return;
+    
+    let movementX = isMouseLocked ? e.movementX : (e.clientX - cam.view.mouse.lastX);
+    let movementY = isMouseLocked ? e.movementY : (e.clientY - cam.view.mouse.lastY);
+
     let { x: clientX, y: clientY } = getEventCoords(e);
 
     if (config.SlowMode) {
@@ -817,8 +828,8 @@ function handlePointerMove(e) {
         return;
     }
 
-    let dxBI = toBigInt(clientX - cam.view.mouse.lastX);
-    let dy = clientY - cam.view.mouse.lastY;
+    let dxBI = toBigInt(movementX);
+    let dy = movementY;
 
     cam.view.x0 += dxBI;
     cam.view.x1 += dxBI;
@@ -949,7 +960,14 @@ window.addEventListener("keydown", (e) => {
         render();
     } else if (key === "r" && !(e.ctrlKey || e.metaKey)) {
         resetViewport();
+    } else if (key === "1" && !(e.ctrlKey || e.metaKey)) {
+        if (!isMouseLocked) {
+            canvas.requestPointerLock();
+        } else {
+            document.exitPointerLock();
+        }
     }
+
 
     if (actionTriggered) render();
 });
