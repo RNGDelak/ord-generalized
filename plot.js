@@ -107,6 +107,10 @@ let config = {
     LabelBetweenTickSpacing: 5,
     LabelBetweenLabelSpacing: 25,
     TickBetweenLabelXoffest: -5,
+    LabelBetweenLabelXoffest: 0,
+    LabelBetweenTimelineXoffest: 0,
+    LabelRotation: 0,
+    TimelineRotation: 0,
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
@@ -242,17 +246,29 @@ function drawLine(x1, y1, x2, y2, color, lineWidth = 2) {
     ctx.stroke();
 }
 
-function createTextLabel(text, color, x, y, alignX, alignY, font) {
+function createTextLabel(text, color, x, y, alignX, alignY, font, rotation = 0) {
     let label = document.createElement("div");
     label.className = "textLabel";
     label.innerHTML = text;
 
     let tx = "0", ty = "0";
-    if (alignX === "center") tx = "-50%";
-    else if (alignX === "right") tx = "-100%";
+    let originX = "left", originY = "top";
 
-    if (alignY === "middle") ty = "-50%";
-    else if (alignY === "bottom") ty = "-100%";
+    if (alignX === "center") {
+        tx = "-50%";
+        originX = "center";
+    } else if (alignX === "right") {
+        tx = "-100%";
+        originX = "right";
+    }
+
+    if (alignY === "middle") {
+        ty = "-50%";
+        originY = "center";
+    } else if (alignY === "bottom") {
+        ty = "-100%";
+        originY = "bottom";
+    }
 
     Object.assign(label.style, {
         position: "absolute",
@@ -260,7 +276,8 @@ function createTextLabel(text, color, x, y, alignX, alignY, font) {
         top: `${y}px`,
         color: color,
         font: font,
-        transform: `translate(${tx}, ${ty})`
+        transformOrigin: `${originX} ${originY}`,
+        transform: `translate(${tx}, ${ty}) rotate(${rotation}deg)`
     });
 
     dynamicContainer.appendChild(label);
@@ -494,13 +511,24 @@ function drawTimelineLabels() {
                 let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
                 let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
 
-                createTextLabel(labelString, color, px + config.TickBetweenLabelXoffest, currentY, "left", "bottom", "22px Serif");
+                let labelX = px + config.TickBetweenLabelXoffest + (config.LabelBetweenLabelXoffest * (totalModes - 1 - i));
+
+                createTextLabel(labelString, color, labelX, currentY, "left", "bottom", "22px Serif", config.LabelRotation);
             });
         }
 
         if (config.ShowTimelineLabel && aliasName) {
             let aliasY = py - modeStackHeight - spacingBelowAlias;
-            createTextLabel(aliasName, config.DefaultTimelineLabelColor, px + config.TickBetweenLabelXoffest, aliasY, "left", "bottom", "italic 20px Serif");
+
+            // Count of mode offset steps (e.g., if 3 modes exist, max index offset is 2)
+            let modeSteps = (config.ShowLabel && totalModes > 0) ? (totalModes - 1) : 0;
+
+            let aliasX = px
+                + config.TickBetweenLabelXoffest
+                + (modeSteps * config.LabelBetweenLabelXoffest)
+                + config.LabelBetweenTimelineXoffest;
+
+            createTextLabel(aliasName, config.DefaultTimelineLabelColor, aliasX, aliasY, "left", "bottom", "italic 20px Serif", config.TimelineRotation);
         }
     });
 }
@@ -631,8 +659,8 @@ function render() {
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
                 // 2. Calculate and clamp the tick height
-                let currentTickHeight = config.MathstickMode 
-                    ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n]) 
+                let currentTickHeight = config.MathstickMode
+                    ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n])
                     : cam.tHeight;
 
                 if (!isFinite(currentTickHeight)) {
@@ -766,8 +794,8 @@ function undoViewport() {
 
 // --- Interaction Handlers ---
 function getEventCoords(e) {
-    let t = (e.touches && e.touches.length > 0) ? e.touches[0] : 
-            (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
+    let t = (e.touches && e.touches.length > 0) ? e.touches[0] :
+        (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
     return { x: t.clientX, y: t.clientY };
 }
 
