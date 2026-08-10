@@ -262,91 +262,82 @@ window.notation = (() => {
 
 # Changelogs
 
-Current Version: https://rngdelak.github.io/ord-generalized
+Current Version: https://rngdelak.github.io/ord-generalized[cite: 1]
 
 ---
 
-## Version 0 Series (0.1 → 0.9)
+## Version 0 Series (0.1 → 0.9)[cite: 1]
 
-> **Overview:** These versions are experimental and mostly unusable. They have limited rendering capability and contain many bugs.  
-> **Major Milestone:** Figured out an efficient way to render ordinal number line (v0.3)
+> **Overview:** These versions are experimental and mostly unusable. They have limited rendering capability and contain many bugs.[cite: 1]  
+> **Major Milestone:** Figured out an efficient way to render ordinal number line (v0.3)[cite: 1]
 
 <details>
-<summary><b>v0.1</b></summary>
+<summary><b>v0.1</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.1/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.1/
-- **Added:** Initial prototype build.
-- **Changes:**
+- **Added:** Initial prototype build[cite: 1].
+- **Changes:** trying binary search on ordinal using construction from [ord-limbms: The contrustive continoustivity](https://github.com/RNGDelak/ord-limbms/blob/main/README.md)
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.2</b></summary>
+<summary><b>v0.2</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.2/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.2/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.3</b></summary>
+<summary><b>v0.3</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.3/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.3/
-- **Added:** Efficient rendering system for ordinal number line.
+- **Added:** Efficient rendering system for ordinal number line[cite: 1].
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.4</b></summary>
+<summary><b>v0.4</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.4/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.4/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.5</b></summary>
+<summary><b>v0.5</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.5/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.5/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.6</b></summary>
+<summary><b>v0.6</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.6/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.6/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.7</b></summary>
+<summary><b>v0.7</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.7/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.7/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.8</b></summary>
+<summary><b>v0.8</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.8/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.8/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v0.9</b></summary>
+<summary><b>v0.9</b> — https://rngdelak.github.io/ord-generalized/versions/version%200.9/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%200.9/
 - **Added:**
 - **Changes:**
 - **Fixes:**
@@ -354,123 +345,110 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 ---
 
-## Version 1 Series (1.0 → 1.12)
+## Version 1 Series (1.0 → 1.12)[cite: 1]
 
-> **Overview:** Added more GUI elements and wide cross-device support.  
-> **Major Milestone:** Added MathStick Mode (v1.9)
+> **Overview:** Added more GUI elements and wide cross-device support.[cite: 1]  
+> **Major Milestone:** Added MathStick Mode (v1.9)[cite: 1]
 
 <details>
-<summary><b>v1.0</b></summary>
+<summary><b>v1.0</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.0/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.0/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.1</b></summary>
+<summary><b>v1.1</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.1/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.1/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.2</b></summary>
+<summary><b>v1.2</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.2/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.2/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.3</b></summary>
+<summary><b>v1.3</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.3/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.3/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.4</b></summary>
+<summary><b>v1.4</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.4/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.4/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.5</b></summary>
+<summary><b>v1.5</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.5/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.5/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.6</b></summary>
+<summary><b>v1.6</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.6/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.6/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.7</b></summary>
+<summary><b>v1.7</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.7/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.7/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.8</b></summary>
+<summary><b>v1.8</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.8/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.8/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.9</b></summary>
+<summary><b>v1.9</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.9/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.9/
-- **Added:** Introduced MathStick Mode.
+- **Added:** Introduced MathStick Mode[cite: 1].
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.10</b></summary>
+<summary><b>v1.10</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.10/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.10/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.11</b></summary>
+<summary><b>v1.11</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.11/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.11/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v1.12</b></summary>
+<summary><b>v1.12</b> — https://rngdelak.github.io/ord-generalized/versions/version%201.12/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%201.12/
 - **Added:**
 - **Changes:**
 - **Fixes:**
@@ -478,168 +456,150 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 ---
 
-## Version 2 Series (2.0 → 2.17)
+## Version 2 Series (2.0 → 2.17)[cite: 1]
 
-> **Overview:** Feature-complete releases. Minor bugs resolved after v2.9.  
-> **Major Milestones:** Added Ordinal Finder (v2.2), Set Viewport State (v2.7), and formalized sharing transfinite number line notations (v2.10).
+> **Overview:** Feature-complete releases. Minor bugs resolved after v2.9.[cite: 1]  
+> **Major Milestones:** Added Ordinal Finder (v2.2), Set Viewport State (v2.7), and formalized sharing transfinite number line notations (v2.10)[cite: 1].
 
 <details>
-<summary><b>v2.0</b></summary>
+<summary><b>v2.0</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.0/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.0/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.1</b></summary>
+<summary><b>v2.1</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.1/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.1/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.2</b></summary>
+<summary><b>v2.2</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.2/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.2/
-- **Added:** Added Ordinal Finder.
+- **Added:** Added Ordinal Finder[cite: 1].
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.3</b></summary>
+<summary><b>v2.3</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.3/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.3/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.4</b></summary>
+<summary><b>v2.4</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.4/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.4/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.5</b></summary>
+<summary><b>v2.5</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.5/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.5/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.6</b></summary>
+<summary><b>v2.6</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.6/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.6/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.7</b></summary>
+<summary><b>v2.7</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.7/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.7/
-- **Added:** Added Set Viewport State.
+- **Added:** Added Set Viewport State[cite: 1].
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.8</b></summary>
+<summary><b>v2.8</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.8/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.8/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.9</b></summary>
+<summary><b>v2.9</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.9/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.9/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.10</b></summary>
+<summary><b>v2.10</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.10/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.10/
-- **Added:** Formalized sharing transfinite number line notations.
+- **Added:** Formalized sharing transfinite number line notations[cite: 1].
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.11</b></summary>
+<summary><b>v2.11</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.11/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.11/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.12</b></summary>
+<summary><b>v2.12</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.12/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.12/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.13</b></summary>
+<summary><b>v2.13</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.13/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.13/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.14</b></summary>
+<summary><b>v2.14</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.14/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.14/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.15</b></summary>
+<summary><b>v2.15</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.15/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.15/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.16</b></summary>
+<summary><b>v2.16</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.16/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.16/
 - **Added:**
 - **Changes:**
 - **Fixes:**
 </details>
 
 <details>
-<summary><b>v2.17</b></summary>
+<summary><b>v2.17</b> — https://rngdelak.github.io/ord-generalized/versions/version%202.17/</summary>
 
-- **Link:** https://rngdelak.github.io/ord-generalized/versions/version%202.17/
 - **Added:**
 - **Changes:**
 - **Fixes:**
