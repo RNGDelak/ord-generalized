@@ -247,7 +247,7 @@ window.notation = (() => {
     isSuccessor,
     display,
     classifyOrdinal,
-    parse, //remove this if you don't have a parser to let my program know.
+    parse,
     Zero,
     Limit,
     DisplayName,
