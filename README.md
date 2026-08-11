@@ -44,6 +44,8 @@ Here's some **"Landscapes"**
 
 - I to show viewport state
 
+- 1 to lock mouse (so it won't move anymore)
+
 - L to lock screen (disable interactions) 
 
 
