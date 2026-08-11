@@ -266,7 +266,7 @@ If implement a proper parser is too hard, do this instead (this work universally
 function parse(ord){
     let arr = ord.split(',').map(x => Number(x))
     let current = Limit
-    for(let i = 0 , i < arr.length , i++){
+    for(let i = 0 ; i < arr.length ; i++){
         if(isSuccessor(current)) break;
         current = fs(current,arr[i])
     }
