@@ -269,11 +269,11 @@ Current Version: https://rngdelak.github.io/ord-generalized
 **Major Update:** Figured out an efficient way to render ordinal number line (v0.3)
 
 - **v0.1** — https://rngdelak.github.io/ord-generalized/versions/version%200.1/
-  - **Description:** Initial prototype build.
+- **Description:** Initial prototype build.
   - **Added:** Binary search on ordinal o(log2n) but sadly decimal.js ruined the thing so yeah.
 
 - **v0.2** — https://rngdelak.github.io/ord-generalized/versions/version%200.2/
-  - **Description:**
+- **Description:**
 
   - Refactored the transfinite number-line implementation by separating rendering from ordinal/rational computation.
   - Replaced the previous Decimal-based calculation system with `BigRational.js` for exact rational arithmetic.
@@ -315,7 +315,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved canvas sizing so it automatically fills the browser viewport.
 
 - **v0.3** — https://rngdelak.github.io/ord-generalized/versions/version%200.3/
-  - **Description:**
+- **Description:**
 
   - Reworked the visualization layer by replacing `main.js` with a new `plot.js` visual orchestration engine.
   - Moved the number-line traversal, viewport handling, tick generation, labeling, sampling, HUD, and interaction logic into `plot.js`.
@@ -373,7 +373,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Added frame-based FPS measurement to make rendering performance visible.
 
 - **v0.4** — https://rngdelak.github.io/ord-generalized/versions/version%200.4/
-  - **Description:**
+- **Description:**
 
   - Improved the interactive number-line visualization with faster zooming and new mouse-wheel zoom support.
   - Adjusted timeline label positioning to better follow the visualization's diagonal trajectory.
@@ -407,7 +407,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Prevented the browser's default wheel behavior while interacting with the visualization, allowing the canvas to control zoom directly.
 
 - **v0.5** — https://rngdelak.github.io/ord-generalized/versions/version%200.5/
-  - **Description:**
+- **Description:**
 
   - Expanded the visualization controls with keyboard navigation and continuous zoom/panning.
   - Improved mouse-wheel zoom behavior to make zooming substantially faster and more responsive.
@@ -449,7 +449,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved navigation responsiveness through continuous keyboard updates rather than one-off key events.
 
 - **v0.6** — https://rngdelak.github.io/ord-generalized/versions/version%200.6/
-  - **Description:**
+- **Description:**
 
   - Reworked the center-point ordinal sampler to use targeted recursive computation instead of scanning the rendered tick array.
   - Improved the accuracy of the ordinal value displayed at the center of the visualization.
@@ -487,7 +487,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Simplified keyboard zoom behavior to avoid the previous speed-multiplier interaction between modifier keys.
 
 - **v0.7** — https://rngdelak.github.io/ord-generalized/versions/version%200.7/
-  - **Description:**
+- **Description:**
 
   - Switched the active ordinal notation system from **HPrSS** to **BMS (Bashicu Matrix System)**.
   - Replaced the previous `core.js` implementation with a dedicated `Libs/BMS.js` module.
@@ -558,7 +558,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Preserved the existing plotting API (`cmp`, `fs`, `isSuccessor`, `display`, `classifyOrdinal`, `parse`, `Zero`, `Limit`) so the visualization layer requires only minimal changes.
 
 - **v0.8** — https://rngdelak.github.io/ord-generalized/versions/version%200.8/
-  - **Description:**
+- **Description:**
 
   - Added a configurable UI panel for changing notation systems and visualization settings at runtime.
   - Refactored `plot.js` configuration and runtime state into centralized `config` and `cam` objects.
@@ -639,7 +639,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved runtime configuration handling with JSON parsing and error feedback for malformed configuration input.
 
 - **v0.9** — https://rngdelak.github.io/ord-generalized/versions/version%200.9/
-  - **Description:**
+- **Description:**
 
   - Added interactive control over the recursion depth used to render the transfinite number line.
   - Improved runtime notation switching by making preset notation loading more explicit and reliable.
@@ -688,7 +688,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 **Major Update:** Added mathstick mode (v1.9), switch from native js number to BigInt (v1.3)
 
 - **v1.0** — https://rngdelak.github.io/ord-generalized/versions/version%201.0/
-  - **Description:**
+- **Description:**
 
   - Version 1.0 updates the ordinal notation logic, changes the displayed ordinal format from **CNF Included** to **Normal**, improves handling of zero/limit values, and adds touch interaction support to the canvas.
   - The internal fundamental-sequence (`fs`) calculation was also revised.
@@ -719,11 +719,11 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved touch interaction behavior on the canvas by preventing default browser touch actions.
 
 - **v1.1** — https://rngdelak.github.io/ord-generalized/versions/version%201.1/
-  - **Description:** Optimizing and added "Predicting" Alogrithm from Stephen Brooks verions
+- **Description:** Optimizing and added "Predicting" Alogrithm from Stephen Brooks verions
   - **Added:** AdaptiveScale() function
 
 - **v1.2** — https://rngdelak.github.io/ord-generalized/versions/version%201.2/
-  - **Description:**
+- **Description:**
 
   - Version 1.2 significantly expands the notation and ordinal classification system while improving the rendering/UI experience.
   - The application now supports multiple display modes, more ordinal classifications, an FPS counter, an interactive usage hint, improved canvas resizing, and a new LPrSS notation preset.
@@ -792,7 +792,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved UI interaction by allowing the tutorial hint to be completely removed after dismissal.
 
 - **v1.3** — https://rngdelak.github.io/ord-generalized/versions/version%201.3/
-  - **Description:**
+- **Description:**
 
   - Version 1.3 introduces **high-precision BigInt-based viewport calculations** to improve zooming, panning, subdivision, and rendering accuracy at extreme zoom levels.
   - The default notation is switched back from **LPrSS to BMS**.
@@ -844,11 +844,11 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Prevented errors when the dynamic label container is unavailable.
 
 - **v1.4** — https://rngdelak.github.io/ord-generalized/versions/version%201.4/
-  - **Description:** The release only includes a minor update to the project documentation.
+- **Description:** The release only includes a minor update to the project documentation.
   - **Changes:** \* Updated `README.md` with a minor documentation/text change.
 
 - **v1.5** — https://rngdelak.github.io/ord-generalized/versions/version%201.5/
-  - **Description:**
+- **Description:**
 
   - Version 1.5 reintroduces **HPrSS** as an available notation preset and improves the rendering system so special values such as `Limit` are handled by the active notation library instead of being hard-coded to BMS.
   - The BMS notation now explicitly displays its `Limit` value as `Lim(BMS)`.
@@ -876,7 +876,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Fixed the potential mismatch where an alias definition of `"Limit"` was treated differently from other ordinal definitions.
 
 - **v1.6** — https://rngdelak.github.io/ord-generalized/versions/version%201.6/
-  - **Description:**
+- **Description:**
 
   - Version 1.6 restores **LPrSS** as an available notation preset and improves the custom notation/script execution system.
   - Custom scripts are now syntax-validated before being executed, and runtime errors provide more detailed diagnostic information.
@@ -914,7 +914,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved identification of errors originating from injected custom code through the `InjectedCustomCode.js` source label.
 
 - **v1.7** — https://rngdelak.github.io/ord-generalized/versions/version%201.7/
-  - **Description:**
+- **Description:**
 
   - Version 1.7 significantly expands ordinal classification in **BMS** and **LPrSS**, allowing more specific identification of ordinal classes such as ε, Veblen, Bachmann–Howard, and Buchholz ordinals.
   - The rendering system now exposes the number of tick labels as a configurable setting.
@@ -959,7 +959,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Removed the hard-coded tick-label count from the rendering calculation, making it configurable.
 
 - **v1.8** — https://rngdelak.github.io/ord-generalized/versions/version%201.8/
-  - **Description:**
+- **Description:**
 
   - Version 1.8 introduces **BSM** as a new notation system/preset.
   - The new BSM implementation provides its own parsing, comparison, expansion, display, classification, and BMS-to-OCF conversion logic.
@@ -1010,7 +1010,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - The new BSM implementation provides a separate notation implementation rather than modifying the existing BMS logic.
 
 - **v1.9** — https://rngdelak.github.io/ord-generalized/versions/version%201.9/
-  - **Description:**
+- **Description:**
 
   - Version 1.9 introduces a new **Worm (Ackermann Worm)** notation as an example of how to inject a custom notation module.
   - The rendering configuration is significantly expanded, allowing multiple notation display modes, customizable label/tick behavior, colors, spacing, and slow-mode rendering.
@@ -1072,7 +1072,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved rendering-depth feedback by displaying the current depth directly in the UI.
 
 - **v1.10** — https://rngdelak.github.io/ord-generalized/versions/version%201.10/
-  - **Description:**
+- **Description:**
 
   - Version 1.10 expands the notation system with four new experimental notation presets: **EBOCF, cOCF, TON, and n-shifted OCF**.
   - The notation UI is redesigned so users can dynamically add, remove, and switch between multiple display notations.
@@ -1146,7 +1146,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved usability on mobile by providing direct controls for rendering depth.
 
 - **v1.11** — https://rngdelak.github.io/ord-generalized/versions/version%201.11/
-  - **Description:**
+- **Description:**
 
   - Version 1.11 consolidates the rendering-related code into `plot.js` and removes the separate `render.js` file.
   - The HTML script-loading structure is simplified accordingly.
@@ -1184,7 +1184,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - **Potential regression:** Mouse, touch, wheel, keyboard-navigation, Slow Mode, viewport-history, and resize handlers that were located after these functions in Version 1.10's `plot.js` are also absent from Version 1.11.
 
 - **v1.12** — https://rngdelak.github.io/ord-generalized/versions/version%201.12/
-  - **Description:**
+- **Description:**
 
   - Version 1.12 restores the main rendering, canvas-resizing, initialization, camera-control, Slow Mode, keyboard, mouse, touch, and viewport-history functionality that was missing from Version 1.11.
   - Adds **5 configuration save/load slots** using browser `localStorage`.
@@ -1263,7 +1263,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 **Major Updates:** Formalized sharing transfinite number line notations (v2.10), added find ordinal (v2.2), and set viewport state (v2.7).
 
 - **v2.0** — https://rngdelak.github.io/ord-generalized/versions/version%202.0/
-  - **Description:**
+- **Description:**
 
   - Version 2.0 consolidates the notation explorer into a more mature and extensible interface.
   - The existing notation systems are retained, while notation selection and display-mode management are made more dynamic.
@@ -1337,7 +1337,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved custom notation compatibility by documenting and enforcing the expected `window.notation` interface.
 
 - **v2.1** — https://rngdelak.github.io/ord-generalized/versions/version%202.1/
-  - **Description:**
+- **Description:**
 
   - Version 2.1 adds finer control over rendering depth, interval subdivision, harmonic interval spacing, and BigInt precision.
   - Rendering state is made more configuration-driven, with `MaxIntervalDepth` replacing the previous camera-level depth setting.
@@ -1386,7 +1386,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Updated the BMS/notation rendering code to use the new configuration-driven depth system.
 
 - **v2.2** — https://rngdelak.github.io/ord-generalized/versions/version%202.2/
-  - **Description:**
+- **Description:**
 
   - Version 2.2 introduces an **Ordinal Finder** that allows users to enter an ordinal expression and automatically navigate/zoom the timeline toward that ordinal.
   - The finder uses the currently loaded notation's `parse()` function and high-precision viewport calculations.
@@ -1442,7 +1442,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved integration between notation switching and optional parsing capabilities.
 
 - **v2.3** — https://rngdelak.github.io/ord-generalized/versions/version%202.3/
-  - **Description:**
+- **Description:**
 
   - Version 2.3 refines the Ordinal Finder and rendering system introduced in Version 2.2.
   - The application now exposes parsing support more consistently across the notation libraries, while the Finder remains integrated with high-precision navigation.
@@ -1591,7 +1591,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved UI synchronization when configuration is injected or changed.
 
 - **v2.5** — https://rngdelak.github.io/ord-generalized/versions/version%202.5/
-  - **Description:**
+- **Description:**
 
   - Version 2.5 is primarily a code-cleanup and UI-maintenance release.
   - No functional changes were made to the notation libraries, rendering engine, Ordinal Finder, or configuration model.
@@ -1614,7 +1614,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Cleaned up minor formatting inconsistencies without changing application behavior.
 
 - **v2.6** — https://rngdelak.github.io/ord-generalized/versions/version%202.6/
-  - **Description:**
+- **Description:**
 
   - Version 2.6 simplifies the internal representation of the **Worm (Ackermann Worm)** notation.
   - Worm ordinals are changed from explicit `[exponent, coefficient]` pairs back to a simple array of repeated exponents.
@@ -1673,7 +1673,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Added configuration defaults for previously hard-coded UI colors.
 
 - **v2.7** — https://rngdelak.github.io/ord-generalized/versions/version%202.7/
-  - **Description:**
+- **Description:**
 
   - Version 2.7 adds an optional **Camera Stats HUD** showing the current zoom level and world position.
   - The new statistics use BigInt-safe formatting so they remain usable at extremely deep zoom levels.
@@ -1711,7 +1711,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved camera-stat formatting so deep-zoom BigInt values can be displayed without unsafe floating-point conversion.
 
 - **v2.8** — https://rngdelak.github.io/ord-generalized/versions/version%202.8/
-  - **Description:**
+- **Description:**
 
   - Version 2.8 introduces a new **Set Viewport** feature that lets users directly enter a world position and zoom level and apply them to the current view.
   - Zoom, pan, and viewport limits are now independently configurable through fencing options.
@@ -1771,7 +1771,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved accessibility of several UI controls through explicit form names and depth-control labels.
 
 - **v2.9** — https://rngdelak.github.io/ord-generalized/versions/version%202.9/
-  - **Description:**
+- **Description:**
 
   - Version 2.9 refines the navigation and configuration system introduced in Version 2.8.
   - The Ordinal Finder and Set Viewport interfaces remain available, but their default activation is changed so they are no longer enabled automatically.
@@ -1816,7 +1816,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Cleaned up the custom notation documentation so the required module structure and exposed functions are clearer.
 
 - **v2.10** — https://rngdelak.github.io/ord-generalized/versions/version%202.10/
-  - **Description:**
+- **Description:**
 
   - Version 2.10 adds a complete **custom notation import/export and URL-sharing system**.
   - Users can now import `.tnls`, `.js`, or `.txt` files directly, export inline notation code as a compressed URL, or share an external script URL.
@@ -1868,7 +1868,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved configuration-menu usability by making the menu scrollable when its contents exceed the viewport height.
 
 - **v2.11** — https://rngdelak.github.io/ord-generalized/versions/version%202.11/
-  - **Description:**
+- **Description:**
 
   - Version 2.11 refines the custom-notation import/export system introduced in Version 2.10.
   - URL-based notation loading is standardized around the `source` and `href` parameters and now supports both URL hash and query-string forms.
@@ -1927,7 +1927,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Reduced the risk of collisions between variables/functions exposed by different notation libraries.
 
 - **v2.12** — https://rngdelak.github.io/ord-generalized/versions/version%202.12/
-  - **Description:**
+- **Description:**
 
   - Version 2.12 is a UI and documentation refinement release.
   - The Config Menu layout is improved so its width adapts to its contents while remaining constrained by the viewport.
@@ -1983,7 +1983,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Clarified custom-notation requirements so developers are less likely to omit essential functions.
 
 - **v2.13** — https://rngdelak.github.io/ord-generalized/versions/version%202.13/
-  - **Description:**
+- **Description:**
 
   - Version 2.13 introduces **EcOCF (Extended collapsing OCF)** as a new experimental notation system.
   - Adds an interactive configuration editor with sliders, checkboxes, and color controls, while retaining the existing JSON configuration editor.
@@ -2080,7 +2080,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved documentation accuracy by adding the project's complete version history and current feature set.
 
 - **v2.14** — https://rngdelak.github.io/ord-generalized/versions/version%202.14/
-  - **Description:**
+- **Description:**
 
   - Version 2.14 refines the configuration UI introduced in Version 2.13.
   - Mobile interaction with the resizable Config Menu is improved by allowing vertical page scrolling while preserving the menu's resize behavior.
@@ -2129,7 +2129,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved documentation by adding the missing Version 2.14 entry and newer screenshots.
 
 - **v2.15** — https://rngdelak.github.io/ord-generalized/versions/version%202.15/
-  - **Description:**
+- **Description:**
 
   - Version 2.15 adds a dedicated **Reset Viewport** function for quickly returning the camera to its default viewport.
   - Resetting the viewport preserves the previous viewport in camera history, so the user can still use Revert/undo afterward.
@@ -2187,7 +2187,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved Reset button color customization through the configuration system.
 
 - **v2.16** — https://rngdelak.github.io/ord-generalized/versions/version%202.16/
-  - **Description:**
+- **Description:**
 
   - Version 2.16 adds a convenient way to copy the current camera state directly from the Camera Stats HUD.
   - Clicking the displayed camera statistics copies the current world position and zoom value to the clipboard.
@@ -2225,7 +2225,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Added a clipboard fallback for environments where `navigator.clipboard` is unavailable or blocked.
 
 - **v2.17** — https://rngdelak.github.io/ord-generalized/versions/version%202.17/
-  - **Description:**
+- **Description:**
 
   - Version 2.17 introduces a **Mouse Pointer Lock** mode that allows the user to keep panning without the physical mouse cursor reaching the edge of the screen.
   - Pointer Lock can be toggled with the `1` keyboard shortcut.
@@ -2281,7 +2281,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Added a proper page title instead of leaving the `<title>` element empty.
 
 - **v2.18** — https://rngdelak.github.io/ord-generalized/versions/version%202.18/
-  - **Description:**
+- **Description:**
 
   - Version 2.18 improves the positioning and orientation of ordinal/timeline labels.
   - Labels can now be independently offset horizontally and rotated through configuration.
@@ -2345,7 +2345,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
   - Improved HUD feedback by explicitly showing when Harmonic Interval Spacing is enabled.
 
 - **v2.19** — https://rngdelak.github.io/ord-generalized/versions/version%202.19/
-  - **Description:**
+- **Description:**
 
   - Version 2.19 adds control over whether tick colors are automatically blended with brightness during rendering.
   - Tick color blending is enabled by default, preserving the existing behavior.
