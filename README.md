@@ -4987,6 +4987,4 @@ Thats it, now i can finally take out the plan that i have written 4 month ago fo
 
 # Final words
 
-I've built what I wanted to build, implemented everything i could dream, that's it
-
-Enjoy the project!!!
+I've built everything i wanted, dreamed and hoped. See you!
