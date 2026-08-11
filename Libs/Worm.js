@@ -5,21 +5,16 @@ Limit : ω^ω
 
 window.notation = (() => {
 
-  //convert to readable ordinal. you should put your heper into there
+  // Required Constants
+  const Zero = [];
+  const Limit = "Limit";
+
+  // Convert ordinal represented as [[exp, coef], ...] to a readable string
   function pretty(ord) {
-    if (ord.length === 0) return "0";
+    if (ord === Limit) return "Limit";
+    if (!Array.isArray(ord) || ord.length === 0) return "0";
 
-    // 1. Group exponents into [[exp, coef], ...]
-    const terms = [];
-    for (let i = 0; i < ord.length;) {
-      let j = i + 1;
-      while (j < ord.length && ord[j] === ord[i]) j++;
-      terms.push([ord[i], j - i]);
-      i = j;
-    }
-
-    // 2. Format each [exp, coef] term (fixing 1*n to display directly as n)
-    return terms.map(([exp, coef]) => {
+    return ord.map(([exp, coef]) => {
       if (exp === 0) {
         return `${coef}`;
       }
@@ -29,134 +24,149 @@ window.notation = (() => {
     }).join("+");
   }
 
-
-  //Impportant: without this the program wont be able to render the number line
+  // Fundamental sequence for Cantor Normal Form terms
   function fs(ord, n) {
-    if (ord == Limit) return [n];
+    if (ord === Limit) return [[n, 1]]; // FS(ω^ω, n) = ω^n
 
-    ord = [...ord];
+    if (!Array.isArray(ord) || ord.length === 0) return [];
 
-    const head = ord.pop();
+    // Deep clone ordinal structure to maintain immutability
+    const res = ord.map(term => [...term]);
+    const last = res[res.length - 1];
 
-    if (head > 0)
-      for (let i = 0; i < n; i++)
-        ord.push(head - 1);
+    if (last[1] > 1) {
+      last[1]--;
+    } else {
+      res.pop();
+    }
 
-    return ord;
+    if (last[0] > 0 && n > 0) {
+      const newExp = last[0] - 1;
+      if (res.length > 0 && res[res.length - 1][0] === newExp) {
+        res[res.length - 1][1] += n;
+      } else {
+        res.push([newExp, n]);
+      }
+    }
+
+    return res;
   }
 
-  //Important : etablish the well orderness of the number line.
-  //without this, the number line will rather messy(no broken)
+  // Compare two ordinals in [[exp, coef], ...] representation
   function cmp(a, b) {
-    if (a == Limit && b == Limit) return 0;
-    if (a == Limit) return 1;
-    if (b == Limit) return -1;
+    if (a === Limit && b === Limit) return 0;
+    if (a === Limit) return 1;
+    if (b === Limit) return -1;
 
     const minLength = Math.min(a.length, b.length);
 
-    for (let i = 0; i < minLength; i++)
-      if (a[i] !== b[i])
-        return a[i] < b[i] ? -1 : 1;
+    for (let i = 0; i < minLength; i++) {
+      const [expA, coefA] = a[i];
+      const [expB, coefB] = b[i];
+
+      if (expA !== expB) return expA < expB ? -1 : 1;
+      if (coefA !== coefB) return coefA < coefB ? -1 : 1;
+    }
 
     if (a.length < b.length) return -1;
     if (a.length > b.length) return 1;
     return 0;
   }
 
-  //Important : handle for successor ordinal or it will literally take the successor fs's
+  // Check if ordinal is a successor
   function isSuccessor(ord) {
-    return ord !== Limit && ord.at(-1) == 0;
+    return ord !== Limit && Array.isArray(ord) && ord.length > 0 && ord[ord.length - 1][0] === 0;
   }
 
-  //Important : let the program display your ordinal in texts (you can add html tags too!)
+  // Display functions
   function display(ord, mode) {
-    if (ord == Limit) return "Limit";
-    if (ord.length == 0) return "0";
-    if (mode == 'raw')
-      return `(${ord.join(",")})`;
-    if (mode == 'pretty')
+    if (ord === Limit) return "Limit";
+    if (!Array.isArray(ord) || ord.length === 0) return "0";
+    if (mode === 'raw') {
+      return JSON.stringify(ord);
+    }
+    if (mode === 'pretty') {
       return pretty(ord);
+    }
   }
 
-  //optional: if you can't implement this, just return return "#808080" or nay color you like
+  // Classify ordinals for visualization styling
   function classifyOrdinal(ord) {
-    if (ord == Limit) return "#ffffff";
-    if (ord.length == 0) return "#808080";
+    if (ord === Limit) return "#ffffff";
+    if (!Array.isArray(ord) || ord.length === 0) return "#808080";
     if (isSuccessor(ord)) return "#d40000";
-    if (ord.at(-1) > 0) return "#ffd000";
-    return "#ff8000";
+    if (ord.length === 1 && ord[0][1] === 1 && ord[0][0] > 0) return "#ffd000"; // Power of ω
+    return "#ff8000"; // Limit ordinal
   }
 
-  //optional: if you dont have this, just leave empty and dont return this in the end of IIEF (this will ler the program know you don't implement this)
+  // Parser supporting pair notation [[e, c], ...], flat array [e1, e2, ...], and text expressions
   function parse(str) {
-    str = str.trim();
-    if (str === "" || str === "0") return [];
+    str = String(str).trim();
+    if (str === "" || str === "0") return Zero;
     if (str.toLowerCase() === "limit" || str === "ω^ω" || str === "w^w") return Limit;
 
-    // Treat (, [, and { flexibly
-    let normalized = str.replace(/[\[\{]/g, "(").replace(/[\]\}]/g, ")");
+    const termsMap = new Map();
 
-    // 1. Array-like and Grouped Notation (e.g., (5,3,1,0), [5,3,1,0], or [[5,1], [3,2]])
-    if (normalized.includes("(") || normalized.includes(",")) {
-      // Check for nested pair notation like [[5, 1], [3, 2]]
-      let pairMatches = str.match(/[\(\[\{]\s*\d+\s*,\s*\d+\s*[\)\]\}]/g);
-      if (pairMatches && pairMatches.length > 0) {
-        let expanded = [];
-        for (let pairStr of pairMatches) {
-          let [e, c] = pairStr.replace(/[^0-9,]/g, "").split(",").map(Number);
-          for (let i = 0; i < c; i++) expanded.push(e);
-        }
-        return expanded;
-      }
-
-      // Standard array notation (5, 3, 1, 0)
-      let cleaned = normalized.replace(/[()]/g, "");
-      return cleaned.split(",").map(s => s.trim()).filter(Boolean).map(Number);
+    function addTerm(exp, coef) {
+      if (coef <= 0 || isNaN(exp) || isNaN(coef)) return;
+      termsMap.set(exp, (termsMap.get(exp) || 0) + coef);
     }
 
-    // 2. Transfinite text notation (e.g., "w^2 + w*3 + 5" or "ω^2 + 5")
-    let cleanText = str.toLowerCase().replace(/&omega;|ω/g, "w").replace(/·|\*/g, "*");
-    let terms = cleanText.split("+");
-    let result = [];
+    // 1. Nested Pair Notation e.g., [[5, 1], [3, 2]] or [(5,1), (3,2)]
+    const pairMatches = str.match(/[\(\[\{]\s*\d+\s*,\s*\d+\s*[\)\]\}]/g);
+    if (pairMatches && pairMatches.length > 0) {
+      for (const pairStr of pairMatches) {
+        const [e, c] = pairStr.replace(/[^0-9,]/g, "").split(",").map(Number);
+        addTerm(e, c);
+      }
+    } 
+    // 2. Flat exponent array notation e.g., (5, 3, 3, 1, 0)
+    else if (str.includes("(") || str.includes("[") || str.includes(",")) {
+      const cleaned = str.replace(/[()\[\]{}]/g, "");
+      const exps = cleaned.split(",").map(s => s.trim()).filter(Boolean).map(Number);
+      for (const e of exps) {
+        addTerm(e, 1);
+      }
+    } 
+    // 3. Transfinite text notation e.g., "w^2*3 + w + 5"
+    else {
+      const cleanText = str.toLowerCase().replace(/&omega;|ω/g, "w").replace(/·|\*/g, "*");
+      const terms = cleanText.split("+");
 
-    for (let term of terms) {
-      term = term.trim();
-      if (!term) continue;
+      for (let term of terms) {
+        term = term.trim();
+        if (!term) continue;
 
-      let exp = 0;
-      let coef = 1;
+        let exp = 0;
+        let coef = 1;
 
-      if (term.includes("w")) {
-        if (term.includes("^")) {
-          let parts = term.split("^");
-          let expPart = parts[1].split("*")[0].trim();
-          exp = parseInt(expPart, 10);
+        if (term.includes("w")) {
+          if (term.includes("^")) {
+            const parts = term.split("^");
+            const expPart = parts[1].split("*")[0].trim();
+            exp = parseInt(expPart, 10);
+          } else {
+            exp = 1;
+          }
+
+          if (term.includes("*")) {
+            const coefPart = term.split("*")[1].trim();
+            coef = parseInt(coefPart, 10);
+          }
         } else {
-          exp = 1;
+          exp = 0;
+          coef = parseInt(term, 10);
         }
 
-        if (term.includes("*")) {
-          let coefPart = term.split("*")[1].trim();
-          coef = parseInt(coefPart, 10);
-        }
-      } else {
-        exp = 0;
-        coef = parseInt(term, 10);
-      }
-
-      for (let i = 0; i < coef; i++) {
-        result.push(exp);
+        addTerm(exp, coef);
       }
     }
 
-    return result;
+    // Convert map to canonical form sorted by exponent descending
+    return Array.from(termsMap.entries()).sort((a, b) => b[0] - a[0]);
   }
 
-  //Required Constants
-  const Zero = [];
-  const Limit = "Limit";
-
-  const DisplayName = ["raw","pretty"];
+  const DisplayName = ["raw", "pretty"];
 
   const ordinalTypes = [
     ["Zero", "#808080"],
@@ -167,14 +177,13 @@ window.notation = (() => {
 
   const Aliases = [
     ["0", Zero],
-    ["1", [0]],
-    ["ω", [1]],
-    ["ω²", [2]],
+    ["1", [[0, 1]]],
+    ["ω", [[1, 1]]],
+    ["ω²", [[2, 1]]],
     ["ω^ω", Limit],
   ];
 
-  const config = {mode:[1]};//you must put an array of number represents the orders of notations incase you want a starting notation. look for configs for more 
-
+  const config = { modes: [1] };
   const title = "Worm transfinite number line";
 
   return {
