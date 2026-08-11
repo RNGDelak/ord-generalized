@@ -194,3 +194,22 @@ window.notation = (() => {
   };
 
 })();
+
+/*
+
+If implement a proper parser is too hard, do this instead (this work universally!)
+
+function parse(ord){
+    let arr = ord.split(',').map(x => Number(x))
+    let current = Limit
+    for(let i = 0 ; i < arr.length ; i++){
+        if(isSuccessor(current)) break;
+        current = fs(current,arr[i])
+    }
+    return current;
+}
+
+basically it takes a sequence of number representing the adress of that ordinal
+eg : 2,6,2,8,1 --> fs(fs(fs(fs(fs(Limit,2),6),2),8),1) / Limit[2][6][2][8][1]
+
+*/
