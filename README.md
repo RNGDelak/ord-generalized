@@ -44,9 +44,11 @@ Here's some **"Landscapes"**
 
 - I to show viewport state
 
+- L to lock screen (disable interactions) 
+
 - 1 to lock mouse (so it won't move anymore)
 
-- L to lock screen (disable interactions) 
+- R to reset viewport (safe exit)
 
 
 - Ctrl/Shift to adjust sensivity of arrow key controls
