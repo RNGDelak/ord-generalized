@@ -68,6 +68,7 @@ let config = {
     ColorSample: false,
     ColorLabel: false,
     ColorTimelineLabel: false,
+    EnableTickColorBlending: true,
 
     // --- Color Palette ---
     BackgroundColor: "#000000",
@@ -289,6 +290,7 @@ function clearTextLabels() {
 }
 
 function blendColorWithBrightness(hexColor, b) {
+    if (!config.EnableTickColorBlending) {return hexColor;}
     let cVal = parseInt(hexColor.replace("#", ""), 16);
 
     let r = (cVal >> 16) & 0xff;
