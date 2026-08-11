@@ -237,7 +237,7 @@ window.notation = (() => {
     ["ω^ω", Limit],
   ];
 
-  const config = {mode:[1]};//you must put an array of number represents the orders of notations incase you want a starting notation. look for configs for more 
+  const config = {modes:[1]};//you must put an array of number represents the orders of notations incase you want a starting notation. look for configs for more 
 
   const title = "Worm transfinite number line";
 
