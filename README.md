@@ -3086,8 +3086,8 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 
-* **v2.4** — https://rngdelak.github.io/ord-generalized/versions/version%202.4/
- * **Description:**
+* **v2.4** — https://rngdelak.github.io/ord-generalized/versions/version%202.4/ <details>
+  * **Description:**
 
     * Version 2.4 expands the rendering configuration system with controls for showing/hiding HUD elements, ticks, labels, samples, legends, and navigation controls.
     * Adds a configurable center division line that can appear during interaction or while idle.
@@ -3775,8 +3775,8 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 
-* **v2.10** — https://rngdelak.github.io/ord-generalized/versions/version%202.10/
-    * **Description:**
+* **v2.10** — https://rngdelak.github.io/ord-generalized/versions/version%202.10/ <details>
+  * **Description:**
 
     * Version 2.10 adds a complete **custom notation import/export and URL-sharing system**.
     * Users can now import `.tnls`, `.js`, or `.txt` files directly, export inline notation code as a compressed URL, or share an external script URL.
