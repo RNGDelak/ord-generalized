@@ -2593,7 +2593,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 ---
 
-## Version 2 Series (2.0 → 2.18)
+## Version 2 Series (2.0 → 2.19)
 
 **Overview:** These versions are very complete, though there were still some bugs fixed overall after v2.9.  
 **Major Updates:** Formalized sharing transfinite number line notations (v2.10), added find ordinal (v2.2), and set viewport state (v2.7).
