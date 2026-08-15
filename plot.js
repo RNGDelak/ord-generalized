@@ -31,7 +31,7 @@ let config = {
     ZoomIntoMouse: false,
 
     // --- Interactive & Rendering Modes ---
-    modes: [{ index: 0, target: "both" }],
+    modes: [{ mode: 0, target: 'both' }],
     LockScreen: false,
     MathstickMode: false,
     MathStick_UseLogarithmLength: false,
@@ -179,6 +179,19 @@ let isMouseLocked = false;
 document.addEventListener("pointerlockchange", () => {
     isMouseLocked = (document.pointerLockElement === canvas);
 });
+
+function normalizeMode(item) {
+    if (typeof item === 'object' && item !== null) {
+        return {
+            mode: typeof item.mode === 'number' ? item.mode : 0,
+            target: item.target || 'both'
+        };
+    }
+    return {
+        mode: typeof item === 'number' ? item : 0,
+        target: 'both'
+    };
+}
 
 function updateDivisionLine() {
     // Check if mouse is down or navigation keys are held
@@ -453,23 +466,33 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20 && cam.samplerOrd !== null) {
         let htmlContent = "";
-        
-        // Filter modes allowed on the sample display
-        let activeSampleModes = config.modes.filter(m => m.target === "both" || m.target === "sample");
 
-            activeSampleModes.forEach(m => {
-                const mode = notation.DisplayName[m.index];
-                const ordStr = notation.display(cam.samplerOrd, mode);
-                htmlContent += `<div>${ordStr}</div>`;
-            });
-        
+        // Filter modes assigned to sample display
+        let sampleModes = config.modes
+            .map(normalizeMode)
+            .filter(m => m.target === 'both' || m.target === 'sample');
+
+        if (sampleModes.length > 0) {
+                sampleModes.forEach(item => {
+                    const mode = notation.DisplayName[item.mode];
+                    if (mode) {
+                        const ordStr = notation.display(cam.samplerOrd, mode);
+                        htmlContent += `<div>${ordStr}</div>`;
+                    }
+                });
+        }
+
         sampleElem.innerHTML = htmlContent;
         sampleElem.style.color = config.ColorSample ? notation.classifyOrdinal(cam.samplerOrd) : config.DefaultSampleColor;
     }
 }
-
 function drawTimelineLabels() {
     let h = canvas.height;
+
+    // Filter modes assigned to number line display
+    let lineModes = config.modes
+        .map(normalizeMode)
+        .filter(m => m.target === 'both' || m.target === 'line');
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
@@ -480,18 +503,14 @@ function drawTimelineLabels() {
         let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
         let py = (h / 2) + (slope * h * (px / canvas.width - 0.5)) - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
-        // Filter modes allowed on the timeline
-        let activeTimelineModes = config.modes.filter(m => m.target === "both" || m.target === "timeline");
-        let totalModes = activeTimelineModes.length;
+        let totalModes = lineModes.length;
 
         let aliasName = null;
-        if (window.notation && window.notation.Aliases) {
-            notation.Aliases.forEach(([name, defStr]) => {
-                if (notation.cmp(lbl.ord, defStr) === 0) {
-                    aliasName = name;
-                }
-            });
-        }
+        notation.Aliases.forEach(([name, defStr]) => {
+            if (notation.cmp(lbl.ord, defStr) === 0) {
+                aliasName = name;
+            }
+        });
 
         let modeStackHeight = (config.ShowLabel && totalModes > 0)
             ? (totalModes - 1) * config.LabelBetweenLabelSpacing
@@ -510,8 +529,10 @@ function drawTimelineLabels() {
         }
 
         if (config.ShowLabel) {
-            activeTimelineModes.forEach((m, i) => {
-                let mode = window.notation.DisplayName[m.index];
+            lineModes.forEach((item, i) => {
+                let mode = window.notation.DisplayName[item.mode];
+                if (!mode) return;
+
                 let labelString = notation.display(lbl.ord, mode);
                 let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
                 let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
