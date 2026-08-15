@@ -31,14 +31,13 @@ let config = {
     ZoomIntoMouse: false,
 
     // --- Interactive & Rendering Modes ---
-    modes: [0],
+    modes: [{ mode: 0, target: 'both' }],
     LockScreen: false,
     MathstickMode: false,
     MathStick_UseLogarithmLength: false,
     MathStick_LogarithmBase: 2,
     DiagonalTickArrangement: true,
     HarmonicInvtervalSpacing: false,
-    MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
     EnableSetViewPort: false,
     SlowMode: false,
@@ -51,7 +50,7 @@ let config = {
     ShowTitle: true,
     ShowFPS: true,
     ShowDepthAdjustGui: true,
-    ShowOrdinalNotationConfigGui: true,
+    ShowOrdinalNotationConfigGui: false,
     AlwaysShowDivisionOnIdle: false,
     AlwaysShowDivisionOnInteraction: true,
     ShowMiddleNumberLineDivision: false,
@@ -173,6 +172,143 @@ Object.assign(divisionLine.style, {
 });
 document.body.appendChild(divisionLine);
 
+// --- Floating GUI Setup for Notation Configuration ---
+let floatingGuiContainer = document.createElement("div");
+Object.assign(floatingGuiContainer.style, {
+    position: "absolute",
+    top: "60px",
+    right: "20px",
+    background: "rgba(20, 20, 20, 0.9)",
+    border: "1px solid #444",
+    padding: "15px",
+    borderRadius: "8px",
+    display: "none",
+    zIndex: "1000",
+    color: "#fff",
+    fontFamily: "sans-serif",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.5)"
+});
+document.body.appendChild(floatingGuiContainer);
+
+function checkAndInitFloatingGui() {
+    if (!config.ShowOrdinalNotationConfigGui) {
+        floatingGuiContainer.style.display = "none";
+        return;
+    }
+    floatingGuiContainer.style.display = "block";
+    floatingGuiContainer.innerHTML = `<h3 style="margin-top:0; margin-bottom:10px; font-size:16px;">Notation Configurations</h3>`;
+    
+    let listWrapper = document.createElement("div");
+    listWrapper.style.maxHeight = "200px";
+    listWrapper.style.overflowY = "auto";
+    listWrapper.style.marginBottom = "10px";
+
+    config.modes.forEach((item, index) => {
+        let row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "8px";
+        row.style.marginBottom = "8px";
+
+        // 1. Notation Selector Dropdown
+        let select = document.createElement("select");
+        select.style.background = "#333";
+        select.style.color = config.SelectNotationBoxColor;
+        select.style.border = "1px solid #555";
+        select.style.padding = "4px";
+        select.style.borderRadius = "4px";
+
+        if (window.notation && window.notation.DisplayName) {
+            window.notation.DisplayName.forEach((name, mIdx) => {
+                let opt = document.createElement("option");
+                opt.value = mIdx;
+                opt.innerText = name;
+                if (mIdx === item.mode) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+        select.addEventListener("change", (e) => {
+            config.modes[index].mode = parseInt(e.target.value);
+            render();
+        });
+
+        // 2. Delete Notation Button
+        let delBtn = document.createElement("button");
+        delBtn.innerText = "Delete";
+        Object.assign(delBtn.style, {
+            background: config.RemoveNotationBtnColor,
+            color: "#fff",
+            border: "none",
+            padding: "5px 8px",
+            borderRadius: "4px",
+            cursor: "pointer"
+        });
+        delBtn.addEventListener("click", () => {
+            if (config.modes.length > 1) {
+                config.modes.splice(index, 1);
+                checkAndInitFloatingGui();
+                render();
+            } else {
+                alert("At least one notation must remain.");
+            }
+        });
+
+        // 3. Display Target Toggle Button (<btn>Display on number line/sample/both</btn>)
+        let targetBtn = document.createElement("button");
+        let updateTargetBtnText = () => {
+            let t = config.modes[index].target;
+            if (t === 'both') targetBtn.innerText = "Display: Both";
+            else if (t === 'label') targetBtn.innerText = "Display: Number Line";
+            else if (t === 'sample') targetBtn.innerText = "Display: Sample";
+        };
+        updateTargetBtnText();
+
+        Object.assign(targetBtn.style, {
+            background: config.AddNotationBtnColor,
+            color: "#fff",
+            border: "none",
+            padding: "5px 8px",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "12px"
+        });
+        targetBtn.addEventListener("click", () => {
+            let t = config.modes[index].target;
+            if (t === 'both') config.modes[index].target = 'label';
+            else if (t === 'label') config.modes[index].target = 'sample';
+            else config.modes[index].target = 'both';
+            updateTargetBtnText();
+            render();
+        });
+
+        row.appendChild(select);
+        row.appendChild(delBtn);
+        row.appendChild(targetBtn);
+        listWrapper.appendChild(row);
+    });
+
+    floatingGuiContainer.appendChild(listWrapper);
+
+    // Add Notation Button
+    let addBtn = document.createElement("button");
+    addBtn.innerText = "+ Add Notation";
+    Object.assign(addBtn.style, {
+        background: config.AddNotationBtnColor,
+        color: "#fff",
+        border: "none",
+        padding: "6px 12px",
+        borderRadius: "4px",
+        cursor: "pointer",
+        width: "100%"
+    });
+    addBtn.addEventListener("click", () => {
+        config.modes.push({ mode: 0, target: 'both' });
+        checkAndInitFloatingGui();
+        render();
+    });
+    floatingGuiContainer.appendChild(addBtn);
+}
+
 // --- Pointer Lock Setup ---
 let isMouseLocked = false;
 
@@ -181,7 +317,6 @@ document.addEventListener("pointerlockchange", () => {
 });
 
 function updateDivisionLine() {
-    // Check if mouse is down or navigation keys are held
     let isInteracting = cam.view.mouse.isDown ||
         cam.activeKeys["arrowleft"] ||
         cam.activeKeys["arrowright"] ||
@@ -299,13 +434,11 @@ function blendColorWithBrightness(hexColor, b) {
 
     if (b <= config.TickColorMaxBrightness) {
         const scale = b / config.TickColorMaxBrightness;
-
         r = Math.floor(r * scale);
         g = Math.floor(g * scale);
         bChan = Math.floor(bChan * scale);
     } else {
         const boost = Math.min(config.TickColorMaxBoost, b - config.TickColorBoostStart);
-
         r = Math.min(config.TickColorMaxChannel, r + boost);
         g = Math.min(config.TickColorMaxChannel, g + boost);
         bChan = Math.min(config.TickColorMaxChannel, bChan + boost);
@@ -453,17 +586,14 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20 && cam.samplerOrd !== null) {
         let htmlContent = "";
-        if (config.MultipleNotationOnSample) {
-            config.modes.forEach(modeIdx => {
-                const mode = notation.DisplayName[modeIdx];
-                const ordStr = notation.display(cam.samplerOrd, mode);
-                htmlContent += `<div>${ordStr}</div>`;
-            });
-        } else {
-            const mode = notation.DisplayName[config.modes[0]];
+        let sampleModes = config.modes.filter(item => item.target === 'both' || item.target === 'sample');
+
+        sampleModes.forEach(item => {
+            const mode = notation.DisplayName[item.mode];
             const ordStr = notation.display(cam.samplerOrd, mode);
-            htmlContent = `<div>${ordStr}</div>`;
-        }
+            htmlContent += `<div>${ordStr}</div>`;
+        });
+        
         sampleElem.innerHTML = htmlContent;
         sampleElem.style.color = config.ColorSample ? notation.classifyOrdinal(cam.samplerOrd) : config.DefaultSampleColor;
     }
@@ -471,6 +601,7 @@ function sampleHighPrecision(x, width) {
 
 function drawTimelineLabels() {
     let h = canvas.height;
+    let activeLabelModes = config.modes.filter(item => item.target === 'both' || item.target === 'label');
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
@@ -481,7 +612,7 @@ function drawTimelineLabels() {
         let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
         let py = (h / 2) + (slope * h * (px / canvas.width - 0.5)) - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
-        let totalModes = config.modes.length;
+        let totalModes = activeLabelModes.length;
 
         let aliasName = null;
         notation.Aliases.forEach(([name, defStr]) => {
@@ -507,8 +638,8 @@ function drawTimelineLabels() {
         }
 
         if (config.ShowLabel) {
-            config.modes.forEach((modeIdx, i) => {
-                let mode = window.notation.DisplayName[modeIdx];
+            activeLabelModes.forEach((item, i) => {
+                let mode = window.notation.DisplayName[item.mode];
                 let labelString = notation.display(lbl.ord, mode);
                 let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
                 let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
@@ -521,8 +652,6 @@ function drawTimelineLabels() {
 
         if (config.ShowTimelineLabel && aliasName) {
             let aliasY = py - modeStackHeight - spacingBelowAlias;
-
-            // Count of mode offset steps (e.g., if 3 modes exist, max index offset is 2)
             let modeSteps = (config.ShowLabel && totalModes > 0) ? (totalModes - 1) : 0;
 
             let aliasX = px
@@ -553,7 +682,7 @@ function drawHUD() {
     }
 }
 
-// --- 1. Fast, Overflow-Safe BigInt Zoom Formatter ---
+// --- BigInt Zoom & Fraction Formatters ---
 function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
     if (!currentWidthBI || currentWidthBI <= 0n || !canvasWidthBI) return "1.00x";
 
@@ -563,7 +692,6 @@ function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
     let len1 = sNum.length;
     let len2 = sDen.length;
 
-    // Normalize top 15 digits into standard mantissas [1.0, 10.0)
     let mant1 = Number(sNum.slice(0, 15)) / Math.pow(10, Math.min(15, len1) - 1);
     let mant2 = Number(sDen.slice(0, 15)) / Math.pow(10, Math.min(15, len2) - 1);
 
@@ -648,10 +776,8 @@ function render() {
         for (let n = 0; n < cam.ticks.length; n++) {
             if (cam.ticks[n]) {
                 let x = n;
-                // Unclamped vertical slope position based on TickSlopeArrangement
                 let y = (cam.h / 2) + (slope * cam.h * (n / cam.w - 0.5));
 
-                // 1. Calculate and sanitize brightness
                 let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
                 if (!isFinite(b)) b = 255;
                 b = Math.max(0, Math.min(b, 255));
@@ -660,7 +786,6 @@ function render() {
                     ? blendColorWithBrightness(cam.ticks[n].color, b)
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
-                // 2. Calculate and clamp the tick height
                 let currentTickHeight = config.MathstickMode
                     ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n])
                     : cam.tHeight;
@@ -707,8 +832,7 @@ function refreshLoop() {
         cam.fps = 1000 / deltaTime;
         fpsElem.innerText = cam.fps.toFixed(config.fpsPrecision) + 'fps';
 
-        updateDivisionLine()
-
+        updateDivisionLine();
         refreshLoop();
     });
 }
@@ -801,7 +925,6 @@ function getEventCoords(e) {
     return { x: t.clientX, y: t.clientY };
 }
 
-
 function handlePointerDown(e) {
     if (config.LockScreen) { return; }
     if (window.isSettingsOpen) return;
@@ -837,14 +960,12 @@ function handlePointerMove(e) {
     let movementX = isMouseLocked ? e.movementX : (clientX - cam.view.mouse.lastX);
     let movementY = isMouseLocked ? e.movementY : (clientY - cam.view.mouse.lastY);
 
-    // Save previous positions IMMEDIATELY so the next touchmove delta is correct
     cam.view.mouse.lastX = clientX;
     cam.view.mouse.lastY = clientY;
 
     if (config.SlowMode) {
         cam.selection.currentX = clientX;
         cam.selection.currentY = clientY;
-        // ... rest of SlowMode selection box code remains the same
 
         let x = Math.min(cam.selection.startX, cam.selection.currentX);
         let y = Math.min(cam.selection.startY, cam.selection.currentY);
@@ -963,34 +1084,33 @@ window.addEventListener("keydown", (e) => {
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
     } else if (key === "f" && !(e.ctrlKey || e.metaKey)) {
-        config.EnableOrdinalFinder = !(config.EnableOrdinalFinder)
-        checkAndInitFloatingGui();
+        config.EnableOrdinalFinder = !(config.EnableOrdinalFinder);
     } else if (key === "g" && !(e.ctrlKey || e.metaKey)) {
-        config.EnableSetViewPort = !(config.EnableSetViewPort)
+        config.ShowOrdinalNotationConfigGui = !(config.ShowOrdinalNotationConfigGui);
         checkAndInitFloatingGui();
     } else if (key === "i" && !(e.ctrlKey || e.metaKey)) {
-        config.ShowCurrentPositionState = !(config.ShowCurrentPositionState)
+        config.ShowCurrentPositionState = !(config.ShowCurrentPositionState);
         if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
     } else if (key === "m" && !(e.ctrlKey || e.metaKey)) {
-        config.MathstickMode = !(config.MathstickMode)
-        config.TickBetweenLabelXoffest = config.MathstickMode ? 5 : -5
-        config.Tickheight = config.MathstickMode ? 0.0035 : 0.05
+        config.MathstickMode = !(config.MathstickMode);
+        config.TickBetweenLabelXoffest = config.MathstickMode ? 5 : -5;
+        config.Tickheight = config.MathstickMode ? 0.0035 : 0.05;
         render();
     } else if (key === "h" && !(e.ctrlKey || e.metaKey)) {
-        config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing)
+        config.HarmonicInvtervalSpacing = !(config.HarmonicInvtervalSpacing);
         render();
     } else if (key === "l" && !(e.ctrlKey || e.metaKey)) {
-        config.LockScreen = !(config.LockScreen)
-        render()
+        config.LockScreen = !(config.LockScreen);
+        render();
     } else if (key === "s" && (e.shiftKey || e.metaKey)) {
-        config.SlowMode = !(config.SlowMode)
+        config.SlowMode = !(config.SlowMode);
         alert((config.SlowMode ? "Enabled" : "Disabled") + " Slow Mode");
         render();
     } else if (key === "d" && !(e.ctrlKey || e.metaKey)) {
-        config.DiagonalTickArrangement = !(config.DiagonalTickArrangement)
+        config.DiagonalTickArrangement = !(config.DiagonalTickArrangement);
         render();
     } else if (key === "z" && !(e.ctrlKey || e.metaKey)) {
-        config.ZoomIntoMouse = !(config.ZoomIntoMouse)
+        config.ZoomIntoMouse = !(config.ZoomIntoMouse);
         render();
     } else if (key === "r" && !(e.ctrlKey || e.metaKey)) {
         resetViewport();
@@ -1001,7 +1121,6 @@ window.addEventListener("keydown", (e) => {
             document.exitPointerLock();
         }
     }
-
 
     if (actionTriggered) render();
 });
