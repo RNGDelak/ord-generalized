@@ -31,7 +31,7 @@ let config = {
     ZoomIntoMouse: false,
 
     // --- Interactive & Rendering Modes ---
-    modes: [{ mode: 0, target: 'both' }],
+    modes: [{ mode: 0, target: "both" }],
     LockScreen: false,
     MathstickMode: false,
     MathStick_UseLogarithmLength: false,
@@ -50,7 +50,7 @@ let config = {
     ShowTitle: true,
     ShowFPS: true,
     ShowDepthAdjustGui: true,
-    ShowOrdinalNotationConfigGui: false,
+    ShowOrdinalNotationConfigGui: true,
     AlwaysShowDivisionOnIdle: false,
     AlwaysShowDivisionOnInteraction: true,
     ShowMiddleNumberLineDivision: false,
@@ -172,141 +172,173 @@ Object.assign(divisionLine.style, {
 });
 document.body.appendChild(divisionLine);
 
-// --- Floating GUI Setup for Notation Configuration ---
+// --- Floating GUI & Notation Selector Panel ---
 let floatingGuiContainer = document.createElement("div");
 Object.assign(floatingGuiContainer.style, {
-    position: "absolute",
-    top: "60px",
-    right: "20px",
-    background: "rgba(20, 20, 20, 0.9)",
-    border: "1px solid #444",
+    position: "fixed",
+    top: "10px",
+    right: "10px",
+    background: "rgba(0, 0, 0, 0.85)",
+    color: "#fff",
     padding: "15px",
     borderRadius: "8px",
-    display: "none",
-    zIndex: "1000",
-    color: "#fff",
     fontFamily: "sans-serif",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.5)"
+    zIndex: "1000",
+    maxHeight: "80vh",
+    overflowY: "auto",
+    display: "none"
 });
 document.body.appendChild(floatingGuiContainer);
+window.isSettingsOpen = false;
 
 function checkAndInitFloatingGui() {
-    if (!config.ShowOrdinalNotationConfigGui) {
+    let shouldShow = config.ShowOrdinalNotationConfigGui || config.EnableOrdinalFinder || config.EnableSetViewPort;
+    if (!shouldShow) {
         floatingGuiContainer.style.display = "none";
+        window.isSettingsOpen = false;
         return;
     }
+
     floatingGuiContainer.style.display = "block";
-    floatingGuiContainer.innerHTML = `<h3 style="margin-top:0; margin-bottom:10px; font-size:16px;">Notation Configurations</h3>`;
-    
-    let listWrapper = document.createElement("div");
-    listWrapper.style.maxHeight = "200px";
-    listWrapper.style.overflowY = "auto";
-    listWrapper.style.marginBottom = "10px";
+    window.isSettingsOpen = true;
+    floatingGuiContainer.innerHTML = "";
 
-    config.modes.forEach((item, index) => {
-        let row = document.createElement("div");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.gap = "8px";
-        row.style.marginBottom = "8px";
+    let header = document.createElement("div");
+    header.innerHTML = "<b>Notation & Configuration Panel</b>";
+    header.style.marginBottom = "10px";
+    floatingGuiContainer.appendChild(header);
 
-        // 1. Notation Selector Dropdown
-        let select = document.createElement("select");
-        select.style.background = "#333";
-        select.style.color = config.SelectNotationBoxColor;
-        select.style.border = "1px solid #555";
-        select.style.padding = "4px";
-        select.style.borderRadius = "4px";
+    if (config.ShowOrdinalNotationConfigGui) {
+        let section = document.createElement("div");
+        section.style.marginBottom = "15px";
+        
+        let title = document.createElement("div");
+        title.innerHTML = "<b>Notations Configuration</b>";
+        title.style.marginBottom = "5px";
+        section.appendChild(title);
 
-        if (window.notation && window.notation.DisplayName) {
-            window.notation.DisplayName.forEach((name, mIdx) => {
+        config.modes.forEach((item, index) => {
+            // Ensure backwards compatibility if stored as a primitive number
+            if (typeof item === "number") {
+                config.modes[index] = { mode: item, target: "both" };
+                item = config.modes[index];
+            }
+
+            let row = document.createElement("div");
+            Object.assign(row.style, {
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "8px"
+            });
+
+            // 1. Notation selector
+            let notationSelect = document.createElement("select");
+            notation.DisplayName.forEach((name, mIdx) => {
                 let opt = document.createElement("option");
                 opt.value = mIdx;
                 opt.innerText = name;
                 if (mIdx === item.mode) opt.selected = true;
-                select.appendChild(opt);
+                notationSelect.appendChild(opt);
             });
-        }
-        select.addEventListener("change", (e) => {
-            config.modes[index].mode = parseInt(e.target.value);
-            render();
-        });
-
-        // 2. Delete Notation Button
-        let delBtn = document.createElement("button");
-        delBtn.innerText = "Delete";
-        Object.assign(delBtn.style, {
-            background: config.RemoveNotationBtnColor,
-            color: "#fff",
-            border: "none",
-            padding: "5px 8px",
-            borderRadius: "4px",
-            cursor: "pointer"
-        });
-        delBtn.addEventListener("click", () => {
-            if (config.modes.length > 1) {
-                config.modes.splice(index, 1);
-                checkAndInitFloatingGui();
+            notationSelect.addEventListener("change", (e) => {
+                config.modes[index].mode = parseInt(e.target.value);
                 render();
-            } else {
-                alert("At least one notation must remain.");
-            }
+            });
+
+            // 2. Delete notation button
+            let deleteBtn = document.createElement("button");
+            deleteBtn.innerText = "Delete";
+            Object.assign(deleteBtn.style, {
+                background: config.RemoveNotationBtnColor || "#ff4444",
+                color: "#fff",
+                border: "none",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                cursor: "pointer"
+            });
+            deleteBtn.addEventListener("click", () => {
+                if (config.modes.length > 1) {
+                    config.modes.splice(index, 1);
+                    checkAndInitFloatingGui();
+                    render();
+                } else {
+                    alert("At least one notation is required.");
+                }
+            });
+
+            // 3. Display target selector (<btn>Display on number line/sample/both</btn>)
+            let targetSelect = document.createElement("select");
+            let targets = [
+                { value: "both", label: "Display on both" },
+                { value: "label", label: "Display on number line" },
+                { value: "sample", label: "Display on sample" }
+            ];
+            targets.forEach(t => {
+                let opt = document.createElement("option");
+                opt.value = t.value;
+                opt.innerText = t.label;
+                if (t.value === item.target) opt.selected = true;
+                targetSelect.appendChild(opt);
+            });
+            Object.assign(targetSelect.style, {
+                background: config.AddNotationBtnColor || "#0098ff",
+                color: "#fff",
+                border: "none",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                cursor: "pointer"
+            });
+            targetSelect.addEventListener("change", (e) => {
+                config.modes[index].target = e.target.value;
+                render();
+            });
+
+            row.appendChild(notationSelect);
+            row.appendChild(deleteBtn);
+            row.appendChild(targetSelect);
+            section.appendChild(row);
         });
 
-        // 3. Display Target Toggle Button (<btn>Display on number line/sample/both</btn>)
-        let targetBtn = document.createElement("button");
-        let updateTargetBtnText = () => {
-            let t = config.modes[index].target;
-            if (t === 'both') targetBtn.innerText = "Display: Both";
-            else if (t === 'label') targetBtn.innerText = "Display: Number Line";
-            else if (t === 'sample') targetBtn.innerText = "Display: Sample";
-        };
-        updateTargetBtnText();
-
-        Object.assign(targetBtn.style, {
-            background: config.AddNotationBtnColor,
+        let addBtn = document.createElement("button");
+        addBtn.innerText = "Add Notation";
+        Object.assign(addBtn.style, {
+            background: config.AddNotationBtnColor || "#0098ff",
             color: "#fff",
             border: "none",
-            padding: "5px 8px",
+            padding: "6px 12px",
             borderRadius: "4px",
             cursor: "pointer",
-            fontSize: "12px"
+            marginTop: "5px"
         });
-        targetBtn.addEventListener("click", () => {
-            let t = config.modes[index].target;
-            if (t === 'both') config.modes[index].target = 'label';
-            else if (t === 'label') config.modes[index].target = 'sample';
-            else config.modes[index].target = 'both';
-            updateTargetBtnText();
+        addBtn.addEventListener("click", () => {
+            config.modes.push({ mode: 0, target: "both" });
+            checkAndInitFloatingGui();
             render();
         });
+        section.appendChild(addBtn);
 
-        row.appendChild(select);
-        row.appendChild(delBtn);
-        row.appendChild(targetBtn);
-        listWrapper.appendChild(row);
-    });
+        floatingGuiContainer.appendChild(section);
+    }
 
-    floatingGuiContainer.appendChild(listWrapper);
-
-    // Add Notation Button
-    let addBtn = document.createElement("button");
-    addBtn.innerText = "+ Add Notation";
-    Object.assign(addBtn.style, {
-        background: config.AddNotationBtnColor,
+    let closeBtn = document.createElement("button");
+    closeBtn.innerText = "Close Panel";
+    Object.assign(closeBtn.style, {
+        background: "#444",
         color: "#fff",
         border: "none",
         padding: "6px 12px",
         borderRadius: "4px",
         cursor: "pointer",
-        width: "100%"
+        marginTop: "10px"
     });
-    addBtn.addEventListener("click", () => {
-        config.modes.push({ mode: 0, target: 'both' });
+    closeBtn.addEventListener("click", () => {
+        config.ShowOrdinalNotationConfigGui = false;
+        config.EnableOrdinalFinder = false;
+        config.EnableSetViewPort = false;
         checkAndInitFloatingGui();
-        render();
     });
-    floatingGuiContainer.appendChild(addBtn);
+    floatingGuiContainer.appendChild(closeBtn);
 }
 
 // --- Pointer Lock Setup ---
@@ -434,11 +466,13 @@ function blendColorWithBrightness(hexColor, b) {
 
     if (b <= config.TickColorMaxBrightness) {
         const scale = b / config.TickColorMaxBrightness;
+
         r = Math.floor(r * scale);
         g = Math.floor(g * scale);
         bChan = Math.floor(bChan * scale);
     } else {
         const boost = Math.min(config.TickColorMaxBoost, b - config.TickColorBoostStart);
+
         r = Math.min(config.TickColorMaxChannel, r + boost);
         g = Math.min(config.TickColorMaxChannel, g + boost);
         bChan = Math.min(config.TickColorMaxChannel, bChan + boost);
@@ -586,14 +620,14 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20 && cam.samplerOrd !== null) {
         let htmlContent = "";
-        let sampleModes = config.modes.filter(item => item.target === 'both' || item.target === 'sample');
+        let sampleModes = config.modes.map(m => typeof m === 'number' ? { mode: m, target: 'both' } : m)
+                                      .filter(m => m.target === 'sample' || m.target === 'both');
 
-        sampleModes.forEach(item => {
-            const mode = notation.DisplayName[item.mode];
-            const ordStr = notation.display(cam.samplerOrd, mode);
-            htmlContent += `<div>${ordStr}</div>`;
-        });
-        
+            sampleModes.forEach(item => {
+                const mode = notation.DisplayName[item.mode];
+                const ordStr = notation.display(cam.samplerOrd, mode);
+                htmlContent += `<div>${ordStr}</div>`;
+            });
         sampleElem.innerHTML = htmlContent;
         sampleElem.style.color = config.ColorSample ? notation.classifyOrdinal(cam.samplerOrd) : config.DefaultSampleColor;
     }
@@ -601,7 +635,9 @@ function sampleHighPrecision(x, width) {
 
 function drawTimelineLabels() {
     let h = canvas.height;
-    let activeLabelModes = config.modes.filter(item => item.target === 'both' || item.target === 'label');
+
+    let labelModes = config.modes.map(m => typeof m === 'number' ? { mode: m, target: 'both' } : m)
+                                 .filter(m => m.target === 'label' || m.target === 'both');
 
     cam.labelsToDraw.forEach((lbl) => {
         let px = lbl.x;
@@ -612,7 +648,7 @@ function drawTimelineLabels() {
         let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
         let py = (h / 2) + (slope * h * (px / canvas.width - 0.5)) - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
-        let totalModes = activeLabelModes.length;
+        let totalModes = labelModes.length;
 
         let aliasName = null;
         notation.Aliases.forEach(([name, defStr]) => {
@@ -638,7 +674,7 @@ function drawTimelineLabels() {
         }
 
         if (config.ShowLabel) {
-            activeLabelModes.forEach((item, i) => {
+            labelModes.forEach((item, i) => {
                 let mode = window.notation.DisplayName[item.mode];
                 let labelString = notation.display(lbl.ord, mode);
                 let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
@@ -652,6 +688,7 @@ function drawTimelineLabels() {
 
         if (config.ShowTimelineLabel && aliasName) {
             let aliasY = py - modeStackHeight - spacingBelowAlias;
+
             let modeSteps = (config.ShowLabel && totalModes > 0) ? (totalModes - 1) : 0;
 
             let aliasX = px
@@ -682,7 +719,7 @@ function drawHUD() {
     }
 }
 
-// --- BigInt Zoom & Fraction Formatters ---
+// --- Zoom & Position Formatters ---
 function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
     if (!currentWidthBI || currentWidthBI <= 0n || !canvasWidthBI) return "1.00x";
 
@@ -1066,7 +1103,7 @@ window.addEventListener("wheel", (e) => {
 }, { passive: false });
 
 window.addEventListener("keydown", (e) => {
-    if (window.isSettingsOpen) return;
+    if (window.isSettingsOpen && e.key.toLowerCase() !== "g" && e.key.toLowerCase() !== "f") return;
     let key = e.key.toLowerCase();
     cam.activeKeys[key] = true;
     cam.activeKeys[e.code] = true;
@@ -1085,6 +1122,7 @@ window.addEventListener("keydown", (e) => {
         actionTriggered = true;
     } else if (key === "f" && !(e.ctrlKey || e.metaKey)) {
         config.EnableOrdinalFinder = !(config.EnableOrdinalFinder);
+        checkAndInitFloatingGui();
     } else if (key === "g" && !(e.ctrlKey || e.metaKey)) {
         config.ShowOrdinalNotationConfigGui = !(config.ShowOrdinalNotationConfigGui);
         checkAndInitFloatingGui();
@@ -1126,7 +1164,6 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-    if (window.isSettingsOpen) return;
     cam.activeKeys[e.key.toLowerCase()] = false;
     cam.activeKeys[e.code] = false;
 });
