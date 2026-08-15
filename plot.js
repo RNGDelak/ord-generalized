@@ -38,12 +38,16 @@ let config = {
     MathStick_LogarithmBase: 2,
     DiagonalTickArrangement: true,
     HarmonicInvtervalSpacing: false,
-    MultipleNotationOnSample: false,
     EnableOrdinalFinder: false,
     EnableSetViewPort: false,
     SlowMode: false,
     ZoomOutFencing: true,
     PanOutFencing: true,
+
+    // --- Dynamic Notation Layouts ---
+    notationLayouts: [
+        { modeId: 0, displayTarget: "both" } // Options: "numberline", "sample", "both"
+    ],
 
     // --- UI & HUD Visibility ---
     ShowHUD: true,
@@ -181,7 +185,6 @@ document.addEventListener("pointerlockchange", () => {
 });
 
 function updateDivisionLine() {
-    // Check if mouse is down or navigation keys are held
     let isInteracting = cam.view.mouse.isDown ||
         cam.activeKeys["arrowleft"] ||
         cam.activeKeys["arrowright"] ||
@@ -453,17 +456,14 @@ function sampleHighPrecision(x, width) {
 
     if (cam.samplerBd < 1e20 && cam.samplerOrd !== null) {
         let htmlContent = "";
-        if (config.MultipleNotationOnSample) {
-            config.modes.forEach(modeIdx => {
-                const mode = notation.DisplayName[modeIdx];
-                const ordStr = notation.display(cam.samplerOrd, mode);
-                htmlContent += `<div>${ordStr}</div>`;
-            });
-        } else {
-            const mode = notation.DisplayName[config.modes[0]];
+        let sampleNotations = config.notationLayouts.filter(l => l.displayTarget === "sample" || l.displayTarget === "both");
+        
+        sampleNotations.forEach(layout => {
+            const mode = notation.DisplayName[layout.modeId];
             const ordStr = notation.display(cam.samplerOrd, mode);
-            htmlContent = `<div>${ordStr}</div>`;
-        }
+            htmlContent += `<div>${ordStr}</div>`;
+        });
+
         sampleElem.innerHTML = htmlContent;
         sampleElem.style.color = config.ColorSample ? notation.classifyOrdinal(cam.samplerOrd) : config.DefaultSampleColor;
     }
@@ -481,7 +481,8 @@ function drawTimelineLabels() {
         let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
         let py = (h / 2) + (slope * h * (px / canvas.width - 0.5)) - tH * (1 - config.TickAnchorPoint) - config.LabelBetweenTickSpacing;
 
-        let totalModes = config.modes.length;
+        let activeNotations = config.notationLayouts.filter(l => l.displayTarget === "numberline" || l.displayTarget === "both");
+        let totalModes = activeNotations.length;
 
         let aliasName = null;
         notation.Aliases.forEach(([name, defStr]) => {
@@ -507,8 +508,8 @@ function drawTimelineLabels() {
         }
 
         if (config.ShowLabel) {
-            config.modes.forEach((modeIdx, i) => {
-                let mode = window.notation.DisplayName[modeIdx];
+            activeNotations.forEach((layout, i) => {
+                let mode = window.notation.DisplayName[layout.modeId];
                 let labelString = notation.display(lbl.ord, mode);
                 let color = config.ColorLabel ? notation.classifyOrdinal(lbl.ord) : config.DefaultLabelColor;
                 let currentY = py - ((totalModes - 1 - i) * config.LabelBetweenLabelSpacing);
@@ -522,7 +523,6 @@ function drawTimelineLabels() {
         if (config.ShowTimelineLabel && aliasName) {
             let aliasY = py - modeStackHeight - spacingBelowAlias;
 
-            // Count of mode offset steps (e.g., if 3 modes exist, max index offset is 2)
             let modeSteps = (config.ShowLabel && totalModes > 0) ? (totalModes - 1) : 0;
 
             let aliasX = px
@@ -563,7 +563,6 @@ function formatBigIntZoom(currentWidthBI, canvasWidthBI) {
     let len1 = sNum.length;
     let len2 = sDen.length;
 
-    // Normalize top 15 digits into standard mantissas [1.0, 10.0)
     let mant1 = Number(sNum.slice(0, 15)) / Math.pow(10, Math.min(15, len1) - 1);
     let mant2 = Number(sDen.slice(0, 15)) / Math.pow(10, Math.min(15, len2) - 1);
 
@@ -648,10 +647,8 @@ function render() {
         for (let n = 0; n < cam.ticks.length; n++) {
             if (cam.ticks[n]) {
                 let x = n;
-                // Unclamped vertical slope position based on TickSlopeArrangement
                 let y = (cam.h / 2) + (slope * cam.h * (n / cam.w - 0.5));
 
-                // 1. Calculate and sanitize brightness
                 let b = 128.0 + 256.0 * Math.log(1.0 + cam.impor[n]) * cam.ilxw;
                 if (!isFinite(b)) b = 255;
                 b = Math.max(0, Math.min(b, 255));
@@ -660,7 +657,6 @@ function render() {
                     ? blendColorWithBrightness(cam.ticks[n].color, b)
                     : blendColorWithBrightness(config.DefaultTickColor, b);
 
-                // 2. Calculate and clamp the tick height
                 let currentTickHeight = config.MathstickMode
                     ? cam.tHeight * (config.MathStick_UseLogarithmLength ? Math.log(cam.impor[n] + 1) / Math.log(config.MathStick_LogarithmBase) : cam.impor[n])
                     : cam.tHeight;
@@ -714,7 +710,6 @@ function refreshLoop() {
 }
 refreshLoop();
 
-// --- Viewport & Camera Helpers ---
 function resizeCanvas() {
     let oldWidth = canvas.width;
     canvas.width = window.innerWidth;
@@ -794,13 +789,11 @@ function undoViewport() {
     return false;
 }
 
-// --- Interaction Handlers ---
 function getEventCoords(e) {
     let t = (e.touches && e.touches.length > 0) ? e.touches[0] :
         (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
     return { x: t.clientX, y: t.clientY };
 }
-
 
 function handlePointerDown(e) {
     if (config.LockScreen) { return; }
@@ -837,14 +830,12 @@ function handlePointerMove(e) {
     let movementX = isMouseLocked ? e.movementX : (clientX - cam.view.mouse.lastX);
     let movementY = isMouseLocked ? e.movementY : (clientY - cam.view.mouse.lastY);
 
-    // Save previous positions IMMEDIATELY so the next touchmove delta is correct
     cam.view.mouse.lastX = clientX;
     cam.view.mouse.lastY = clientY;
 
     if (config.SlowMode) {
         cam.selection.currentX = clientX;
         cam.selection.currentY = clientY;
-        // ... rest of SlowMode selection box code remains the same
 
         let x = Math.min(cam.selection.startX, cam.selection.currentX);
         let y = Math.min(cam.selection.startY, cam.selection.currentY);
@@ -902,7 +893,6 @@ function handlePointerUp() {
     applySelectionZoom();
 }
 
-// --- Event Listeners ---
 window.addEventListener("resize", () => {
     resizeCanvas();
     render();
@@ -964,10 +954,8 @@ window.addEventListener("keydown", (e) => {
         actionTriggered = true;
     } else if (key === "f" && !(e.ctrlKey || e.metaKey)) {
         config.EnableOrdinalFinder = !(config.EnableOrdinalFinder)
-        checkAndInitFloatingGui();
     } else if (key === "g" && !(e.ctrlKey || e.metaKey)) {
         config.EnableSetViewPort = !(config.EnableSetViewPort)
-        checkAndInitFloatingGui();
     } else if (key === "i" && !(e.ctrlKey || e.metaKey)) {
         config.ShowCurrentPositionState = !(config.ShowCurrentPositionState)
         if (config.ShowCurrentPositionState) { updateCameraStats() } else { zoomElem.innerText = ''; posElem.innerText = '' }
@@ -1001,7 +989,6 @@ window.addEventListener("keydown", (e) => {
             document.exitPointerLock();
         }
     }
-
 
     if (actionTriggered) render();
 });
@@ -1076,6 +1063,5 @@ function updateKeyboardInput() {
     requestAnimationFrame(updateKeyboardInput);
 }
 
-// Start Main Application
 updateKeyboardInput();
 init();
