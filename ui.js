@@ -222,14 +222,14 @@ function resetNotationsForSystem() {
     if (typeof config !== 'undefined') {
         if (window.notation && window.notation.config) {
             if (Array.isArray(window.notation.config.modes)) {
-                config.modes = [...window.notation.config.modes];
+                config.modes = window.notation.config.modes.map(normalizeMode);
             } else if (typeof window.notation.config.mode === 'number') {
-                config.modes = [window.notation.config.mode];
+                config.modes = [{ mode: window.notation.config.mode, target: 'both' }];
             } else {
-                config.modes = [0];
+                config.modes = [{ mode: 0, target: 'both' }];
             }
         } else {
-            config.modes = [0];
+            config.modes = [{ mode: 0, target: 'both' }];
         }
     }
     updateNotationConfigUI();
@@ -390,13 +390,19 @@ function updateNotationConfigUI() {
     container.innerHTML = "";
 
     if (!config.modes || !Array.isArray(config.modes)) {
-        config.modes = [0];
+        config.modes = [{ mode: 0, target: 'both' }];
     }
 
-    config.modes.forEach((modeVal, index) => {
+    config.modes.forEach((modeItem, index) => {
+        const item = normalizeMode(modeItem);
+
         const row = document.createElement("div");
         row.style.marginBottom = "4px";
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "6px";
 
+        // Notation Selector
         const select = document.createElement("select");
         select.id = `selectnotationbox_${index}`;
         select.style.background = "transparent";
@@ -413,23 +419,25 @@ function updateNotationConfigUI() {
                 opt.innerText = name;
                 opt.style.background = "#000000";
                 opt.style.color = "#ffffff";
-                if (idx === modeVal) opt.selected = true;
+                if (idx === item.mode) opt.selected = true;
                 select.appendChild(opt);
             });
         }
 
         select.onchange = (e) => {
-            config.modes[index] = parseInt(e.target.value);
+            const current = normalizeMode(config.modes[index]);
+            current.mode = parseInt(e.target.value);
+            config.modes[index] = current;
             render();
         };
 
+        // Remove Notation Button
         const removeBtn = document.createElement("button");
         removeBtn.innerText = "Remove notation";
         removeBtn.style.background = "transparent";
         removeBtn.style.color = config.RemoveNotationBtnColor;
         removeBtn.style.border = "none";
         removeBtn.style.cursor = "pointer";
-        removeBtn.style.marginLeft = "8px";
 
         removeBtn.onclick = () => {
             if (config.modes.length > 1 && !window.isSettingsOpen) {
@@ -439,16 +447,56 @@ function updateNotationConfigUI() {
             }
         };
 
+        // Target Switcher Button: Display on number line / sample / both
+        const targetBtn = document.createElement("button");
+        targetBtn.style.background = "transparent";
+        targetBtn.style.color = "#00ffcc";
+        targetBtn.style.border = "1px solid #444";
+        targetBtn.style.borderRadius = "3px";
+        targetBtn.style.padding = "2px 6px";
+        targetBtn.style.cursor = "pointer";
+        targetBtn.style.fontSize = "12px";
+
+        const targetLabels = {
+            both: "Display: both",
+            line: "Display: number line",
+            sample: "Display: sample"
+        };
+
+        const targetCycle = {
+            both: "line",
+            line: "sample",
+            sample: "both"
+        };
+
+        targetBtn.innerText = targetLabels[item.target] || targetLabels.both;
+
+        targetBtn.onclick = () => {
+            if (!window.isSettingsOpen) {
+                const current = normalizeMode(config.modes[index]);
+                current.target = targetCycle[current.target] || "both";
+                config.modes[index] = current;
+                targetBtn.innerText = targetLabels[current.target];
+                render();
+            }
+        };
+
         row.appendChild(select);
         row.appendChild(removeBtn);
+        row.appendChild(targetBtn);
         container.appendChild(row);
     });
 }
 
 function addNotationSelector() {
     if (!window.isSettingsOpen) {
-        const nextMode = (config.modes.length > 0) ? (config.modes[0] + 1) % window.notation.DisplayName.length : 0;
-        config.modes.unshift(nextMode);
+        const firstItem = normalizeMode(config.modes[0]);
+        const nextMode = (config.modes.length > 0 && window.notation?.DisplayName)
+            ? (firstItem.mode + 1) % window.notation.DisplayName.length
+            : 0;
+
+        // Default target is "both"
+        config.modes.unshift({ mode: nextMode, target: "both" });
         updateNotationConfigUI();
         render();
     }
