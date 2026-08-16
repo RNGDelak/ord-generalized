@@ -203,7 +203,7 @@ window.notation = (() => {
 
   const config = {
     aspectratio: 0.5,
-    modes:[1],
+    modes: [{ mode: 1, target: 'both' }],
     SlowMode:true
   };
 

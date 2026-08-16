@@ -311,7 +311,7 @@ window.notation = (() => {
   ];
 
   const config = {
-    modes:[1],
+    modes: [{ mode: 1, target: 'both' }],
     SlowMode:true
   };
 

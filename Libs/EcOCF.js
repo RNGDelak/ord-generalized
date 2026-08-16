@@ -5168,7 +5168,7 @@ window.notation = (() => {
    const Aliases = [
    ];
 
-   const config = { modes: [0] };//you must put an array of number represents the orders of notations incase you want a starting notation. look for configs for more 
+   const config = { modes: [{ mode: 0, target: 'both' }] };//you must put an array of objects represents the orders of notations incase you want a starting notation. look for configs for more 
 
    const title = "EcOCF transfinite number line";
 

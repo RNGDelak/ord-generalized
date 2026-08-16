@@ -183,7 +183,7 @@ window.notation = (() => {
     ["ω^ω", Limit],
   ];
 
-  const config = { modes: [1] };
+  const config = { modes: [{ mode: 1, target: 'both' }]}; //you must put in an array of objects with mode and target, target can be 'both', 'line' or 'sample'
   const title = "Worm transfinite number line";
 
   return {
