@@ -58,6 +58,7 @@ let config = {
 
     // --- Element Toggles (Show / Hide) ---
     ShowTick: true,
+    Rendernumberline: true,
     ShowSample: true,
     ShowLabel: true,
     ShowTimelineLabel: true,
@@ -115,6 +116,7 @@ let config = {
     samplefont: "30px Serif",
     sampleleftspacing: "10%",
     sampletopspacing: "83.5%",
+    sampleTextAlign: "left",
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
@@ -143,6 +145,7 @@ let cam = {
     samplerBd: 1e20,
     samplerOrd: null,
     activeKeys: {},
+    toggleHeldKeys: {},
     history: [],
     selection: { active: false, startX: 0, currentX: 0, startY: 0, currentY: 0 }
 };
@@ -449,7 +452,13 @@ function sampleHighPrecision(x, width) {
     if (!config.ShowSample) { sampleElem.innerHTML = ''; return; }
     cam.samplerBd = 1e20;
     cam.samplerOrd = null;
+    Object.assign(sampleElem.style, {
+        position: "absolute",
+        width: "100%",
+        textAlign: config.sampleTextAlign
+    });
     sampleElem.innerHTML = `<div></div>`;
+    
 
     let xBI = toBigInt(x);
     if (xBI <= cam.view.x0) {
@@ -573,6 +582,25 @@ function drawHUD() {
         if (config.LockScreen) { hudItems.push({ text: 'Screen Locked', color: 'rgb(255, 0, 0)' }); }
         if (config.ZoomIntoMouse) { hudItems.push({ text: 'Zoom Into Mouse Enabled', color: 'rgb(0, 255, 0)' }); }
         if (config.HarmonicInvtervalSpacing) { hudItems.push({ text: 'Harmonic Interval Spacing Enabled', color: 'rgb(0, 255, 0)' }); }
+
+        // --- Line-by-line Toggle-Held Arrow Keys ---
+        let arrowMapping = {
+            "arrowleft": "Left Arrow",
+            "arrowright": "Right Arrow",
+            "arrowup": "Up Arrow",
+            "arrowdown": "Down Arrow"
+        };
+
+        for (let key in arrowMapping) {
+            if (cam.toggleHeldKeys[key]) {
+                hudItems.push({ 
+                    text: `Toggled Holding ${arrowMapping[key]}`, 
+                    color: 'rgb(255, 145, 0)' 
+                });
+            }
+        }
+        // -------------------------------------------
+
         let lineHeight = 20;
         hudItems.forEach((item, index) => { createTextLabel(item.text, item.color, 0, index * lineHeight, "left", "top", "20px Serif"); });
     }
@@ -653,7 +681,9 @@ function render() {
     cam.w = canvas.width;
     cam.h = canvas.height;
 
-    computeTree(cam.w);
+    if (config.Rendernumberline) {
+        computeTree(cam.w);
+    }
 
     cam.yStart = 0;
     cam.yEnd = cam.h;
@@ -975,6 +1005,15 @@ window.addEventListener("keydown", (e) => {
     cam.activeKeys[key] = true;
     cam.activeKeys[e.code] = true;
 
+    if (cam.activeKeys[" "]) {
+        let arrowKeys = ["arrowleft", "arrowright", "arrowup", "arrowdown"];
+        if (arrowKeys.includes(key)) {
+            cam.toggleHeldKeys[key] = !cam.toggleHeldKeys[key];
+            e.preventDefault();
+            return;
+        }
+    }
+
     let actionTriggered = false;
 
     if (key === "z" && (e.ctrlKey || e.metaKey)) {
@@ -983,7 +1022,7 @@ window.addEventListener("keydown", (e) => {
         config.MaxIntervalDepth = Math.max(-1, config.MaxIntervalDepth - 1);
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
-    } else if (key === "s" && !(e.shiftKey || e.metaKey)) {
+    } else if (key === "s" && !(e.shiftKey || e.metaKey || e.ctrlKey)) {
         config.MaxIntervalDepth = config.MaxIntervalDepth === -1 ? 0 : config.MaxIntervalDepth + 1;
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         actionTriggered = true;
@@ -1033,8 +1072,15 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
     if (window.isSettingsOpen) return;
-    cam.activeKeys[e.key.toLowerCase()] = false;
+    let key = e.key.toLowerCase();
     cam.activeKeys[e.code] = false;
+
+    let arrowKeys = ["arrowleft", "arrowright", "arrowup", "arrowdown"];
+    if (arrowKeys.includes(key) && cam.toggleHeldKeys[key]) {
+        return;
+    }
+    
+    cam.activeKeys[key] = false;
 });
 
 function updateKeyboardInput() {
