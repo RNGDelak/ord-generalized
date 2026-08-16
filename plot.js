@@ -112,6 +112,9 @@ let config = {
     LabelBetweenTimelineXoffest: 0,
     LabelRotation: 0,
     TimelineRotation: 0,
+    samplefont: "30px Serif",
+    sampleleftspacing: "10%",
+    sampletopspacing: "83.5%",
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,

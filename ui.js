@@ -283,6 +283,9 @@ function applyingCSSUpdate() {
     configToggleBtn.style.color = config.ConfigMenuBtnColor;
     AddNotationBtn.style.color = config.AddNotationBtnColor;
     hudStats.style.color = config.CurrentPositionStateTextColor;
+    sampleElem.style.font = config.samplefont;
+    sampleElem.style.left = config.sampleleftspacing;
+    sampleElem.style.top = config.sampletopspacing;
 }
 
 window.applyInjectedConfig = function () {

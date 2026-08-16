@@ -247,7 +247,7 @@ window.notation = (() => {
     ["ω^ω", Limit],
   ];
 
-  const config = { modes: [1] };
+  const config = { modes: [{ mode: 1, target: 'both' }]}; //you must put in an array of objects with mode and target, target can be 'both', 'line' or 'sample'
   const title = "Worm transfinite number line";
 
   return {
@@ -286,7 +286,6 @@ basically it takes a sequence of number representing the adress of that ordinal
 eg : 2,6,2,8,1 --> fs(fs(fs(fs(fs(Limit,2),6),2),8),1) / Limit[2][6][2][8][1]
 
 */
-
 ```
 
 # Changelogs
@@ -2593,7 +2592,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 ---
 
-## Version 2 Series (2.0 → 2.19)
+## Version 2 Series (2.0 → 2.20)
 
 **Overview:** These versions are very complete, though there were still some bugs fixed overall after v2.9.  
 **Major Updates:** Formalized sharing transfinite number line notations (v2.10), added find ordinal (v2.2), and set viewport state (v2.7).
@@ -4931,6 +4930,103 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* **v2.20** — https://rngdelak.github.io/ord-generalized/versions/version%202.20/ <details>
+  * **Description:**
+    * Introduced per-notation display targets, allowing each notation mode to be shown on the **number line**, **sample display**, or **both**.
+    * Updated the notation configuration format across the supported libraries to use structured mode objects instead of simple numeric mode arrays.
+    * Added UI controls for selecting where each notation is displayed.
+    * Added configurable styling/positioning for the center sample readout.
+    * Updated the Worm notation implementation to use a structured Cantor Normal Form representation.
+    * Expanded and substantially revised the README documentation.
+
+  * **Added:**
+    * Added per-mode `target` configuration:
+      * `both`
+      * `line`
+      * `sample`
+    * Added `normalizeMode()` so both the new object format and legacy numeric mode values can be handled.
+    * Added a **Display target** button beside each notation selector in the Config Menu.
+    * Added target cycling:
+      * `Display: both`
+      * `Display: number line`
+      * `Display: sample`
+    * Added filtering so only modes targeting the **sample** are rendered in the sample readout.
+    * Added filtering so only modes targeting the **number line** are rendered as timeline labels.
+    * Added new sample display configuration:
+      * `samplefont`
+      * `sampleleftspacing`
+      * `sampletopspacing`
+    * Added runtime application of those sample display settings.
+    * Added support for structured notation configurations such as:
+      `modes: [{ mode: 1, target: 'both' }]`.
+
+  * **Changes:**
+    * Changed the global mode configuration from:
+      `modes: [0]`
+      to:
+      `modes: [{ mode: 0, target: 'both' }]`.
+    * Updated `plot.js` to normalize notation modes before rendering.
+    * Updated sample rendering so `config.modes` is no longer assumed to contain only numeric mode indexes.
+    * Updated timeline rendering to calculate the number of displayed modes based only on modes targeting the number line.
+    * Updated the notation selector UI to work with structured mode objects.
+    * Updated the **Add Notation** button to create new modes with `target: "both"`.
+    * Updated all affected notation libraries to the new configuration format:
+      * `cOCF.js`
+      * `EcOCF.js`
+      * `LPrSS.js`
+      * `n-shifted-OCF.js`
+      * `TON.js`
+      * `Worm.js`
+    * Updated Worm's ordinal representation from the previous flat exponent sequence to `[[exponent, coefficient], ...]`.
+    * Updated Worm's:
+      * `fs()`
+      * `cmp()`
+      * `isSuccessor()`
+      * `display()`
+      * `classifyOrdinal()`
+      * `parse()`
+      to operate on the structured representation.
+    * Updated Worm aliases from values such as `[1]` and `[2]` to `[[0,1]]` and `[[2,1]]`.
+    * Updated Worm's configuration to the new structured `modes` format.
+    * Expanded the README substantially with updated notation-library/API documentation and configuration examples.
+
+  * **Fixes:**
+    * Fixed the assumption that every configured notation must appear in both the number line and sample display.
+    * Fixed mode-count/layout calculations when some notations are hidden from the number line.
+    * Improved compatibility between older numeric mode configurations and the new structured mode format through normalization.
+    * Fixed the Worm notation implementation so its internal ordinal representation is consistent with its declared `[[exponent, coefficient]]` format.
+    * Improved Worm parsing by combining repeated exponents into canonical coefficient form and sorting terms by descending exponent.
+    * Improved Worm handling of `Limit`, zero, successors, and power-of-ω classification.
+    * Fixed the sample display's font and position so they can be controlled through configuration.
+
+
+</details>
 
 
 
