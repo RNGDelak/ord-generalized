@@ -44,12 +44,18 @@ Here's some **"Landscapes"**
 
 - I to show viewport state
 
+- 1 to lock mouse (mouse wont move anymore)
+
+- 2 to change sample text alignment
+
 - L to lock screen (disable interactions) 
 
 
 - Ctrl/Shift to adjust sensivity of arrow key controls
 
 - Shift+S to Enter/Exit Slow Mode
+
+- Space+Arrow Key to Toggle Auto hold for that arrow key
 
 - Open Config Menu for further configurations
 
