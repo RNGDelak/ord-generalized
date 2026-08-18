@@ -416,6 +416,9 @@ function updateNotationConfigUI() {
         select.style.outline = "none";
         select.style.cursor = "pointer";
         select.style.fontFamily = "inherit";
+        select.style.fontSize = "12px";         
+        select.style.lineHeight = "1";      
+        select.style.padding = "2px 6px";
 
         if (window.notation && window.notation.DisplayName) {
             window.notation.DisplayName.forEach((name, idx) => {
