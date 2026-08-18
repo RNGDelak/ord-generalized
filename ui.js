@@ -459,6 +459,8 @@ function updateNotationConfigUI() {
         targetBtn.style.padding = "2px 6px";
         targetBtn.style.cursor = "pointer";
         targetBtn.style.fontSize = "12px";
+        targetBtn.style.border = "none";
+        targetBtn.style.outline = "none";
 
         const targetLabels = {
             both: "Display: both",
