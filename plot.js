@@ -83,8 +83,8 @@ let config = {
     TitleColor: "#ffffff",
     AddNotationBtnColor: "#0098ff",
     RemoveNotationBtnColor: "#ff4444",
-    SelectNotationBoxColor: "#00ffcc",
-    ChangeNotationDisplayLocationBtnColor: ""
+    SelectNotationBoxColor: "#ffffff",
+    ChangeNotationDisplayLocationBtnColor: "#00ffcc",
     MiddleNumberLineDivisionColor: "rgba(255,0,0,0.5)",
     ZoomSelectionFillColor: "rgba(0, 150, 255, 0.2)",
     ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
