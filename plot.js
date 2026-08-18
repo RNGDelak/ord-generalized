@@ -83,7 +83,8 @@ let config = {
     TitleColor: "#ffffff",
     AddNotationBtnColor: "#0098ff",
     RemoveNotationBtnColor: "#ff4444",
-    SelectNotationBoxColor: "#ffffff",
+    SelectNotationBoxColor: "#00ffcc",
+    ChangeNotationDisplayLocationBtnColor: ""
     MiddleNumberLineDivisionColor: "rgba(255,0,0,0.5)",
     ZoomSelectionFillColor: "rgba(0, 150, 255, 0.2)",
     ZoomSelectionBorder: "1px solid rgba(0, 150, 255, 0.8)",
@@ -116,6 +117,8 @@ let config = {
     samplefont: "30px Serif",
     sampleleftspacing: "10%",
     sampletopspacing: "83.5%",
+    sampleMaxWidth: "80%",
+    sampleTransform: "translateY(-80%)",
     sampleTextAlign: "left",
 
     // --- Computation & Performance Limits ---

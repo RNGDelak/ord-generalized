@@ -285,6 +285,8 @@ function applyingCSSUpdate() {
     hudStats.style.color = config.CurrentPositionStateTextColor;
     sampleElem.style.font = config.samplefont;
     sampleElem.style.left = config.sampleleftspacing;
+    sampleElem.style.max-width = config.sampleMaxWidth;
+    sampleElem.style.transform = config.sampleTransform;
     sampleElem.style.top = config.sampletopspacing;
 }
 
@@ -453,9 +455,7 @@ function updateNotationConfigUI() {
         // Target Switcher Button: Display on number line / sample / both
         const targetBtn = document.createElement("button");
         targetBtn.style.background = "transparent";
-        targetBtn.style.color = "#00ffcc";
-        targetBtn.style.border = "1px solid #444";
-        targetBtn.style.borderRadius = "3px";
+        targetBtn.style.color = config.ChangeNotationDisplayLocationBtnColor;
         targetBtn.style.padding = "2px 6px";
         targetBtn.style.cursor = "pointer";
         targetBtn.style.fontSize = "12px";
