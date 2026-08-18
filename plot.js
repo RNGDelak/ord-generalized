@@ -1067,7 +1067,14 @@ window.addEventListener("keydown", (e) => {
         } else {
             document.exitPointerLock();
         }
+    } else if (key === "2" && !(e.ctrlKey || e.metaKey)) {
+        config.sampleTextAlign = 
+              config.sampleTextAlign === 'left' ? 'center' : 
+              config.sampleTextAlign === 'center' ? 'right' : 'left';
+
+        render();
     }
+
 
 
     if (actionTriggered) render();
