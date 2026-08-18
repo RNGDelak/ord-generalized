@@ -404,7 +404,7 @@ function updateNotationConfigUI() {
         const row = document.createElement("div");
         row.style.marginBottom = "4px";
         row.style.display = "flex";
-        row.style.alignItems = "center";
+        row.style.alignItems = "baseline";
         row.style.gap = "6px";
 
         // Notation Selector
