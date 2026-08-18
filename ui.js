@@ -285,7 +285,7 @@ function applyingCSSUpdate() {
     hudStats.style.color = config.CurrentPositionStateTextColor;
     sampleElem.style.font = config.samplefont;
     sampleElem.style.left = config.sampleleftspacing;
-    sampleElem.style.max-width = config.sampleMaxWidth;
+    sampleElem.style.maxWidth = config.sampleMaxWidth;
     sampleElem.style.transform = config.sampleTransform;
     sampleElem.style.top = config.sampletopspacing;
 }
