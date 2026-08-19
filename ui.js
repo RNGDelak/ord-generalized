@@ -738,7 +738,7 @@ function copyPositionAndZoom() {
     let posText = posElem.innerText || "";
     let zoomText = zoomElem.innerText || "";
     let ratio = "Aspect ratio: " + (config.aspectratio || "");
-    ler har = "Harmonic spacing: " + ((config.HarmonicInvtervalSpacing)? "Enabled" : "Disabled")
+    let har = "Harmonic spacing: " + ((config.HarmonicInvtervalSpacing)? "Enabled" : "Disabled")
 
     let formattedText = `${notaname}\n${posText}\n${zoomText}\n${ratio}\n${har}`;
 
