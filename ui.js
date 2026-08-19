@@ -734,10 +734,13 @@ function findAndZoomToOrdinal() {
 }
 
 function copyPositionAndZoom() {
+    let notaname = "Notation: " + (notation.title || "");
     let posText = posElem.innerText || "";
     let zoomText = zoomElem.innerText || "";
+    let ratio = "Aspect ratio: " + (config.aspectratio || "");
+    ler har = "Harmonic spacing: " + ((config.HarmonicInvtervalSpacing)? "Enabled" : "Disabled")
 
-    let formattedText = `${posText}\n${zoomText}`;
+    let formattedText = `${notaname}\n${posText}\n${zoomText}\n${ratio}\n${har}`;
 
     navigator.clipboard.writeText(formattedText).then(() => {
         alert("Copied to clipboard!\n\n" + formattedText);
