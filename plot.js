@@ -1100,52 +1100,62 @@ function updateKeyboardInput() {
     }
 
     let now = performance.now();
-    let dt = (now - cam.lastKeyboardTime) / 1000
+    // Calculate total actual time passed, capping max delay to 1.0s to avoid infinite loops on huge freezes
+    let totalDt = Math.min((now - cam.lastKeyboardTime) / 1000, 1.0);
     cam.lastKeyboardTime = now;
 
     if (cam.activeKeys["shift"]) {
-        dt *= config.shiftMultiplier;
+        totalDt *= config.shiftMultiplier;
     } else if (cam.activeKeys["control"] || cam.activeKeys["ctrl"]) {
-        dt *= config.ctrlMultiplier;
+        totalDt *= config.ctrlMultiplier;
     }
 
     let moved = false;
 
     if (!config.SlowMode) {
-        let panSpeedBI = toBigInt(canvas.width * config.panSpeedBaseFactor * dt);
-        let zoomFactorInBI = toBigInt(Math.pow(config.zoomSpeedBase, dt));
-        let zoomFactorOutBI = toBigInt(Math.pow(1 / config.zoomSpeedBase, dt));
-        let mxBI = toBigInt(canvas.width / 2);
+        // Slicing elapsed time into fixed 60 FPS intervals (16.6ms per step)
+        const FIXED_STEP = 1 / 60;
+        let accumulator = totalDt;
 
-        if (cam.activeKeys["arrowleft"]) {
-            cam.view.x0 += panSpeedBI;
-            cam.view.x1 += panSpeedBI;
-            moved = true;
-        }
-        if (cam.activeKeys["arrowright"]) {
-            cam.view.x0 -= panSpeedBI;
-            cam.view.x1 -= panSpeedBI;
-            moved = true;
-        }
-        if (cam.activeKeys["arrowup"]) {
-            cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
-            cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
-            moved = true;
-        }
-        if (cam.activeKeys["arrowdown"]) {
-            let currentWidth = cam.view.x1 - cam.view.x0;
-            let maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
-            let targetWidth = currentWidth * zoomFactorOutBI / PRECISION_SCALE;
+        while (accumulator > 0) {
+            let dt = Math.min(accumulator, FIXED_STEP);
+            accumulator -= dt;
 
-            if (!config.ZoomOutFencing || targetWidth >= maxAllowedWidthBI) {
-                cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
-                cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
-            } else if (currentWidth > 0n) {
-                let scaleToLimitBI = (maxAllowedWidthBI * PRECISION_SCALE) / currentWidth;
-                cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
-                cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
+            let panSpeedBI = toBigInt(canvas.width * config.panSpeedBaseFactor * dt);
+            let zoomFactorInBI = toBigInt(Math.pow(config.zoomSpeedBase, dt));
+            let zoomFactorOutBI = toBigInt(Math.pow(1 / config.zoomSpeedBase, dt));
+            let mxBI = toBigInt(canvas.width / 2);
+
+            if (cam.activeKeys["arrowleft"]) {
+                cam.view.x0 += panSpeedBI;
+                cam.view.x1 += panSpeedBI;
+                moved = true;
             }
-            moved = true;
+            if (cam.activeKeys["arrowright"]) {
+                cam.view.x0 -= panSpeedBI;
+                cam.view.x1 -= panSpeedBI;
+                moved = true;
+            }
+            if (cam.activeKeys["arrowup"]) {
+                cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
+                cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorInBI / PRECISION_SCALE);
+                moved = true;
+            }
+            if (cam.activeKeys["arrowdown"]) {
+                let currentWidth = cam.view.x1 - cam.view.x0;
+                let maxAllowedWidthBI = toBigInt(canvas.width * config.maxAllowedWidthFactor);
+                let targetWidth = currentWidth * zoomFactorOutBI / PRECISION_SCALE;
+
+                if (!config.ZoomOutFencing || targetWidth >= maxAllowedWidthBI) {
+                    cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
+                    cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * zoomFactorOutBI / PRECISION_SCALE);
+                } else if (currentWidth > 0n) {
+                    let scaleToLimitBI = (maxAllowedWidthBI * PRECISION_SCALE) / currentWidth;
+                    cam.view.x0 = mxBI + ((cam.view.x0 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
+                    cam.view.x1 = mxBI + ((cam.view.x1 - mxBI) * scaleToLimitBI / PRECISION_SCALE);
+                }
+                moved = true;
+            }
         }
     }
 
