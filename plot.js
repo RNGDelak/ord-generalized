@@ -1100,7 +1100,7 @@ function updateKeyboardInput() {
     }
 
     let now = performance.now();
-    let dt = Math.min((now - cam.lastKeyboardTime) / 1000, 0.1);
+    let dt = now - cam.lastKeyboardTime
     cam.lastKeyboardTime = now;
 
     if (cam.activeKeys["shift"]) {
