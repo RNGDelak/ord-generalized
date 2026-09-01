@@ -1268,7 +1268,19 @@ window.notation = (() => {
    // Classify ordinals for visualization styling
    function classifyOrdinal(ord) {
       if (!Array.isArray(ord) || ord.length === 0) return "#808080"; // Zero
-      if (cmp(ord, [1, 3]) >= 0) return (isSuccessor(ord))? "#d40000" : "#ff8000"; // Successor or Limit
+      if (cmp(ord, [1, 3]) >= 0) {
+
+         let count = 0;
+         const len = ord.length;
+
+         for (let i = 0; i < len; i++) {
+            if (ord[i] == 1) count++;
+         }
+
+         if (count == 1) return "#ffff00"
+
+         return (isSuccessor(ord)) ? "#d40000" : "#ff8000";
+      } // Successor or Limit or Power of ω
       let arr = trimZeroColumns(dbmsToBms(DimY_to_DBMS(ord)))
       return classifyBMSOrdinal(arr);
    }
@@ -1288,10 +1300,58 @@ window.notation = (() => {
       ["Buchholz Ordinal", "#3f3f3f"]
    ];
 
-   const Aliases = [];
+   const Aliases = [
+      //["First 67 Ordinal", fs([1,2], 66)], deprecated
+      ["First Transfinite Ordinal", [1,2]],
+      ["Small Cantor Ordinal", [1,2,4]],
+      ["Veblen Ordinal", [1,2,4,6,7]],
+      ["Feferman–Schütte Ordinal", [1,2,4,6,8]],
+      ["First Γ fixed point", [1,2,4,6,8,6]],
+      ["Ackermann Ordinal", [1,2,4,6,8,8]],
+      ["Small Veblen Ordinal", [1,2,4,6,8,9]],
+      ["Large Veblen Ordinal", [1,2,4,6,8,10]],
+      ["Bachmann–Howard Ordinal", [1,2,4,7]],
+      ["Buchholz's Ordinal", [1,2,4,8]],
+      ["Takeuti-Feferman-Buchholz Ordinal", [1,2,4,8,11,15]],
+      ["Bird's Ordinal", [1,2,4,8,12,14]],
+      ["Extended Buchholz Ordinal", [1,2,4,8,12,15,9]],
+      ["Limit of Battery Management System", [1,2,4,8,12,16,12,15,9]],
+      ["Multivariable Buchholz Ordinal", [1,2,4,8,12,16,13]],
+      ["Transfinitary Buchholz Ordinal", [1,2,4,8,12,16,15,9]],
+      ["Small Mahlo Ordinal", [1,2,4,8,12,16,16]],
+      ["Dimensional Buchholz Ordinal / Small Rathjen Ordinal / PTO(KPM)", [1,2,4,8,12,16,15,19]],
+      // i cant fine the expression of rathjen ordinal so yeah skipped
+      ["Large Rathjen Ordinal", [1,2,4,8,12,16,19,23]],
+      ["Small Weakly Compact Ordinal", [1,2,4,8,12,16,20]],
+      ["Small Stergent Ordinal", [1,2,4,8,13]],
+      ["Small Dropping Ordinal", [1,2,4,8,14,15]],
+      ["NDAN ordinal" , [1,2,4,8,14,19]],
+      ["WDEN ordinal" , [1,2,4,8,14,19,25,31,37]],
+      ["mWDEN ordinal" , [1,2,4,8,14,20,15]],
+      ["2nd Back Gear ordinal", [1,2,4,8,14,21]],
+      ["Omega Back ordinal / Small Bashicu ordinal", [1,2,4,8,15]],
+      ["pDDN ordinal / Final limit of SAN" , [1,2,4,8,15,23]],
+      ["Lim(TSS)", [1,2,4,8,16]],
+      ["Lim(QSS)", [1,2,4,8,16,32]],
+      ["Lim(BMS) / Small Hydra Ordinal", [1,3]],
+      ["Limit of ω+1SS / (0)(1<sup>ω+1</sup>)" , [1,3,4,2,5,7,11]],
+      ["Limit of ω*2SS / (0)(1<sup>ω2</sup>)" , [1,3,4,2,5,7,12]],
+      //im so lazy to add more aliases so yeah
+      ["&psi;<sub>0</sub>(&Omega;<sub>2</sub>) row BMS" , [1,3,4,2,5,8,9,11,14]],
+      ["&psi;<sub>0</sub>(&Omega;<sub>&omega;</sub>) row BMS" , [1,3,4,2,5,8,9,11,15]],
+      ["(&omega; row BMS) row BMS" , [1,3,4,2,5,8,9,12]],
+      ["&Omega; row BMS" , [1,3,4,2,5,8,10]],
+      ["Weak Spatialum" , [1,3,4,2,5,8,10,2,5,8,10]],
+      ["Limit of Hassium" , [1,3,4,2,5,8,11]],
+      ["Lim(1-Y) / Small Yukito Ordinal" , [1,4]],
+      ["Lim(2-Y)" , [1,5]],
+      ["Lim(3-Y)" , [1,6]],
+      ["Lim(67-Y)" , [1,72]], //as always , there must be a easter egg on major systems
+      ["Lim(&omega;-Y) / Large Yukito Ordinal" , [Infinity]]
+   ];
 
    const config = { modes: [{ mode: 0, target: 'both' }] };
-   const title = "&omega;-Y Sequence transfinite number line";
+   const title = "&omega;-Y transfinite number line";
 
    return {
       fs,
