@@ -663,7 +663,6 @@ window.notation = (() => {
       ["Ackermann Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [3, 1]]],
       ["Small Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [4, 0]]],
       ["Large Veblen Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [4, 1]]],
-      ["Ackermann Ordinal", [[0, 0], [1, 1], [2, 1], [3, 1], [3, 1]]],
       ["Bachmann–Howard Ordinal", [[0, 0], [1, 1], [2, 2]]],
       ["Buchholz's Ordinal", [[0, 0, 0], [1, 1, 1]]],
       ["Takeuti-Feferman-Buchholz Ordinal", [[0, 0, 0], [1, 1, 1], [2, 1, 0], [3, 2, 0]]],
