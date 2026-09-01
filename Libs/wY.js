@@ -1351,7 +1351,7 @@ window.notation = (() => {
    ];
 
    const config = { modes: [{ mode: 0, target: 'both' }] };
-   const title = "&omega;-Y transfinite number line";
+   const title = "&omega;-Y sequence transfinite number line";
 
    return {
       fs,
