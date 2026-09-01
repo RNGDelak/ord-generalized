@@ -1,6 +1,6 @@
 /*
-Notation : ω-Y sequence
-Limit : idk but it should be the same as the ω-Y limit (lmao)
+Notation : Hierachical Strong ω-Y sequence
+Limit : idk but it should be > W-Y according to MRREDSHARKFAN
 */
 
 window.notation = (() => {
