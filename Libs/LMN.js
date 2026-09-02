@@ -181,17 +181,23 @@ window.notation = (() => {
     return LMN_FS(cut0(change(x2, lift(inner(xi), xj, xk))), FSterm);
   };
 
+  // Unicode subscript mapping
+  const subscriptDigits = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+  function toSubscript(num) {
+    return String(num).split('').map(d => subscriptDigits[d] || d).join('');
+  }
+
   // Aliases Milestones
   const Aliases = [
     ["0", Zero],
     ["1", [true, 0, 0]],
     ["ω", [true, 0, [true, 0, 0]]],
-    ["ψ_0(ψ_0(0))", [true, 0, [true, 0, 0]]],
-    ["ψ_0(ψ_1(0))", [true, 0, [true, 1, 0]]],
-    ["ψ_1(0)", [true, 1, 0]],
-    ["ψ_1(ψ_0(0))", [true, 1, [true, 0, 0]]],
-    ["ψ_1(ψ_1(0))", [true, 1, [true, 1, 0]]],
-    ["ψ_2(0)", [true, 2, 0]],
+    ["ψ₀(ψ₀(0))", [true, 0, [true, 0, 0]]],
+    ["ψ₀(ψ₁(0))", [true, 0, [true, 1, 0]]],
+    ["ψ₁(0)", [true, 1, 0]],
+    ["ψ₁(ψ₀(0))", [true, 1, [true, 0, 0]]],
+    ["ψ₁(ψ₁(0))", [true, 1, [true, 1, 0]]],
+    ["ψ₂(0)", [true, 2, 0]],
     ["Limit", Limit]
   ];
 
@@ -224,25 +230,42 @@ window.notation = (() => {
     return false;
   }
 
-  // Pretty Display Formatter
-  function pretty(x) {
+  // Formatting helpers
+  function formatPretty(x) {
     if (x === Limit || (Array.isArray(x) && x[0] === true && x[1] === Infinity)) return 'Limit';
     if (x === 0 || x === Zero) return '0';
     if (x[0]) {
-      return `ψ_${x[1]} (${pretty(x[2])})`;
+      return `ψ_${x[1]}(${formatPretty(x[2])})`;
     } else {
       var list = [];
       var curr = x;
       while (curr && !curr[0]) {
-        list.push(pretty(curr[1]));
+        list.push(formatPretty(curr[1]));
         curr = curr[2];
       }
-      if (curr) list.push(pretty(curr));
+      if (curr) list.push(formatPretty(curr));
       return list.join(' + ');
     }
   }
 
-  // Display modes handler
+  function formatSubscript(x) {
+    if (x === Limit || (Array.isArray(x) && x[0] === true && x[1] === Infinity)) return 'Limit';
+    if (x === 0 || x === Zero) return '0';
+    if (x[0]) {
+      return `ψ${toSubscript(x[1])}(${formatSubscript(x[2])})`;
+    } else {
+      var list = [];
+      var curr = x;
+      while (curr && !curr[0]) {
+        list.push(formatSubscript(curr[1]));
+        curr = curr[2];
+      }
+      if (curr) list.push(formatSubscript(curr));
+      return list.join(' + ');
+    }
+  }
+
+  // Display modes handler (raw, pretty, subscript)
   function display(ord, mode) {
     if (ord === Limit) return 'Limit';
     if (ord === Zero || ord === 0) return '0';
@@ -250,9 +273,12 @@ window.notation = (() => {
       return JSON.stringify(ord);
     }
     if (mode === "pretty") {
-      return pretty(ord);
+      return formatPretty(ord);
     }
-    return pretty(ord);
+    if (mode === "subscript") {
+      return formatSubscript(ord);
+    }
+    return formatSubscript(ord);
   }
 
   // Classify ordinals for visual styling
@@ -297,7 +323,7 @@ window.notation = (() => {
     return Zero;
   }
 
-  const DisplayName = ["raw", "pretty"];
+  const DisplayName = ["raw", "pretty", "subscript"];
 
   const ordinalTypes = [
     ["Zero", "#808080"],
@@ -306,7 +332,7 @@ window.notation = (() => {
     ["Principal Ordinal", "#ffd000"]
   ];
 
-  const config = { modes: [{ mode: 1, target: "both" }] };
+  const config = { modes: [{ mode: 2, target: "both" }] };
   const title = "Lifting M-Notation Transfinite Number Line";
 
   return {
