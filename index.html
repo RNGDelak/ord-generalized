@@ -372,16 +372,36 @@
         <div class="menu-group">
             <label for="presetSelect">Tutorial Presets (Notation System)</label>
             <select id="presetSelect" name="presetSelect" onchange="loadPresetNotation(this.value)">
-                <option value="Libs/BMS.js">BMS (Default)</option>
-                <option value="Libs/HPrSS.js">HPrSS</option>
-                <option value="Libs/LPrSS.js">LPrSS</option>
-                <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
-                <option value="Libs/wY.js">Experimental -- ω-Y Sequence</option>
-                <option value="Libs/EBO.js">Experimental -- EBOCF</option>
-                <option value="Libs/cOCF.js">Experimental -- cOCF</option>
-                <option value="Libs/EcOCF.js">Experimental -- EcOCF</option>
-                <option value="Libs/TON.js">Experimental -- TON</option>
-                <option value="Libs/n-shifted-OCF.js">Experimental -- n-shifted OCF</option>
+                <optgroup label="Official Notations">
+                    <option value="Libs/BMS.js">BMS (Default)</option>
+                    <option value="Libs/HPrSS.js">HPrSS</option>
+                    <option value="Libs/LPrSS.js">LPrSS</option>
+                    <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
+                    <option value="Libs/wY.js">ω-Y Sequence</option>
+                </optgroup>
+
+                <optgroup label="Experimental Notations">
+                    <option value="Libs/EBO.js">EBOCF</option>
+                    <option value="Libs/cOCF.js">cOCF</option>
+                    <option value="Libs/EcOCF.js">EcOCF</option>
+                    <option value="Libs/TON.js">TON</option>
+                    <option value="Libs/n-shifted-OCF.js">n-shifted OCF</option>
+                    <option value="Libs/HS.js">Hyper Sequence - ψ(Ωω)</option>
+                    <option value="Libs/PPS.js">Pointer Pair Sequence - ψ(Ωω)</option>
+                    <option value="Libs/APS.js">Address Pair Sequence - ψ(Ωω)</option>
+                    <option value="Libs/PS.js">Pair Sequence (PSS - ψ(Ωω))</option>
+                    <option value="Libs/SH.js">Sequence Hydra (PSS Hydra) - ψ(Ωω)</option>
+                    <option value="Libs/HH.js">Hyper Hydra - ψ(Ωω)</option>
+                    <option value="Libs/ESS.js">Extended Shifted Sequence - ψ(Λ)</option>
+                    <option value="Libs/SSH.js">Shifted Sequence Hydra - ψ(Mω)</option>
+                    <option value="Libs/TS.js">Trio Sequence (TSS) - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/PTS.js">Pointer Trio Sequence - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/ATS.js">Address Trio Sequence - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/HSH.js">Hyper Sequence Hydra - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/HHH.js">Hyper Hyper Hydra - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/MS.js">Matrix Sequence (Bashicu Matrix System / BMS) - ψ(B(ω))</option>
+                    <option value="Libs/PMS.js">Pointer Matrix Sequence (PMS) - ψ(B(ω))</option>
+                </optgroup>
             </select>
             <hr style="border-color: #333; margin: 15px 0;">
             <div class="menu-group">
