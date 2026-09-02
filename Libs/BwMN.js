@@ -627,7 +627,7 @@ window.notation = (() => {
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }],SlowMode:true };
-  const title = "Branching ω Mountain Notation Transfinite System";
+  const title = "Branching ω Mountain Notation Transfinite Number Line";
 
   return {
     register,
