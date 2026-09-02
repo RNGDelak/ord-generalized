@@ -1350,6 +1350,11 @@ window.notation = (() => {
       ["Lim(&omega;-Y) / Large Yukito Ordinal" , [Infinity]]
    ];
 
+   function parse(ord){
+      return ord.split(',').map(x=>Number(x))
+   }
+   
+
    const config = { modes: [{ mode: 0, target: 'both' }] };
    const title = "&omega;-Y sequence transfinite number line";
 
@@ -1360,6 +1365,7 @@ window.notation = (() => {
       display,
       classifyOrdinal,
       Zero,
+      parse,
       Limit,
       DisplayName,
       ordinalTypes,
