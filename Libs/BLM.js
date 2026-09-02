@@ -354,7 +354,7 @@ window.notation = (() => {
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }] };
-  const title = "Bashicu Large Matrix Transfinite Matrix System";
+  const title = "Bashicu Large Matrix Transfinite Number Line";
 
   return {
     register,
