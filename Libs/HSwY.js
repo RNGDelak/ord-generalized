@@ -1399,7 +1399,7 @@ window.notation = (() => {
    ];
 
    const config = { MaxIntervalDepth:0 };
-   const title = "Hierachical Strong &omega;-Y sequence transfinite number line";
+   const title = "Hierachical Strong / &Omega;-Y sequence transfinite number line";
 
    return {
       fs,
