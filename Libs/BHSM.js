@@ -736,7 +736,7 @@ window.notation = (() => {
     types: "default"
   };
 
-  const title = "Bashicu Sudden Matrix transfinite number line";
+  const title = "Bashicu Hyper Sudden Matrix transfinite number line";
 
   return {
     fs,
