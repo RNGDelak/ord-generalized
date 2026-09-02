@@ -1,6 +1,6 @@
 /*
-Notation : Hyper Sequence Hydra
-Limit : ψ(T[1[0]<ω>0])
+Notation : Extended Sequence Hydra
+Limit : ψ(T[ω])
 */
 
 window.notation = (() => {
@@ -9,7 +9,7 @@ window.notation = (() => {
   const Zero = [];
   const Limit = "Limit";
 
-  // Milestones
+  // Milestones translated to module Aliases format
   const Aliases = [
     ["0", Zero],
     ["1", [1]],
@@ -24,32 +24,22 @@ window.notation = (() => {
     ["φ(ω,0)", [1, 2, 2, 1]],
     ["Γ0", [1, 2, 2, 2]],
     ["ψ(ε{Ω+1})", [1, 2, 3]],
-    ["ψ(Ωω)", [1, 2, 4]],
-    ["ψ(Λ)", [1, 2, 4, 4, 3, 0, 0, 1]],
-    ["ψ(Iω)", [1, 2, 4, 4, 4]],
-    ["ψ(I(ω,0))", [1, 2, 4, 4, 4, 0, 1]],
-    ["ψ(ε{M+1})", [1, 2, 4, 4, 4, 0, 3, 4]],
-    ["ψ(Mω)", [1, 2, 4, 4, 4, 0, 4]],
-    ["ψ(M(ω;0))", [1, 2, 4, 4, 4, 1]],
-    ["ψ(Kω)", [1, 2, 4, 4, 4, 4]],
-    ["ψ(ε{T+1})", [1, 2, 4, 5]],
-    ["ψ(Tω)", [1, 2, 4, 6]],
-    ["ψ(T[ω])", [1, 2, 4, 6, 1]],
-    ["ψ(T[1:;0]ω)", [1, 2, 4, 6, 6]],
-    ["ψ(T[1:;;0]ω)", [1, 2, 4, 6, 8]],
-    ["ψ(T[1:{ω}0]ω)", [1, 2, 4, 7]],
-    ["ψ(T[1{1{*ω}0}0])", [1, 2, 4, 7, 10]],
-    ["ψ(T[1[ω[[1]]0]0])", [1, 2, 4, 7, 11]],
-    ["ψ(T[1[0]<ω>0])", Limit]
+    ["ψ(Ωω)", [1, 3]],
+    ["ψ(Λ)", [1, 3, 3, 2, 0, 0, 1]],
+    ["ψ(Iω)", [1, 3, 3, 3]],
+    ["ψ(I(ω,0))", [1, 3, 3, 3, 0, 1]],
+    ["ψ(ε{M+1})", [1, 3, 3, 3, 0, 2, 3]],
+    ["ψ(Mω)", [1, 3, 3, 3, 0, 3]],
+    ["ψ(M(ω;0))", [1, 3, 3, 3, 1]],
+    ["ψ(Kω)", [1, 3, 3, 3, 3]],
+    ["ψ(ε{T+1})", [1, 3, 4]],
+    ["ψ(Tω)", [1, 4]],
+    ["ψ(T[ω])", Limit],
   ];
 
-  // Dynamic limit sequence generator for ψ(T[1[0]<ω>0])
+  // Dynamic limit sequence generator for ψ(T[ω])
   function getLimit(num) {
-    const res = [];
-    for (let i = 0; i < num; i++) {
-      res.push((i * (i + 1)) / 2 + 1);
-    }
-    return res;
+    return [1, num + 2];
   }
 
   // Sequence rank comparison
@@ -75,11 +65,16 @@ window.notation = (() => {
       if (count > 0) count += ord[i] === 0 ? -1 : 1;
       if (ord[i] > 0 && ord[i] <= ord[0]) count = 1;
 
-      map.push(count === 0 && ord[i] !== 0 ? offset : 0);
+      map.push(
+        count === 0 && ord[i] !== 0
+          ? offset
+          : 0
+      );
     }
     return map;
   }
 
+  // Bracket-depth parent finding
   function getParent(ord, root = ord.length) {
     let count = 1;
     do {
@@ -90,23 +85,14 @@ window.notation = (() => {
     return root;
   }
 
-  function getSubParent(ord, head, root) {
+  function search(ord, head, root) {
     while (root >= 0 && ord[root] >= head) {
       root = getParent(ord, root);
     }
     return root;
   }
 
-  function search(ord, offset, root) {
-    let mark = root;
-    do {
-      root = mark;
-      mark = getSubParent(ord, ord[root], root);
-    } while (mark >= 0 && ord[root] - ord[mark] >= offset);
-    return root;
-  }
-
-  // Immutable Hyper Sequence Hydra Expansion Step
+  // Immutable Extended Sequence Hydra Expansion Step
   function expand(ord, num) {
     if (!Array.isArray(ord) || ord.length === 0) return [];
 
@@ -123,20 +109,14 @@ window.notation = (() => {
           copy.push(...part);
         }
       } else {
-        const subParent = getSubParent(copy, head, parent);
-        if (subParent >= 0) {
-          const type = head - copy[subParent];
+        const root = search(copy, head, parent);
+        if (root >= 0) {
+          const part = copy.slice(root);
+          const offset = head - copy[root] - 1;
+          const map = getMap(part, offset);
 
-          const root = type > 1 ? search(copy, type, subParent) : subParent;
-
-          if (root >= 0) {
-            const part = copy.slice(root);
-            const offset = head - copy[root] - 1;
-            const map = getMap(part, offset);
-
-            for (let i = 0; i < num; i++) {
-              copy.push(...ascend(part, map));
-            }
+          for (let i = 0; i < num; i++) {
+            copy.push(...ascend(part, map));
           }
         }
       }
@@ -197,10 +177,10 @@ window.notation = (() => {
   function display(ord, mode) {
     if (ord === Limit) return "Limit";
     if (!Array.isArray(ord) || ord.length === 0) return "0";
-    if (mode === "raw") {
+    if (mode === 'raw') {
       return JSON.stringify(ord);
     }
-    if (mode === "pretty") {
+    if (mode === 'pretty') {
       return pretty(ord);
     }
   }
@@ -218,7 +198,7 @@ window.notation = (() => {
   function parse(str) {
     str = String(str).trim();
     if (str === "" || str === "0") return Zero;
-    if (str.toLowerCase() === "limit" || str.includes("ψ(T[")) return Limit;
+    if (str.toLowerCase() === "limit" || str === "ψ(T[ω])" || str === "psi(T[w])") return Limit;
 
     // 1. Alias lookup
     for (const [aliasName, aliasVal] of Aliases) {
@@ -254,8 +234,8 @@ window.notation = (() => {
     ["Principal Ordinal", "#ffd000"]
   ];
 
-  const config = { modes: [{ mode: 1, target: "both" }] };
-  const title = "Hyper Sequence Hydra Transfinite Number Line";
+  const config = { modes: [{ mode: 1, target: 'both' }] };
+  const title = "Extended Sequence Hydra Transfinite Number Line";
 
   return {
     fs,

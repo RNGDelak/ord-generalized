@@ -1,5 +1,5 @@
 /*
-Notation : Hyper Sequence Hydra
+Notation : Hyper Hyper Hydra
 Limit : ψ(T[1[0]<ω>0])
 */
 
@@ -255,7 +255,7 @@ window.notation = (() => {
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }] };
-  const title = "Hyper Sequence Hydra Transfinite Number Line";
+  const title = "Hyper Hyper Hydra Transfinite Number Line";
 
   return {
     fs,
