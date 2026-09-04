@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="Title">Generalized Transfinite Number Line</title>
+    <meta name="google-site-verification" content="IM1zBnBgdQb1R-R248NFz4owSkiVBqAvX5_oit_Mp5Q" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://rngdelak.github.io/ord-generalized/" />
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/RNGDelak/link@main/Thumnail/FAVICON new.PNG">
+
+    <!-- LZ-String library for compact URL encoding/decoding -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: Serif, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #textOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .textLabel {
+            position: absolute;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        #resetBtn {
+            position: absolute;
+            bottom: 95px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #ff0000;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font: 16px Serif;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        /* Revert Button styling */
+        #revertBtn {
+            position: absolute;
+            bottom: 55px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #0098ff;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font: 16px Serif;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        /* Floating configuration panel styling */
+        #configToggleBtn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0);
+            color: #fff;
+            border: 0px solid #444;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #configMenu {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            border: 1px solid #444;
+            padding: 15px;
+            width: fit-content;
+            min-width: 320px;
+            max-height: 85vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-radius: 6px;
+            display: none;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            resize: both;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #configMenu::-webkit-resizer {
+            background-color: #007acc;
+            border-top-left-radius: 4px;
+            border: 2px solid #ffffff;
+        }
+
+        .menu-group {
+            margin-bottom: 12px;
+        }
+
+        .menu-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .menu-group select,
+        .menu-group textarea {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        .menu-group textarea {
+            height: 150px;
+            resize: auto;
+            font-size: 11px;
+        }
+
+        .apply-btn {
+            width: 100%;
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .apply-btn:hover {
+            background: #0098ff;
+        }
+
+        .action-btn-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .action-btn-row button {
+            flex: 1;
+            padding: 6px 4px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        #hint {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background: rgba(20, 20, 20, 0.95);
+            color: #ffffff;
+            font: 18px Serif;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            line-height: 1.6;
+            user-select: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            pointer-events: auto;
+            touch-action: pan-y;
+            box-sizing: border-box;
+        }
+
+        #closehint {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Center-bottom mobile depth adjuster styling */
+        #mobileDepthControls {
+            white-space: nowrap;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 20, 0);
+            border-radius: 30px;
+            pointer-events: auto;
+            user-select: none;
+        }
+
+        .mobileDepthControlsbtn {
+            background: rgba(20, 20, 20, 0);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #depthDisplay {
+            color: #fff;
+            font-size: 14px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        /* Unified style for both top panels */
+        #viewportZoomContainer,
+        #ordinalFinderContainer {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            align-items: center;
+            justify-content: space-between;
+            width: 380px;
+            height: 42px;
+            box-sizing: border-box;
+            background: rgba(20, 20, 20, 0.85);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            font-size: 14px;
+            transition: top 0.2s ease;
+        }
+
+        #ordinalFinderContainer {
+            top: 65px;
+        }
+
+        #viewportZoomContainer label,
+        #ordinalFinderContainer label {
+            color: #ffffff;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        #viewportZoomContainer input[type="text"],
+        #ordinalFinderContainer input[type="text"],
+        #ordinalFinderContainer input[type="number"] {
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        #viewportZoomContainer input[type="text"] {
+            width: 65px;
+        }
+
+        #ordinalFinderContainer input[type="text"] {
+            width: 120px;
+        }
+
+        #ordinalFinderContainer input[type="number"] {
+            width: 45px;
+        }
+
+        #viewportZoomContainer button,
+        #ordinalFinderContainer button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 0 14px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 28px;
+        }
+
+        #viewportZoomContainer button:hover,
+        #ordinalFinderContainer button:hover {
+            background: #0098ff;
+        }
+
+        #fpsCounter {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: #9083ff;
+            font: 24px Serif;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        #sampleLabel {
+            position: absolute;
+            left: 10%;
+            top: 83.5%;
+            color: #ffffff;
+            font: 30px Serif;
+            user-select: none;
+            pointer-events: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transform: translateY(-80%);
+            max-width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="resetBtn" name="resetBtn" onclick="resetViewport()">Reset</button>
+    <button id="revertBtn" name="revertBtn" onclick="if (undoViewport()) { render(); }">Revert</button>
+    <button id="configToggleBtn" name="configToggleBtn" onclick="toggleConfigMenu();syncConfigToTextArea();">Config
+        Menu</button>
+
+    <!-- Replace the existing #configMenu block with this updated markup -->
+    <div id="configMenu">
+        <div class="menu-group">
+            <label for="presetSelect">Tutorial Presets (Notation System)</label>
+            <select id="presetSelect" name="presetSelect" onchange="loadPresetNotation(this.value)">
+                <optgroup label="Official Notations">
+                    <option value="Libs/BMS.js">Bashicu Matrix System (Default)</option>
+                    <option value="Libs/PHPrSS.js">Pointer HPrSS (each elment store its parent position)</option>
+                    <option value="Libs/PLPrSS.js">Pointer LPrSS (like HPrSS, since it reduce o(N^2) to o(N))</option>
+                    <option value="Libs/Worm.js">Worm (good example for injecting modules)</option>
+                    <option value="Libs/wY.js">ω-Y Sequence (Not completed yet)</option>
+                </optgroup>
+
+                <optgroup label="Experimental Notations">
+                    <option value="Libs/EBO.js">Extended Buchholz OCF</option>
+                    <option value="Libs/cOCF.js">cOCF</option>
+                    <option value="Libs/EcOCF.js">Extended cOCF</option>
+                    <option value="Libs/TON.js">Taranovsky's Ordinal Notation</option>
+                    <option value="Libs/n-shifted-OCF.js">n-shifted OCF</option>
+                    <!-- <option value="Libs/SFSS.js">Strong Fundamental Sequence System</option>
+                    <option value="Libs/HSwY.js">&Omega;-Y Sequence / Hierachical Strong ω-Y seq</option>
+                    <option value="Libs/BSM.js">Bashicu Sudden Matrix</option>
+                    <option value="Libs/BLM.js">Bashicu Large Matrix</option>
+                    <option value="Libs/BHM.js">Bashicu Hyper Matrix</option>
+                    <option value="Libs/BHSM.js">Bashicu Hyper Sudden Matrix</option>
+                    <option value="Libs/BwMN.js">Branching ω Mountain Notation</option>
+                    <option value="Libs/LON.js">Lifting Omega Notation</option>
+                    <option value="Libs/LMN.js">Lifting M-Notation</option>
+                    <option value="Libs/HS.js">Hyper Sequence - ψ(Ωω)</option>
+                    <option value="Libs/PPS.js">Pointer Pair Sequence - ψ(Ωω)</option>
+                    <option value="Libs/APS.js">Address Pair Sequence - ψ(Ωω)</option>
+                    <option value="Libs/PS.js">Pair Sequence (PSS - ψ(Ωω))</option>
+                    <option value="Libs/SH.js">Sequence Hydra (PSS Hydra) - ψ(Ωω)</option>
+                    <option value="Libs/HH.js">Hyper Hydra - ψ(Ωω)</option>
+                    <option value="Libs/ESS.js">Extended Shifted Sequence - ψ(Λ)</option>
+                    <option value="Libs/SSH.js">Shifted Sequence Hydra - ψ(Mω)</option>
+                    <option value="Libs/TS.js">Trio Sequence (TSS) - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/PTS.js">Pointer Trio Sequence - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/ATS.js">Address Trio Sequence - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/HSH.js">Hyper Sequence Hydra - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/HHH.js">Hyper Hyper Hydra - ψ(T[1[0]&lt;ω&gt;0])</option>
+                    <option value="Libs/MS.js">Matrix Sequence (Bashicu Matrix System / BMS) - ψ(B(ω))</option>
+                    <option value="Libs/PMS.js">Pointer Matrix Sequence (PMS) - ψ(B(ω))</option> -->
+                </optgroup>
+            </select>
+            <hr style="border-color: #333; margin: 15px 0;">
+            <div class="menu-group">
+                <label for="codeInject">Inject Custom Script / Notation Code</label>
+                <div style="color:red; margin-bottom:8px;">
+                    <strong>For code injections, please read</strong>
+                    <a href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to
+                        Inject code</a>
+                </div>
+                <textarea id="codeInject" name="codeInject" placeholder="" style="height: 120px;"></textarea>
+            </div>
+
+            <button class="apply-btn" style="background: #28a745; margin-top: 5px;"
+                onclick="applyInjectedCode()">Execute Code Script</button>
+
+            <!-- Import/Export controls -->
+            <div class="action-btn-row">
+                <button style="background: #6c757d;" onclick="document.getElementById('fileInput').click()">Import
+                    File</button>
+                <button style="background: #17a2b8;" onclick="exportToCodeLink()"
+                    title="Share inline script code link">Export Link</button>
+                <button style="background: #e83e8c;" onclick="exportToUrlLink()"
+                    title="Share external script URL link">Export URL</button>
+            </div>
+            <input type="file" id="fileInput" accept=".tnls,.js,.txt" style="display: none;"
+                onchange="importTNLSFile(event)">
+        </div>
+        <hr style="border-color: #333; margin: 15px 0;">
+
+        <div class="menu-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"  id = "BtnViewOpenTool2>
+                <label style="margin:0;" for = "BtnViewOpenTool2">Environment Configurations</label>
+                <button type="button" id="toggleJsonBtn" onclick="toggleJsonEditorView()"
+                    style="background:#444; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">Use
+                    JSON Editor</button>
+            </div>
+
+            <div class="slot-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+                <button onclick="saveConfigToSlot()">Save</button>
+                <button onclick="loadConfigFromSlot()">Load</button>
+
+                <label for="slotSelect" style="display:none;">Config Slot</label>
+                <select id="slotSelect" name="slotSelect"
+                    style="background: #222; color: #fff; padding: 4px; border: 1px solid #444;">
+                    <option value="1">Slot 1</option>
+                    <option value="2">Slot 2</option>
+                    <option value="3">Slot 3</option>
+                    <option value="4">Slot 4</option>
+                    <option value="5">Slot 5</option>
+                </select>
+            </div>
+
+            <!-- Interactive Sliders / Controls Panel -->
+            <div id="interactiveControlsPanel"
+                style="display: flex; flex-direction: column; gap: 12px; background: #181818; padding: 12px; border-radius: 4px; border: 1px solid #333;">
+
+                <div>
+                    <label for="aspectratio">Aspect Ratio: <span id="val_aspectratio"></span></label>
+                    <input type="range" id="aspectratio" min="0.1" max="0.9" step="0.01"
+                        style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                </div>
+
+                <!-- Checkboxes Grid (2 Columns) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <label><input type="checkbox" id="MathstickMode" onchange="updateConfigFromControls()"> Mathstick
+                        Mode</label>
+                    <label><input type="checkbox" id="DiagonalTickArrangement" onchange="updateConfigFromControls()">
+                        Diagonal Ticks</label>
+                    <label><input type="checkbox" id="HarmonicInvtervalSpacing" onchange="updateConfigFromControls()">
+                        Harmonic Spacing</label>
+                    <label><input type="checkbox" id="EnableOrdinalFinder" onchange="updateConfigFromControls()">
+                        Ordinal Finder</label>
+                    <label><input type="checkbox" id="EnableSetViewPort" onchange="updateConfigFromControls()"> Set
+                        ViewPort</label>
+                    <label><input type="checkbox" id="SlowMode" onchange="updateConfigFromControls()"> Slow Mode</label>
+                    <label><input type="checkbox" id="ShowCurrentPositionState" onchange="updateConfigFromControls()">
+                        Current Pos State</label>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="BackgroundColor"
+                            style="margin: 0; color: #aaa; font-size: 12px;">Background:</label>
+                        <input type="color" id="BackgroundColor"
+                            style="background: none; border: 1px solid #444; height: 24px; width: 36px; cursor: pointer; border-radius: 4px;"
+                            onchange="updateConfigFromControls()">
+                    </div>
+                </div>
+
+                <hr style="border-color: #333; margin: 2px 0;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px;">
+
+                    <div>
+                        <label for="TickSpacing">Tick Spacing: <span id="val_TickSpacing"></span></label>
+                        <input type="range" id="TickSpacing" min="1" max="15" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="Tickheight">Tick Height: <span id="val_Tickheight"></span></label>
+                        <input type="range" id="Tickheight" min="0.001" max="0.1" step="0.0001"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="TickWidth">Tick Width: <span id="val_TickWidth"></span></label>
+                        <input type="range" id="TickWidth" min="1" max="5" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="TickAnchorPoint">Tick Anchor Point: <span id="val_TickAnchorPoint"></span></label>
+                        <input type="range" id="TickAnchorPoint" min="0" max="1" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="labelscount">Labels Count: <span id="val_labelscount"></span></label>
+                        <input type="range" id="labelscount" min="1" max="25" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="fpsPrecision">FPS Precision: <span id="val_fpsPrecision"></span></label>
+                        <input type="range" id="fpsPrecision" min="1" max="5" step="1"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="MaxIntervalsDivision">Max Intervals Division: <span
+                                id="val_MaxIntervalsDivision"></span></label>
+                        <input type="range" id="MaxIntervalsDivision" min="-1" max="100" step="1"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="MaxIntervalDepth">Max Interval Depth: <span
+                                id="val_MaxIntervalDepth"></span></label>
+                        <input type="range" id="MaxIntervalDepth" min="-1" max="100" step="1"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Raw JSON Textarea (Hidden by default) -->
+            <div id="jsonEditorPanel" style="display:none;">
+                <textarea id="envConfigJson" name="envConfigJson"></textarea>
+            </div>
+        </div>
+        <button class="apply-btn" onclick="applyInjectedConfig();updateNotationConfigUI();">Apply Configuration</button>
+    </div>
+
+    <div id="mobileDepthControls">
+        <button onclick="adjustDepth(-1)" class="mobileDepthControlsbtn" aria-label="Decrease Depth">-</button>
+        <span id="depthDisplay">Depth: Infinite</span>
+        <button onclick="adjustDepth(1)" class="mobileDepthControlsbtn" aria-label="Increase Depth">+</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div id="textOverlay">
+        <div id="dynamicLabels"></div>
+        <div id="fpsCounter">60fps</div>
+        <div id="sampleLabel"></div>
+    </div>
+
+    <div id="hint">
+        <div style="text-align: left; margin-bottom: 20px;">
+            • Arrow keys / mouse drag & wheel to control<br>
+            • <strong>A/S</strong> to adjust rendering depth<br>
+            • <strong>M</strong> to toggle Mathstick Mode<br>
+            • <strong>Z</strong> to toggle Zoom into Mouse<br>
+            • <strong>D</strong> to toggle diagonal tick arrangement<br>
+            • <strong>H</strong> to toggle harmonic interval spacing (lag fixes)<br>
+            • <strong>F</strong> to toggle ordinal finder (for some notation wih a parser)<br>
+            • <strong>G</strong> to toggle set viewport state<br>
+            • <strong>I</strong> to show viewport state <br>
+            • <strong>L</strong> to lock screen (disable interactions) <br>
+            • <strong>1</strong> to lock mouse (mouse wont move anymore) <br>
+            • <strong>2</strong> to change sample text alignment <br>
+            • <strong>R</strong> to <b style="color:red;">Reset Viewport</b> <br>
+            <br>
+            • <strong>Ctrl</strong>/<strong>Shift</strong> to adjust sensivity of arrow key controls<br>
+            • <strong>Shift</strong>+<strong>S</strong> to Enter/Exit <b>Slow Mode</b><br>
+            • <strong>Space</strong>+<strong>Arrow Key</strong> to Toggle <b>Auto hold</b> for that arrow key<br>
+            • Open Config Menu for further configurations<br>
+            <br>
+            <b style="color:red;">For code injection, please read <a
+                    href="https://github.com/RNGDelak/ord-generalized/blob/main/README.md" target="_blank">How to Inject
+                    code</a></b>
+        </div>
+
+        <button id="closehint" name="closehint" onclick="dismissHint()" onmouseover="this.style.background='#0098ff'"
+            onmouseout="this.style.background='#007acc'">
+            I understand
+        </button>
+    </div>
+    <div id="notationControls"
+        style="position: absolute; left: 10px; bottom: 40px; z-index: 10; color: #fff;pointer-events: auto;">
+        <div id="notationSelectContainer"></div>
+        <button onclick="addNotationSelector()" id="AddNotationBtn" name="AddNotationBtn"
+            style="background: transparent; color: #0098ff; border: none; cursor: pointer; padding: 4px 0; font-weight: bold;">+
+            Add notation</button>
+    </div>
+
+    <div id="hudStats" onclick="copyPositionAndZoom()"
+        style="position: absolute; left: 135px; bottom: 7px; max-width: 30%; z-index: 10; color: #fff; text-align: left; font: 16px Serif; word-break: break-all; overflow-wrap: anywhere; display: flex; flex-direction: column-reverse; gap: 4px;">
+        <div><span id="zoomDisplay">1.00x</span></div>
+        <div><span id="posDisplay">0</span></div>
+    </div>
+
+    <div id="viewportZoomContainer">
+        <label for="viewportPosInput">Position:</label>
+        <input type="text" id="viewportPosInput" name="viewportPosInput" placeholder="0.5" value="0.5" />
+
+        <label for="viewportZoomInput">Zoom:</label>
+        <input type="text" id="viewportZoomInput" name="viewportZoomInput" placeholder="1.0" value="1.0" />
+
+        <button onclick="triggerViewportZoom()">Apply</button>
+    </div>
+
+    <div id="ordinalFinderContainer">
+        <label for="ordinalInput">Ordinal:</label>
+        <input type="text" id="ordinalInput" name="ordinalInput" placeholder="Enter ordinal..." />
+
+        <label for="precisionInput">Depth:</label>
+        <input type="number" id="precisionInput" name="precisionInput" value="40" title="Precision Digits (Mantissa)">
+
+        <button id="findOrdinalBtn" name="findOrdinalBtn" onclick="findAndZoomToOrdinal()">Find</button>
+    </div>
+
+    <script id="notation-script" src="Libs/BMS.js"></script>
+    <script src="plot.js"></script>
+    <script src="ui.js"></script>
+</body>
+
+</html>
