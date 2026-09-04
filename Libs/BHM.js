@@ -204,9 +204,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (bhmSystem.able(ord)) return "#ffd000";
-    return "#ff8000";
+    if (isSuccessor(ord)) return "#a00000";
+    if (bhmSystem.able(ord)) return "#ffff00"; // Power of ω
+    return "#ffA000";
   }
 
   function parse(str) {
@@ -242,8 +242,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Matrix", "#d40000"],
-    ["Limit Matrix", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Power of ω", "#ffff00"]
   ];
 
   // Configured to mode 2 ("subscript")

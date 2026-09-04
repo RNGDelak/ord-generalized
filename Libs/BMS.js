@@ -599,11 +599,11 @@ window.notation = (() => {
       let j = M.findLastIndex(x => !x[0]);
 
       if (j != 0) {
-         if (j == M.length - 1) return "#d40000";
-         return "#ff8000";
+         if (j == M.length - 1) return "#A00000";
+         return "#ffA000";
       }
 
-      if (M.length == 1) return "#d40000";
+      if (M.length == 1) return "#a00000";
 
       j = M.slice(j).findLastIndex(x => x[0] == 1);
 
@@ -642,15 +642,15 @@ window.notation = (() => {
    const DisplayName = ["BMS", "DBMS", "AMS", "PMS", "Vulcaniz", "0Y", "2 shifted-OCF"]
    const ordinalTypes = [
       ["Zero", "#808080"],
-      ["Successor Ordinal", "#d40000"],
-      ["Limit Ordinal", "#ff8000"],
+      ["Successor Ordinal", "#a00000"],
+      ["Limit Ordinal", "#ffA000"],
       ["Power of ω", "#ffff00"],
       ["Tower of ω", "#ffffff"],
       ["ε Ordinal", "#00FF00"],
       ["Veblen Ordinal", "#00FFF0"],
-      ["Feferman–Schütte Ordinal", "#f00fff"],
+      ["Feferman–Schütte Ordinal", "#ff00ff"],
       ["Bachmann–Howard Ordinal", "#000fff"],
-      ["Buchholz Ordinal", "#3f3f3f"]
+      ["Buchholz Ordinal", "#404040"]
    ];
 
    const Aliases = [

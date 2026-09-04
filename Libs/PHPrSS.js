@@ -118,7 +118,7 @@ window.notation = (() => {
 
     function classifyOrdinal(ord) {
         if (ord.length === 0) return "#808080"; // 0
-        if (isSuccessor(ord)) return "#d40000"; // Successor
+        if (isSuccessor(ord)) return "#a00000"; // Successor
 
         let tower = true;
         for (let i = 0; i < ord.length; i++) {
@@ -133,9 +133,9 @@ window.notation = (() => {
         for (let i = 0; i < ord.length; i++) {
             if (ord[i] === 0) zeroCount++;
         }
-        if (zeroCount === 1) return "#ffd000"; // Power of ω
+        if (zeroCount === 1) return "#ffff00"; // Power of ω
 
-        return "#ff8000"; // Other limits
+        return "#ffA000"; // Other limits
     }
 
     function parse(str) {
@@ -147,9 +147,9 @@ window.notation = (() => {
     const DisplayName = ["normal", "CNF included"];
     const ordinalTypes = [
         ["Zero", "#808080"],
-        ["Successor Ordinal", "#d40000"],
-        ["Limit Ordinal", "#ff8000"],
-        ["Power of ω", "#ffd000"],
+        ["Successor Ordinal", "#a00000"],
+        ["Limit Ordinal", "#ffA000"],
+        ["Power of ω", "#ffff00"],
         ["Tower of ω", "#ffffff"]
     ];
 

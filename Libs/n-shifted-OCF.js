@@ -282,10 +282,10 @@ window.notation = (() => {
   }
 
   function classifyOrdinal(ord) {
-    if (ord === Infinity || '' + ord === 'Infinity') return "#ff8000";
+    if (ord === Infinity || '' + ord === 'Infinity') return "#ffA000";
     if (ord === '0') return "#808080";
-    if (HSPN_islimit(ord)) return "#ff8000";
-    return "#d40000";
+    if (HSPN_islimit(ord)) return "#ffA000";
+    return "#a00000";
   }
 
   function parse(str) {
@@ -302,8 +302,8 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"]
   ];
 
   const Aliases = [

@@ -622,8 +622,8 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Mountain", "#d40000"],
-    ["Limit Mountain", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"]
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }],SlowMode:true };

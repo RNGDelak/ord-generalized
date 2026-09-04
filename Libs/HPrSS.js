@@ -105,7 +105,7 @@ function PrSStoCNF(s) {
     function classifyOrdinal(ord) {
         if (ord.length === 0) return "#808080"; // 0
 
-        if (isSuccessor(ord)) return "#d40000"; // Successor
+        if (isSuccessor(ord)) return "#a00000"; // Successor
 
         // {0,1,2,...,n}
         let tower = true;
@@ -122,9 +122,9 @@ function PrSStoCNF(s) {
         for (const x of ord) {
             if (x === 0) zeroCount++;
         }
-        if (zeroCount === 1) return "#ffd000"; // Power of ω
+        if (zeroCount === 1) return "#ffff00"; // Power of ω
 
-        return "#ff8000"; // Other limits
+        return "#ffA000"; // Other limits
     }
 
     function parse(str) {
@@ -134,7 +134,11 @@ function PrSStoCNF(s) {
     const Zero = [] //compulsory: how the first ordinal defined in your system defined? Should be an valid ordinal input for above functions
     const Limit = 'Limit' //compulsory: how the bounded ordinal in your system defined? Should be an valid ordinal input for above functions
     const DisplayName = ["normal", "CNF included"] //compulsory: add all your mode name here so the program can query them and display
-    const ordinalTypes = [["Zero", "#808080"],["Successor Ordinal", "#d40000"],["Limit Ordinal", "#ff8000"],["Power of ω", "#ffd000"],["Tower of ω", "#ffffff"]]; //compulsory: for legends gui purposes so user can know colour correspond to class of ordinal 
+    const ordinalTypes = [["Zero", "#808080"],
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Power of ω", "#ffff00"],
+    ["Tower of ω", "#ffffff"]]; //compulsory: for legends gui purposes so user can know colour correspond to class of ordinal 
 
     const Aliases = [["Small Cantor Ordinal", [0,2]],["Veblen Ordinal", [0,2,4,5]], ["Buchholz Ordinal", "Limit"]] //important ordinal
     const config = {}

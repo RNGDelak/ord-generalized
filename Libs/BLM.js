@@ -221,8 +221,8 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!ord || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    return "#ff8000";
+    if (isSuccessor(ord)) return "#a00000";
+    return "#ffA000";
   }
 
   function parse(str) {
@@ -256,8 +256,8 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Matrix", "#d40000"],
-    ["Limit Matrix", "#ff8000"]
+    ["Successor Matrix", "#a00000"],
+    ["Limit Matrix", "#ffA000"]
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }] };

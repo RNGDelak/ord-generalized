@@ -330,11 +330,11 @@ window.notation = (() => {
     }
 
     function classifyOrdinal(M) {
-        if (M === "Limit" || M === "P(0)") return "#3f3f3f"; 
+        if (M === "Limit" || M === "P(0)") return "#404040"; 
         if (!M || M === "0") return "#808080";              
 
         if (isSuccessor(M)) {
-            return "#d40000"; 
+            return "#a00000"; 
         }
 
         if (M.includes("P(")) {
@@ -350,7 +350,7 @@ window.notation = (() => {
             return "#ffff00"; 
         }
 
-        return "#ff8000"; 
+        return "#ffA000"; 
     }
 
     function parse(str) {
@@ -362,15 +362,15 @@ window.notation = (() => {
     const DisplayName = ["normal", "CNF included"];
     const ordinalTypes = [
         ["Zero", "#808080"],
-        ["Successor Ordinal", "#d40000"],
-        ["Limit Ordinal", "#ff8000"],
+        ["Successor Ordinal", "#a00000"],
+        ["Limit Ordinal", "#ffA000"],
         ["Power of ω", "#ffff00"],
         ["Tower of ω", "#ffffff"],
         ["ε Ordinal", "#00FF00"],
         ["Veblen Ordinal", "#00FFF0"],
         ["Feferman–Schütte Ordinal", "#f00fff"],
         ["Bachmann–Howard Ordinal", "#000fff"],
-        ["Buchholz Ordinal", "#3f3f3f"]
+        ["Buchholz Ordinal", "#404040"]
     ];
 
     const Aliases = [

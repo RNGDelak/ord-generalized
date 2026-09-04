@@ -269,9 +269,9 @@ window.notation = (() => {
   function classifyOrdinal(x) {
     if (x === Limit || (Array.isArray(x) && x[0] === true && x[1] === Infinity)) return "#ffffff";
     if (x === 0) return "#808080";
-    if (isSuccessor(x)) return "#d40000";
-    if (Array.isArray(x) && x[0] === true && x[2] === 0) return "#ffd000"; // Principal omega terms
-    return "#ff8000"; // General limit ordinals
+    if (isSuccessor(x)) return "#a00000";
+    if (Array.isArray(x) && x[0] === true && x[2] === 0) return "#ffff00"; // Principal omega terms
+    return "#ffA000"; // General limit ordinals
   }
 
   // String Parser
@@ -332,9 +332,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Principal Ordinal", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Some very large Ordinal", "#ffff00"]
   ];
 
   const config = { modes: [{ mode: 1, target: "both" }], MaxIntervalDepth:1 };

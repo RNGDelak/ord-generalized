@@ -285,9 +285,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (ord === Zero || ord === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (Array.isArray(ord) && ord[0]) return "#ffd000"; // Principal terms
-    return "#ff8000"; // Limit ordinal / sums
+    if (isSuccessor(ord)) return "#a00000";
+    if (Array.isArray(ord) && ord[0]) return "#ffff00"; // Principal terms
+    return "#ffA000"; // Limit ordinal / sums
   }
 
   // Parse strings into LMN JSON structures
@@ -327,9 +327,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Principal Ordinal", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Some very large Ordinal", "#ffff00"]
   ];
 
   const config = { modes: [{ mode: 2, target: "both" }] };

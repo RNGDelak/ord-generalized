@@ -670,17 +670,17 @@ window.notation = (() => {
     let j = M.findLastIndex(x => !x[0]);
 
     if (j != 0) {
-      if (j == M.length - 1) return "#d40000"; // Successor
-      return "#ff8000"; // Limit
+      if (j == M.length - 1) return "#a00000"; // Successor
+      return "#ffA000"; // Limit
     }
 
-    if (M.length == 1) return "#d40000"; // Successor
+    if (M.length == 1) return "#a00000"; // Successor
 
     j = M.slice(j).findLastIndex(x => x[0] == 1);
 
     const N = M.slice(j);
 
-    if (cmp_BMS(N, [[1, 1, 1]]) >= 0) return "#3f3f3f"; // Buchholz
+    if (cmp_BMS(N, [[1, 1, 1]]) >= 0) return "#404040"; // Buchholz
     if (cmp_BMS(N, [[1, 1], [2, 2]]) >= 0) return "#000fff"; // Bachmann–Howard
     if (cmp_BMS(N, [[1, 1], [2, 1], [3, 1]]) >= 0) return "#f00fff"; // Feferman–Schütte
     if (cmp_BMS(N, [[1, 1], [2, 1]]) >= 0) return "#00FFF0"; // Veblen
@@ -712,15 +712,15 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
     ["Power of ω", "#ffff00"],
     ["Tower of ω", "#ffffff"],
     ["ε Ordinal", "#00FF00"],
     ["Veblen Ordinal", "#00FFF0"],
-    ["Feferman–Schütte Ordinal", "#f00fff"],
+    ["Feferman–Schütte Ordinal", "#ff00ff"],
     ["Bachmann–Howard Ordinal", "#000fff"],
-    ["Buchholz Ordinal", "#3f3f3f"]
+    ["Buchholz Ordinal", "#404040"]
   ];
 
   const Aliases = [

@@ -446,7 +446,7 @@ window.notation = (() => {
       return "#808080";
 
     if (isSuccessor(ord))
-      return "#d40000";
+      return "#a00000";
 
     // Tower of ω
     let tower = true;
@@ -470,7 +470,7 @@ window.notation = (() => {
     }
 
     if (zeroCount >= 2)
-      return "#ff8000";   // ordinary limit
+      return "#ffA000";   // ordinary limit
 
     if (zeroCount === 1) {
       const P = getParents(ord);
@@ -483,7 +483,7 @@ window.notation = (() => {
       }
 
       if (lastChild === 1)
-        return "#ffd000";   // ω^α
+        return "#ffff00";   // ω^α
 
       if (lastChild === 2)
         return "#0fff00";   // ε
@@ -492,7 +492,7 @@ window.notation = (() => {
         return "#00fff0";   // ζ, η, φ₄,...
     }
 
-    return "#ff8000";
+    return "#ffA000";
   }
 
   function parse(str) {
@@ -510,9 +510,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Power of ω", "#ffd000"],
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Power of ω", "#ffff00"],
     ["Tower of ω", "#ffffff"],
     ["ε Ordinal", "#0fff00"],
     ["Veblen Ordinal", "#00fff0"]

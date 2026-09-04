@@ -151,9 +151,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (ord.length === 3) return "#ffd000"; // Principal term
-    return "#ff8000"; // Limit ordinal
+    if (isSuccessor(ord)) return "#a00000";
+    if (ord.length === 3) return "#ffff00"; // Power of ω
+    return "#ffA000"; // Limit ordinal
   }
 
   // Parser supporting alias lookup, raw arrays, bracket formatting, and address paths
@@ -191,9 +191,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Principal Ordinal", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffA000"],
+    ["Some very large Ordinal", "#ffd000"]
   ];
 
   const config = { modes: [{ mode: 1, target: 'both' }] };

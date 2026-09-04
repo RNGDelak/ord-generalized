@@ -5137,12 +5137,12 @@ window.notation = (() => {
    function classifyOrdinal(ord) {
       if (ord == Limit) return "#ffffff";
       if (ord.length == 0) return "#808080";
-      if (EcOCF.isSuccessor(ord)) return "#d40000";
+      if (EcOCF.isSuccessor(ord)) return "#a00000";
       if (EcOCF.isOmega(ord)) return "#1988c9";
       if (EcOCF.isepsilon(ord)) return "#00ff00";
       if (EcOCF.isTowerOfW(ord)) return "#ffffff";
       if (EcOCF.isomegap(ord)) return "#ffff00";
-      return "#ff8000"; // General limits / compound terms
+      return "#ffA000"; // General limits / compound terms
    }
 
    //optional: if you dont have this, just leave empty and dont return this in the end of IIEF (this will ler the program know you don't implement this)
@@ -5157,8 +5157,8 @@ window.notation = (() => {
 
    const ordinalTypes = [
       ["Zero", "#808080"],
-      ["Successor Ordinal", "#d40000"],
-      ["Limit Ordinal", "#ff8000"],
+      ["Successor Ordinal", "#a00000"],
+      ["Limit Ordinal", "#ffA000"],
       ["Power of ω", "#ffff00"],
       ["Tower of ω", "#ffffff"],
       ["ε Ordinal", "#00FF00"],
