@@ -5051,6 +5051,226 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 
+* **v2.21** — https://rngdelak.github.io/ord-generalized/versions/version%202.21/ <details>
+
+  * **Description:**
+
+    * Expanded the project with **34 additional notation-library implementations**, substantially increasing the number of ordinal systems available in the codebase.
+    * Greatly expanded the **Bashicu Matrix System (BMS)** implementation with additional representations and conversion systems.
+    * Added new keyboard controls for sample alignment, mouse locking, and persistent arrow-key movement.
+    * Added the ability to disable rendering of the number line independently from other UI elements.
+    * Improved the notation-selection UI and preset organization.
+    * Standardized ordinal classification colors across several existing notation libraries.
+    * Improved the information copied by the position/zoom sharing function.
+    * Added a favicon to the application.
+    * Expanded the README's usage documentation and updated the version-history range.
+
+  * **Added:**
+
+    * Old libs — already present in v2.20
+
+      * **BMS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBMS.js
+      * **cOCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FcOCF.js
+      * **EcOCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FEcOCF.js
+      * **EBO** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FEBO.js
+      * **HPrSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHPrSS.js
+      * **LPrSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FLPrSS.js
+      * **n-shifted-OCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2Fn-shifted-OCF.js
+      * **TON** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FTON.js
+      * **Worm** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FWorm.js
+
+    * Newly added in v2.21
+
+      * **1-Y** — https://rngdelak.github.io/ord-generalized/#href=Libs%2F1-Y.js
+      * **APS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FAPS.js
+      * **ATS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FATS.js
+      * **BHM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBHM.js
+      * **BHSM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBHSM.js
+      * **BLM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBLM.js
+      * **BSM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBSM.js
+      * **BwMN** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBwMN.js
+      * **ESH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FESH.js
+      * **ESS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FESS.js
+      * **Eulerian** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FEulerian.js
+      * **FSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FFSS.js
+      * **HH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHH.js
+      * **HHH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHHH.js
+      * **HS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHS.js
+      * **HSH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHSH.js
+      * **HSwY** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FHSwY.js
+      * **LMN** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FLMN.js
+      * **LON** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FLON.js
+      * **MS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FMS.js
+      * **OSSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FOSSS.js
+      * **PHPrSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPHPrSS.js
+      * **PLPrSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPLPrSS.js
+      * **PMS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPMS.js
+      * **PPS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPPS.js
+      * **PS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPS.js
+      * **PTS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FPTS.js
+      * **SFSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FSFSS.js
+      * **SH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FSH.js
+      * **SSH** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FSSH.js
+      * **TS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FTS.js
+      * **wFSS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwFSS.js
+      * **wMM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwMM.js
+      * **wY** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwY.js
+    * Added BMS display modes:
+
+      * `BMS`
+      * `DBMS`
+      * `AMS`
+      * `PMS`
+      * `Vulcaniz`
+      * `0Y`
+      * `2 shifted-OCF`
+    * Added BMS conversion functionality:
+
+      * BMS → PMS conversion.
+      * PMS → AMS conversion.
+      * PMS/AMS → Vulcaniz representation.
+      * BMS → 0-Y sequence conversion.
+      * BMS → DBMS conversion.
+    * Added DBMS normalization and trailing-zero trimming.
+    * Added supporting BMS algorithms for:
+
+      * Parent/ancestor tracking.
+      * Column comparison.
+      * Prefix increment/decrement.
+      * Row incrementing.
+      * Zeroing portions of columns.
+      * Matrix normalization.
+      * Ancestor-index construction.
+    * Added new BMS aliases:
+
+      * `Large Rathjen Ordinal`
+      * Updated `Dimensional Buchholz Ordinal` alias to also identify `Small Rathjen Ordinal / PTO(KPM)`.
+    * Added `Rendernumberline` configuration to allow number-line computation/rendering to be disabled.
+    * Added `sampleMaxWidth`.
+    * Added `sampleTransform`.
+    * Added `sampleTextAlign`.
+    * Added `toggleHeldKeys` state for persistent arrow-key movement.
+    * Added keyboard shortcut **`2`** for cycling sample text alignment:
+
+      * left
+      * center
+      * right
+    * Added **Space + Arrow Key** toggling for persistent movement.
+    * Added HUD indicators showing which arrow keys are currently being held through the toggle system.
+    * Added a favicon to `index.html`.
+    * Added additional preset-library organization:
+
+      * **Official Notations**
+      * **Experimental Notations**
+    * Added Pointer HPrSS and Pointer LPrSS to the official notation selection.
+    * Added ω-Y Sequence to the official notation selection.
+    * Added descriptions/full names to the preset notation selector.
+    * Added extra experimental notation entries to the source as prepared/commented options for future activation.
+    * Added notation name, aspect ratio, and harmonic-spacing information to the copied position/zoom text.
+
+  * **Changes:**
+
+    * Expanded the BMS implementation from primarily displaying BMS/2-shifted-OCF into a multi-representation system capable of displaying several related matrix/sequence representations.
+    * Changed BMS `DisplayName` from:
+
+      * `normal`
+      * `2 shifted-OCF`
+      * to:
+      * `BMS`
+      * `DBMS`
+      * `AMS`
+      * `PMS`
+      * `Vulcaniz`
+      * `0Y`
+      * `2 shifted-OCF`
+    * Changed BMS's `display()` logic so each representation is selected explicitly by mode.
+    * Changed the BMS shifted-OCF condition so it is only used for values below its specified threshold.
+    * Expanded BMS aliases and adjusted the ordinal naming of several large ordinal benchmarks.
+    * Updated `plot.js` so `computeTree()` only runs when `Rendernumberline` is enabled.
+    * Updated sample rendering to apply:
+
+      * maximum width
+      * transform/vertical positioning
+      * text alignment
+    * Updated keyboard handling so **Ctrl+S** is no longer treated as the ordinary depth-control `S` shortcut.
+    * Added the new Space+Arrow persistent-hold behavior to the keyboard event system.
+    * Updated the key-release logic so toggled arrow keys remain active after the physical key is released.
+    * Updated the Config Menu notation selector styling:
+
+      * Changed row alignment from `center` to `baseline`.
+      * Added explicit selector font sizing.
+      * Added selector line-height and padding.
+    * Updated the notation display-target button styling to use the configurable:
+
+      * `ChangeNotationDisplayLocationBtnColor`
+    * Removed the border and outline from the notation display-target button.
+    * Updated `copyPositionAndZoom()` to include:
+
+      * current notation name
+      * position
+      * zoom
+      * aspect ratio
+      * harmonic interval spacing status
+    * Updated the preset selector to group notation systems into official and experimental categories.
+    * Renamed the EcOCF display title from:
+
+      * `EcOCF transfinite number line`
+      * to `Extended cOCF transfinite number line`.
+    * Standardized successor/limit classification colors in several notation libraries:
+
+      * `BMS.js`
+      * `cOCF.js`
+      * `EcOCF.js`
+      * `HPrSS.js`
+      * `LPrSS.js`
+      * `n-shifted-OCF.js`
+    * Changed the standard successor color from `#d40000` to `#a00000`.
+    * Changed the standard limit color from `#ff8000` to `#ffA000`.
+    * Updated several power-of-ω colors from the older yellow/orange variants to `#ffff00`.
+    * Updated some dark classification colors from `#3f3f3f` to `#404040`.
+    * Updated the README keyboard-control documentation with the new shortcuts.
+    * Updated the README version-series heading from:
+
+      * `Version 2 Series (2.0 → 2.19)`
+      * to:
+      * `Version 2 Series (2.0 → 2.20)`.
+
+  * **Fixes:**
+
+    * Fixed the EcOCF title so it describes the library as **Extended cOCF** rather than simply `EcOCF`.
+    * Improved consistency of ordinal-classification colors across the existing notation libraries.
+    * Improved BMS representation handling by adding explicit conversions instead of relying on the previous two display paths.
+    * Improved BMS matrix processing with normalization, ancestor tracking, and trailing-zero handling required by the new representations.
+    * Improved keyboard interaction so persistent arrow-key movement can be toggled without requiring the key to remain physically pressed.
+    * Improved sample-text positioning and alignment control.
+    * Improved the information copied for sharing a viewport by including the notation and relevant display configuration.
+    * Improved the notation preset UI by separating currently promoted/official systems from experimental systems.
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
