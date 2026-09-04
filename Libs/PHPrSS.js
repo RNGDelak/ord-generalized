@@ -159,7 +159,7 @@ window.notation = (() => {
         ["Buchholz Ordinal", "Limit"]
     ];
     const config = {};
-    const title = 'HPrSS transfinite number line';
+    const title = 'pointer HPrSS transfinite number line';
 
     return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
 })();
