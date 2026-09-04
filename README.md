@@ -5052,9 +5052,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 * **v2.21** — https://rngdelak.github.io/ord-generalized/versions/version%202.21/ <details>
-
   * **Description:**
-
     * Expanded the project with **34 additional notation-library implementations**, substantially increasing the number of ordinal systems available in the codebase.
     * Greatly expanded the **Bashicu Matrix System (BMS)** implementation with additional representations and conversion systems.
     * Added new keyboard controls for sample alignment, mouse locking, and persistent arrow-key movement.
@@ -5066,9 +5064,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Expanded the README's usage documentation and updated the version-history range.
 
   * **Added:**
-
     * Old libs — already present in v2.20
-
       * **BMS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBMS.js
       * **cOCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FcOCF.js
       * **EcOCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FEcOCF.js
@@ -5078,9 +5074,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * **n-shifted-OCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2Fn-shifted-OCF.js
       * **TON** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FTON.js
       * **Worm** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FWorm.js
-
     * Newly added in v2.21
-
       * **1-Y** — https://rngdelak.github.io/ord-generalized/#href=Libs%2F1-Y.js
       * **APS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FAPS.js
       * **ATS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FATS.js
@@ -5116,7 +5110,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * **wMM** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwMM.js
       * **wY** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwY.js
     * Added BMS display modes:
-
       * `BMS`
       * `DBMS`
       * `AMS`
@@ -5125,7 +5118,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * `0Y`
       * `2 shifted-OCF`
     * Added BMS conversion functionality:
-
       * BMS → PMS conversion.
       * PMS → AMS conversion.
       * PMS/AMS → Vulcaniz representation.
@@ -5133,7 +5125,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * BMS → DBMS conversion.
     * Added DBMS normalization and trailing-zero trimming.
     * Added supporting BMS algorithms for:
-
       * Parent/ancestor tracking.
       * Column comparison.
       * Prefix increment/decrement.
@@ -5142,7 +5133,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * Matrix normalization.
       * Ancestor-index construction.
     * Added new BMS aliases:
-
       * `Large Rathjen Ordinal`
       * Updated `Dimensional Buchholz Ordinal` alias to also identify `Small Rathjen Ordinal / PTO(KPM)`.
     * Added `Rendernumberline` configuration to allow number-line computation/rendering to be disabled.
@@ -5151,7 +5141,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Added `sampleTextAlign`.
     * Added `toggleHeldKeys` state for persistent arrow-key movement.
     * Added keyboard shortcut **`2`** for cycling sample text alignment:
-
       * left
       * center
       * right
@@ -5159,7 +5148,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Added HUD indicators showing which arrow keys are currently being held through the toggle system.
     * Added a favicon to `index.html`.
     * Added additional preset-library organization:
-
       * **Official Notations**
       * **Experimental Notations**
     * Added Pointer HPrSS and Pointer LPrSS to the official notation selection.
@@ -5169,10 +5157,8 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Added notation name, aspect ratio, and harmonic-spacing information to the copied position/zoom text.
 
   * **Changes:**
-
     * Expanded the BMS implementation from primarily displaying BMS/2-shifted-OCF into a multi-representation system capable of displaying several related matrix/sequence representations.
     * Changed BMS `DisplayName` from:
-
       * `normal`
       * `2 shifted-OCF`
       * to:
@@ -5188,7 +5174,6 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Expanded BMS aliases and adjusted the ordinal naming of several large ordinal benchmarks.
     * Updated `plot.js` so `computeTree()` only runs when `Rendernumberline` is enabled.
     * Updated sample rendering to apply:
-
       * maximum width
       * transform/vertical positioning
       * text alignment
@@ -5196,16 +5181,13 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Added the new Space+Arrow persistent-hold behavior to the keyboard event system.
     * Updated the key-release logic so toggled arrow keys remain active after the physical key is released.
     * Updated the Config Menu notation selector styling:
-
       * Changed row alignment from `center` to `baseline`.
       * Added explicit selector font sizing.
       * Added selector line-height and padding.
     * Updated the notation display-target button styling to use the configurable:
-
       * `ChangeNotationDisplayLocationBtnColor`
     * Removed the border and outline from the notation display-target button.
     * Updated `copyPositionAndZoom()` to include:
-
       * current notation name
       * position
       * zoom
@@ -5213,11 +5195,9 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * harmonic interval spacing status
     * Updated the preset selector to group notation systems into official and experimental categories.
     * Renamed the EcOCF display title from:
-
       * `EcOCF transfinite number line`
       * to `Extended cOCF transfinite number line`.
     * Standardized successor/limit classification colors in several notation libraries:
-
       * `BMS.js`
       * `cOCF.js`
       * `EcOCF.js`
@@ -5230,13 +5210,11 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Updated some dark classification colors from `#3f3f3f` to `#404040`.
     * Updated the README keyboard-control documentation with the new shortcuts.
     * Updated the README version-series heading from:
-
       * `Version 2 Series (2.0 → 2.19)`
       * to:
       * `Version 2 Series (2.0 → 2.20)`.
 
   * **Fixes:**
-
     * Fixed the EcOCF title so it describes the library as **Extended cOCF** rather than simply `EcOCF`.
     * Improved consistency of ordinal-classification colors across the existing notation libraries.
     * Improved BMS representation handling by adding explicit conversions instead of relying on the previous two display paths.
