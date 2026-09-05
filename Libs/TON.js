@@ -168,11 +168,11 @@ window.notation = (() => {
   }
 
   function classifyOrdinal(ord) {
-    if (ord === Infinity) return "#ff8000";
+    if (ord === Infinity) return "#ffa000";
     if (isSuccessor(ord)) {
-      return "#d40000"; // Successor / Omega level
+      return "#a00000"; // Successor / Omega level
     }
-    return "#ff8000"; // Limit ordinal
+    return "#ffa000"; // Limit ordinal
   }
 
   function parse(str) {
@@ -193,8 +193,8 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffa000"]
   ];
 
   const Aliases = [

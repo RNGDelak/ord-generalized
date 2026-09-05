@@ -126,7 +126,7 @@ window.notation = (() => {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
     if (isSuccessor(ord)) return "#a00000";
-    if (ord.length === 2 && ord[0] === 0 && ord[1] > 0) return "#ffd000"; // Major limit branch
+    if (ord.length === 2 && ord[0] === 0 && ord[1] > 0) return "#ffff00"; // Major limit branch
     return "#ffA000"; // Limit ordinal
   }
 
@@ -170,7 +170,7 @@ window.notation = (() => {
     ["Zero", "#808080"],
     ["Successor Ordinal", "#a00000"],
     ["Limit Ordinal", "#ffA000"],
-    ["Some very large Ordinal", "#ffd000"]
+    ["Some very large Ordinal", "#ffff00"]
   ];
 
   const config = { modes: [{ mode: 1, target: 'both' }] };

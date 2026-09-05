@@ -145,9 +145,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (ord.length === 2 && ord[0] === 0 && ord[1] === 0) return "#ffd000"; // Major branch term
-    return "#ff8000"; // Limit ordinal
+    if (isSuccessor(ord)) return "#a00000";
+    if (ord.length === 2 && ord[0] === 0 && ord[1] === 0) return "#ffff00"; // Major branch term
+    return "#ffa000"; // Limit ordinal
   }
 
   // Parser supporting alias lookup, raw arrays, pair brackets, and address sequences
@@ -188,9 +188,9 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
-    ["Principal Ordinal", "#ffd000"]
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffa000"],
+    ["Some very large Ordinal", "#ffff00"]
   ];
 
   const config = { modes: [{ mode: 1, target: 'both' }] };

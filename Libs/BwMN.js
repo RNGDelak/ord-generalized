@@ -584,9 +584,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#d40000";
-    if (bwmnSystem.able(ord)) return "#ffd000";
-    return "#ff8000";
+    if (isSuccessor(ord)) return "#a00000";
+    if (bwmnSystem.able(ord)) return "#ffff00";
+    return "#ffa000";
   }
 
   function parse(str) {

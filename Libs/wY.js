@@ -1282,11 +1282,11 @@ window.notation = (() => {
     let j = M.findLastIndex(x => !x[0]);
 
     if (j != 0) {
-      if (j == M.length - 1) return "#d40000";
-      return "#ff8000";
+      if (j == M.length - 1) return "#a00000";
+      return "#ffa000";
     }
 
-    if (M.length == 1) return "#d40000";
+    if (M.length == 1) return "#a00000";
 
     j = M.slice(j).findLastIndex(x => x[0] == 1);
 
@@ -1317,7 +1317,7 @@ window.notation = (() => {
 
       if (count == 1) return "#ffff00"
 
-      return (isSuccessor(ord)) ? "#d40000" : "#ff8000";
+      return (isSuccessor(ord)) ? "#a00000" : "#ffa000";
     } // Successor or Limit or Power of ω
     let arr = trimZeroColumns(dbmsToBms(DimY_to_DBMS(ord)))
     return classifyBMSOrdinal(arr);
@@ -1327,8 +1327,8 @@ window.notation = (() => {
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#d40000"],
-    ["Limit Ordinal", "#ff8000"],
+    ["Successor Ordinal", "#a00000"],
+    ["Limit Ordinal", "#ffa000"],
     ["Power of ω", "#ffff00"],
     ["Tower of ω", "#ffffff"],
     ["ε Ordinal", "#00FF00"],

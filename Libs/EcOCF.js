@@ -5073,7 +5073,7 @@ window.notation = (() => {
       let sugar = [1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 35, 36, 37, 38, 39, 1, 0]
       let sugardefault = [[...sugar], [...sugar]];
       sugardefault[0][10] = 0;
-      let sugarbuttoncolor = ['#d0e0ff', '#fff080', '#d0ffd0', '#d0ffff', '', '', '', '', '#ffff00', '#d0ffff', '#d0ffd0', '#d0ffd0', '#ffe0e0', '#fff0e0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#ffd0ff', '#ffd0ff', '#d0e0ff', '#d0e0ff', '#c0ffff', '#b0ffb0', '#ffe0e0', '#a0f0c0', '#fff000', '#fafa00', '#f0f040', '#f0f040', '#f0f040', '#f0f040', '#c0ffff', '#c0ffff', 35, 36, 37, 38, 39, '#ffd000', '#f0f040'];
+      let sugarbuttoncolor = ['#d0e0ff', '#fff080', '#d0ffd0', '#d0ffff', '', '', '', '', '#ffff00', '#d0ffff', '#d0ffd0', '#d0ffd0', '#ffe0e0', '#fff0e0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#d0ffd0', '#ffd0ff', '#ffd0ff', '#d0e0ff', '#d0e0ff', '#c0ffff', '#b0ffb0', '#ffe0e0', '#a0f0c0', '#fff000', '#fafa00', '#f0f040', '#f0f040', '#f0f040', '#f0f040', '#c0ffff', '#c0ffff', 35, 36, 37, 38, 39, '#ffff00', '#f0f040'];
       let sugarbuttonnumber = [1, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1];
       let multiplicationsign = ['×', '·'];
       let propernames = ['Small Cantor ordinal', 'Cantor ordinal', 'Large Cantor ordinal', 'Feferman–Schütte ordinal', 'Ackermann ordinal', 'Small Veblen ordinal', 'Large Veblen ordinal', 'Second Large Veblen ordinal', 'Bachmann-Howard ordinal', 'Buchholz ordinal', 'Takeuti-Feferman-Buchholz ordinal', 'Bird ordinal', 'Extended Buchholz ordinal', 'Small Rathjen ordinal', 'Rathjen ordinal', 'Large Rathjen ordinal', 'Duchhardt ordinal'];

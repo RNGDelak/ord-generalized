@@ -193,7 +193,7 @@ window.notation = (() => {
     ["Zero", "#808080"],
     ["Successor Ordinal", "#a00000"],
     ["Limit Ordinal", "#ffA000"],
-    ["Some very large Ordinal", "#ffd000"]
+    ["Some very large Ordinal", "#ffff00"]
   ];
 
   const config = { modes: [{ mode: 1, target: 'both' }] };
