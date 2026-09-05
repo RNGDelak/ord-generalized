@@ -1,5 +1,17 @@
 # Ord-Generalized
 
+## *This version, v2.21 has added a lot of notation libs, which is soo much to explore!!!* [click to see more](#added)
+### In future, i'd add some more notation, which including these
+   * Buchholz OCF (not it's extended version)
+   * Rathjen's Small ψ OCF
+   * Rathjen's Capital Ψ OCF
+   * Veblen Function
+   * and all of the rest notation from following notation explorer
+     * hypcos's notation explorer: https://github.com/hypcos/notation-explorer
+     * waffle3z's notation explorer: https://github.com/Waffle3z/notations
+     * janipen's notation explorer: https://janipen.github.io/nox/
+     * azertywastaken's notation explorer: https://azertywastaken.github.io/Ordinals/
+
 ## About this project
 
 
@@ -5063,7 +5075,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
     * Added a favicon to the application.
     * Expanded the README's usage documentation and updated the version-history range.
 
-  * **Added:**
+  * #### Added:
     * Old libs — already present in v2.20
       * **BMS: Bashicu Matrix System** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FBMS.js
       * **cOCF** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FcOCF.js
