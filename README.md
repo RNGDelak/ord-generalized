@@ -5063,7 +5063,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
 
 
 
-* **v2.21** — https://rngdelak.github.io/ord-generalized/versions/version%202.21/ <details>
+* **v2.21** — https://rngdelak.github.io/ord-generalized/versions/version%202.21/ <details open>
   * **Description:**
     * Expanded the project with **34 additional notation-library implementations**, substantially increasing the number of ordinal systems available in the codebase.
     * Greatly expanded the **Bashicu Matrix System (BMS)** implementation with additional representations and conversion systems.
