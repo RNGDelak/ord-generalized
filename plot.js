@@ -121,7 +121,7 @@ let config = {
     sampleMaxWidth: "80%",
     sampleTransform: "translateY(-80%)",
     sampleTextAlign: "left",
-    ShowCursorTooltip: true,
+    ShowCursorTooltip: false,
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
