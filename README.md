@@ -5290,7 +5290,7 @@ As a googology enthusiast, i was shocked of how complex, recursive and beatiful 
 
 So do i, i wanted to explore what inside, but sadly, there isn't any source code (and he shared it in 12/7/2026, after i emailed him)
 
-And in past year, i tried to firgure out myself , and thats it, i written a [document](https://github.com/RNGDelak/ord-limbms/blob/main/README.md), and making 3 transfinite number line which is [ord-w](https://rngdelak.github.io/ord-w/), [ord-ww](https://rngdelak.github.io/ord-ww/) and [ord-limbms](https://rngdelak.github.io/ord-limbms/) with vital help from [@solarzone1010](https://solarzone1010.github.io/).
+And in past year, i tried to firgure out myself , and thats it, i written a [document](https://github.com/RNGDelak/ord-limbms/blob/main/README.md), and making 3 transfinite number line which is [ord-w](https://rngdelak.github.io/ord-w/), [ord-ww](https://rngdelak.github.io/ord-ww/) and [ord-limbms](https://rngdelak.github.io/ord-limbms/) (even a scratch version, which neverrrr to be complete [lol](https://scratch.mit.edu/projects/1247085717/)) with vital help from [@solarzone1010](https://solarzone1010.github.io/).
 
 Yeah, those project are painfully slow. And then, i revised everything, try to optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way.
 
