@@ -808,6 +808,7 @@ function syncConfigToInteractiveControls() {
     setCheck("EnableSetViewPort", config.EnableSetViewPort);
     setCheck("SlowMode", config.SlowMode);
     setCheck("ShowCurrentPositionState", config.ShowCurrentPositionState);
+    setCheck("ShowCursorTooltip", config.ShowCursorTooltip);
 }
 
 // Update config properties based on control changes
@@ -833,6 +834,7 @@ function updateConfigFromControls() {
     config.EnableSetViewPort = getCheck("EnableSetViewPort");
     config.SlowMode = getCheck("SlowMode");
     config.ShowCurrentPositionState = getCheck("ShowCurrentPositionState");
+    config.ShowCursorTooltip = getCheck("ShowCursorTooltip");
 
     // Update value displays
     ["aspectratio", "TickSpacing", "Tickheight", "TickWidth", "TickAnchorPoint", "labelscount", "fpsPrecision", "MaxIntervalsDivision", "MaxIntervalDepth"].forEach(id => {

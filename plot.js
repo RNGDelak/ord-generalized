@@ -8,6 +8,7 @@ let sampleElem = document.getElementById("sampleLabel");
 let fpsElem = document.getElementById("fpsCounter");
 let zoomElem = document.getElementById("zoomDisplay");
 let posElem = document.getElementById("posDisplay");
+let tooltipElem = document.getElementById("cursorTooltip");
 
 // --- State & Configurations ---
 let PRECISION_SCALE = 10n ** 10n;
@@ -120,6 +121,7 @@ let config = {
     sampleMaxWidth: "80%",
     sampleTransform: "translateY(-80%)",
     sampleTextAlign: "left",
+    ShowCursorTooltip: true,
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
@@ -312,7 +314,7 @@ function clearTextLabels() {
 }
 
 function blendColorWithBrightness(hexColor, b) {
-    if (!config.EnableTickColorBlending) {return hexColor;}
+    if (!config.EnableTickColorBlending) { return hexColor; }
     let cVal = parseInt(hexColor.replace("#", ""), 16);
 
     let r = (cVal >> 16) & 0xff;
@@ -461,7 +463,7 @@ function sampleHighPrecision(x, width) {
         textAlign: config.sampleTextAlign
     });
     sampleElem.innerHTML = `<div></div>`;
-    
+
 
     let xBI = toBigInt(x);
     if (xBI <= cam.view.x0) {
@@ -488,13 +490,13 @@ function sampleHighPrecision(x, width) {
             .filter(m => m.target === 'both' || m.target === 'sample');
 
         if (sampleModes.length > 0) {
-                sampleModes.forEach(item => {
-                    const mode = notation.DisplayName[item.mode];
-                    if (mode) {
-                        const ordStr = notation.display(cam.samplerOrd, mode);
-                        htmlContent += `<div>${ordStr}</div>`;
-                    }
-                });
+            sampleModes.forEach(item => {
+                const mode = notation.DisplayName[item.mode];
+                if (mode) {
+                    const ordStr = notation.display(cam.samplerOrd, mode);
+                    htmlContent += `<div>${ordStr}</div>`;
+                }
+            });
         }
 
         sampleElem.innerHTML = htmlContent;
@@ -596,9 +598,9 @@ function drawHUD() {
 
         for (let key in arrowMapping) {
             if (cam.toggleHeldKeys[key]) {
-                hudItems.push({ 
-                    text: `Toggled Holding ${arrowMapping[key]}`, 
-                    color: 'rgb(255, 145, 0)' 
+                hudItems.push({
+                    text: `Toggled Holding ${arrowMapping[key]}`,
+                    color: 'rgb(255, 145, 0)'
                 });
             }
         }
@@ -966,10 +968,253 @@ window.addEventListener("resize", () => {
     render();
 });
 
+let cursorState = { x: -1, y: -1, active: false };
+
+window.addEventListener("mousemove", (e) => {
+    cursorState.x = e.clientX;
+    cursorState.y = e.clientY;
+    cursorState.active = true;
+    updateCursorTooltip();
+});
+
+window.addEventListener("mouseleave", () => {
+    cursorState.active = false;
+    if (tooltipElem) tooltipElem.style.display = "none";
+});
+
+/**
+ * Calculates the integer depth of ordinal 'a' relative to 'limitOrd'
+ * using minimal fundamental sequence expansion steps.
+ */
+function getOrdinalDepth(a, limitOrd) {
+    if (!notation || !notation.cmp) return 0;
+
+    // Depth 0: Limit itself or Zero if configured as baseline
+    if (notation.cmp(a, limitOrd) === 0) return 0;
+
+    let current = limitOrd;
+    let depth = 0;
+    let maxSafetyIter = 1000; // Safeguard against infinite loops
+
+    while (notation.cmp(current, a) > 0 && depth < maxSafetyIter) {
+        // Ensure current ordinal can be expanded via fundamental sequence
+        if (typeof notation.fs !== "function") break;
+
+        // Find min k such that fs(current, k) >= a
+        let k = 0;
+        let nextTerm = null;
+
+        while (k < 10000) {
+            let term = notation.fs(current, k);
+            if (notation.cmp(term, a) >= 0) {
+                nextTerm = term;
+                break;
+            }
+            k++;
+        }
+
+        if (!nextTerm) break; // Could not step down further
+
+        current = nextTerm;
+        depth++;
+
+        // Stop once exact equality is reached
+        if (notation.cmp(current, a) === 0) {
+            return depth;
+        }
+    }
+
+    return depth;
+}
+
+function updateCursorTooltip() {
+    if (!config.ShowCursorTooltip || !cursorState.active || window.isSettingsOpen) {
+        if (tooltipElem) tooltipElem.style.display = "none";
+        return;
+    }
+
+    let px = cursorState.x;
+    let py = cursorState.y;
+
+    // Determine vertical baseline of the main number line
+    let slope = config.DiagonalTickArrangement ? config.TickSlopeArrangement : 0;
+    let lineY = (canvas.height / 2) + (slope * canvas.height * (px / canvas.width - 0.5));
+
+    // Proximity check
+    let proximity = Math.max(40, canvas.height * config.Tickheight * 1.5);
+    if (Math.abs(py - lineY) > proximity) {
+        tooltipElem.style.display = "none";
+        return;
+    }
+
+    // --- Search Nearest Ordinal Tick to the Left ---
+    let tick = null;
+    let targetX = Math.floor(px);
+
+    // Look backward from cursor pixel position
+    for (let x = targetX; x >= 0; x--) {
+        if (cam.ticks[x] && cam.ticks[x].ord) {
+            tick = cam.ticks[x];
+            break;
+        }
+    }
+
+    // Fallback if cursor is to the left of all ticks
+    if (!tick) {
+        for (let x = targetX + 1; x < cam.ticks.length; x++) {
+            if (cam.ticks[x] && cam.ticks[x].ord) {
+                tick = cam.ticks[x];
+                break;
+            }
+        }
+    }
+
+    if (!tick || !tick.ord) {
+        tooltipElem.style.display = "none";
+        return;
+    }
+
+    let ord = tick.ord;
+
+    // 1. Formatted Representation
+    let primaryMode = (config.modes && config.modes.length > 0) ? normalizeMode(config.modes[0]).mode : 0;
+    let modeName = (notation.DisplayName && notation.DisplayName[primaryMode]) 
+        ? notation.DisplayName[primaryMode] 
+        : primaryMode;
+    let ordStr = notation.display ? notation.display(ord, modeName) : JSON.stringify(ord);
+
+    // 2. Classification Resolution tailored to your module
+    let classification = "Unknown";
+    
+    // Get hex color from tick or evaluate via classifyOrdinal
+    let colorHex = tick.color;
+    if (!colorHex && typeof notation.classifyOrdinal === "function") {
+        try {
+            colorHex = notation.classifyOrdinal(ord);
+        } catch (e) {
+            colorHex = null;
+        }
+    }
+
+    if (colorHex) {
+        let hexLower = String(colorHex).toLowerCase();
+        
+        // Edge Case: Check for Limit ("#ffffff")
+        if (hexLower === "#ffffff" || (notation.cmp && notation.cmp(ord, notation.Limit) === 0)) {
+            classification = "Limit";
+        } 
+        // Standard lookup inside notation.ordinalTypes
+        else if (Array.isArray(notation.ordinalTypes)) {
+            let found = notation.ordinalTypes.find(([name, col]) => {
+                return col && col.toLowerCase() === hexLower;
+            });
+            if (found) {
+                classification = found[0];
+            }
+        }
+    }
+
+    // Fallback logic if classifyOrdinal returns direct class names
+    if (classification === "Unknown") {
+        if (notation.cmp && notation.cmp(ord, notation.Zero) === 0) {
+            classification = "Zero";
+        } else if (notation.isSuccessor && notation.isSuccessor(ord)) {
+            classification = "Successor Ordinal";
+        } else {
+            classification = "Normal";
+        }
+    }
+
+    // 3. Ordinal's Exact Viewport Position (Uses tick.x instead of cursor px)
+    let tickX = (typeof tick.x === "number") ? tick.x : (cam.ticks.indexOf(tick));
+    let currentWidthBI = cam.view.x1 - cam.view.x0;
+    let numBI = toBigInt(tickX) - cam.view.x0;
+    let posStr = formatBigIntFraction(numBI, currentWidthBI, 8);
+
+    // 4. Integer Interval Depth Calculation
+    let limitOrd = notation.Limit || notation.Zero;
+    let depthInt = getOrdinalDepth(ord, limitOrd);
+
+    // 5. Aliases / Description
+    let aliasesStr = "";
+    if (notation.Aliases) {
+        let aliases = [];
+        notation.Aliases.forEach(([name, defStr]) => {
+            if (notation.cmp && notation.cmp(ord, defStr) === 0) {
+                aliases.push(name);
+            }
+        });
+        if (aliases.length > 0) {
+            aliasesStr = aliases.join(", ");
+        }
+    }
+
+    // 6. Fundamental Sequence (if limit ordinal)
+    let isLimit = false;
+    if (notation.cmp && notation.Limit) {
+        isLimit = notation.cmp(ord, notation.Limit) === 0 || (!notation.isSuccessor(ord) && notation.cmp(ord, notation.Zero) !== 0);
+    }
+
+    let fsLines = "";
+    if (isLimit && typeof notation.fs === "function") {
+        fsLines = "\nFundamental Sequence:\n";
+        for (let i = 0; i <= 3; i++) {
+            try {
+                let term = notation.fs(ord, i);
+                let termStr = notation.display ? notation.display(term, modeName) : JSON.stringify(term);
+                fsLines += `${i}: ${termStr}\n`;
+            } catch (e) {
+                fsLines += `${i}: -\n`;
+            }
+        }
+        fsLines += "...";
+    }
+
+    // Build text
+    let text = `Ordinal: ${ordStr}\n`;
+    text += `Classification: ${classification}\n`;
+    text += `Position: ${posStr}\n`;
+    text += `Depth: ${depthInt}\n`;
+    if (aliasesStr) {
+        text += `Description : ${aliasesStr}\n`;
+    }
+    if (fsLines) {
+        text += fsLines;
+    }
+
+    tooltipElem.innerHTML = text;
+    tooltipElem.style.display = "block";
+
+    // Viewport-clamped positioning
+    let rect = tooltipElem.getBoundingClientRect();
+    let margin = 10;
+
+    let tooltipX = px + 15;
+    let tooltipY = py + 15;
+
+    if (tooltipX + rect.width > window.innerWidth - margin) {
+        tooltipX = px - rect.width - 15;
+    }
+    if (tooltipY + rect.height > window.innerHeight - margin) {
+        tooltipY = py - rect.height - 15;
+    }
+
+    tooltipX = Math.max(margin, Math.min(tooltipX, window.innerWidth - rect.width - margin));
+    tooltipY = Math.max(margin, Math.min(tooltipY, window.innerHeight - rect.height - margin));
+
+    tooltipElem.style.left = `${tooltipX}px`;
+    tooltipElem.style.top = `${tooltipY}px`;
+}
+
+// Ensure tooltip updates when canvas re-renders
+let originalRender = render;
+render = function () {
+    originalRender();
+    updateCursorTooltip();
+};
+
 window.addEventListener("mousedown", handlePointerDown);
-window.addEventListener("mousemove", handlePointerMove);
 window.addEventListener("mouseup", handlePointerUp);
-window.addEventListener("mouseleave", handlePointerUp);
 
 window.addEventListener("touchstart", (e) => {
     if (e.target === canvas) e.preventDefault();
@@ -1068,9 +1313,9 @@ window.addEventListener("keydown", (e) => {
             document.exitPointerLock();
         }
     } else if (key === "2" && !(e.ctrlKey || e.metaKey)) {
-        config.sampleTextAlign = 
-              config.sampleTextAlign === 'left' ? 'center' : 
-              config.sampleTextAlign === 'center' ? 'right' : 'left';
+        config.sampleTextAlign =
+            config.sampleTextAlign === 'left' ? 'center' :
+                config.sampleTextAlign === 'center' ? 'right' : 'left';
 
         render();
     }
@@ -1089,7 +1334,7 @@ window.addEventListener("keyup", (e) => {
     if (arrowKeys.includes(key) && cam.toggleHeldKeys[key]) {
         return;
     }
-    
+
     cam.activeKeys[key] = false;
 });
 
