@@ -974,6 +974,7 @@ window.addEventListener("mousemove", (e) => {
     cursorState.x = e.clientX;
     cursorState.y = e.clientY;
     cursorState.active = true;
+    handlePointerMove(e);
     updateCursorTooltip();
 });
 
