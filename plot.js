@@ -17,7 +17,7 @@ let isInteracting = false;
 
 let config = {
     // --- Canvas & Layout ---
-    aspectratio: 2 / 3,
+    aspectratio: 0.66, //new so it won't having
     maxAllowedWidthFactor: 0.1,
     panFenceOverlap: 0.1,
 
