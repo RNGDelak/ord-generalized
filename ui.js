@@ -762,18 +762,16 @@ function toggleJsonEditorView() {
     const jsonPanel = document.getElementById("jsonEditorPanel");
     const toggleBtn = document.getElementById("toggleJsonBtn");
 
-    if (jsonPanel.style.display === "none") {
-        // Currently showing sliders -> switch to JSON
-        interactivePanel.style.display = "none";
-        jsonPanel.style.display = "block";
-        toggleBtn.innerText = "Use Sliders Editor";
-        syncConfigToTextArea();
-    } else {
-        // Currently showing JSON -> switch to sliders
+    if (interactivePanel.style.display === "none") {
         interactivePanel.style.display = "flex";
         jsonPanel.style.display = "none";
         toggleBtn.innerText = "Use JSON Editor";
         syncConfigToInteractiveControls();
+    } else {
+        interactivePanel.style.display = "none";
+        jsonPanel.style.display = "block";
+        toggleBtn.innerText = "Use Sliders Editor";
+        syncConfigToTextArea();
     }
 }
 
@@ -797,13 +795,20 @@ function syncConfigToInteractiveControls() {
     setVal("TickSpacing", config.TickSpacing ?? 1);
     setVal("Tickheight", config.Tickheight ?? 0.05);
     setVal("TickWidth", config.TickWidth ?? 2);
+    setVal("TickAnchorPoint", config.TickAnchorPoint ?? 0.5);
     setVal("labelscount", config.labelscount ?? 8);
+    setVal("fpsPrecision", config.fpsPrecision ?? 1);
+    setVal("MaxIntervalsDivision", config.MaxIntervalsDivision ?? -1);
     setVal("MaxIntervalDepth", config.MaxIntervalDepth ?? -1);
 
     setCheck("MathstickMode", config.MathstickMode);
     setCheck("DiagonalTickArrangement", config.DiagonalTickArrangement);
-    setCheck("SlowMode", config.SlowMode);
+    setCheck("HarmonicInvtervalSpacing", config.HarmonicInvtervalSpacing);
     setCheck("EnableOrdinalFinder", config.EnableOrdinalFinder);
+    setCheck("EnableSetViewPort", config.EnableSetViewPort);
+    setCheck("SlowMode", config.SlowMode);
+    setCheck("ShowCurrentPositionState", config.ShowCurrentPositionState);
+    setCheck("ShowCursorTooltip", config.ShowCursorTooltip);
 }
 
 // Update config properties based on control changes
@@ -816,16 +821,23 @@ function updateConfigFromControls() {
     config.TickSpacing = getNum("TickSpacing");
     config.Tickheight = getNum("Tickheight");
     config.TickWidth = getNum("TickWidth");
+    config.TickAnchorPoint = getNum("TickAnchorPoint");
     config.labelscount = getNum("labelscount");
+    config.fpsPrecision = getNum("fpsPrecision");
+    config.MaxIntervalsDivision = getNum("MaxIntervalsDivision");
     config.MaxIntervalDepth = getNum("MaxIntervalDepth");
 
     config.MathstickMode = getCheck("MathstickMode");
     config.DiagonalTickArrangement = getCheck("DiagonalTickArrangement");
-    config.SlowMode = getCheck("SlowMode");
+    config.HarmonicInvtervalSpacing = getCheck("HarmonicInvtervalSpacing");
     config.EnableOrdinalFinder = getCheck("EnableOrdinalFinder");
+    config.EnableSetViewPort = getCheck("EnableSetViewPort");
+    config.SlowMode = getCheck("SlowMode");
+    config.ShowCurrentPositionState = getCheck("ShowCurrentPositionState");
+    config.ShowCursorTooltip = getCheck("ShowCursorTooltip");
 
     // Update value displays
-    ["aspectratio", "TickSpacing", "Tickheight", "TickWidth", "labelscount", "MaxIntervalDepth"].forEach(id => {
+    ["aspectratio", "TickSpacing", "Tickheight", "TickWidth", "TickAnchorPoint", "labelscount", "fpsPrecision", "MaxIntervalsDivision", "MaxIntervalDepth"].forEach(id => {
         const display = document.getElementById(`val_${id}`);
         if (display) display.innerText = document.getElementById(id).value;
     });

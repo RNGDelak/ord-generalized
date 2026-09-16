@@ -121,23 +121,7 @@ let config = {
     sampleMaxWidth: "80%",
     sampleTransform: "translateY(-80%)",
     sampleTextAlign: "left",
-
-    // --- Cursor Tooltip ---
     ShowCursorTooltip: false,
-    TooltipMinProximityPx: 40,
-    TooltipProximityHeightFactor: 1.5,
-    TooltipFSTermCount: 4,
-    TooltipPositionPrecision: 8,
-    TooltipViewportMargin: 10,
-    TooltipCursorOffset: 15,
-    TooltipBackgroundColor: "rgba(15, 15, 15, 0.92)",
-    TooltipTextColor: "#ffffff",
-    TooltipBorder: "1px solid #555555",
-    TooltipBorderRadius: 6,
-    TooltipPadding: "8px 12px",
-    TooltipFont: "14px monospace",
-    TooltipLineHeight: 1.4,
-    TooltipBoxShadow: "0px 4px 12px rgba(0, 0, 0, 0.6)",
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
@@ -1058,7 +1042,7 @@ function updateCursorTooltip() {
     let lineY = (canvas.height / 2) + (slope * canvas.height * (px / canvas.width - 0.5));
 
     // Proximity check
-    let proximity = Math.max(config.TooltipMinProximityPx, canvas.height * config.Tickheight * config.TooltipProximityHeightFactor);
+    let proximity = Math.max(40, canvas.height * config.Tickheight * 1.5);
     if (Math.abs(py - lineY) > proximity) {
         tooltipElem.style.display = "none";
         return;
@@ -1146,7 +1130,7 @@ function updateCursorTooltip() {
     let tickX = (typeof tick.x === "number") ? tick.x : (cam.ticks.indexOf(tick));
     let currentWidthBI = cam.view.x1 - cam.view.x0;
     let numBI = toBigInt(tickX) - cam.view.x0;
-    let posStr = formatBigIntFraction(numBI, currentWidthBI, config.TooltipPositionPrecision);
+    let posStr = formatBigIntFraction(numBI, currentWidthBI, 8);
 
     // 4. Integer Interval Depth Calculation
     let limitOrd = notation.Limit || notation.Zero;
@@ -1175,7 +1159,7 @@ function updateCursorTooltip() {
     let fsLines = "";
     if (isLimit && typeof notation.fs === "function") {
         fsLines = "\nFundamental Sequence:\n";
-        for (let i = 0; i < config.TooltipFSTermCount; i++) {
+        for (let i = 0; i <= 3; i++) {
             try {
                 let term = notation.fs(ord, i);
                 let termStr = notation.display ? notation.display(term, modeName) : JSON.stringify(term);
@@ -1204,17 +1188,16 @@ function updateCursorTooltip() {
 
     // Viewport-clamped positioning
     let rect = tooltipElem.getBoundingClientRect();
-    let margin = config.TooltipViewportMargin;
-    let offset = config.TooltipCursorOffset;
+    let margin = 10;
 
-    let tooltipX = px + offset;
-    let tooltipY = py + offset;
+    let tooltipX = px + 15;
+    let tooltipY = py + 15;
 
     if (tooltipX + rect.width > window.innerWidth - margin) {
-        tooltipX = px - rect.width - offset;
+        tooltipX = px - rect.width - 15;
     }
     if (tooltipY + rect.height > window.innerHeight - margin) {
-        tooltipY = py - rect.height - offset;
+        tooltipY = py - rect.height - 15;
     }
 
     tooltipX = Math.max(margin, Math.min(tooltipX, window.innerWidth - rect.width - margin));
