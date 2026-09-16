@@ -288,15 +288,6 @@ function applyingCSSUpdate() {
     sampleElem.style.maxWidth = config.sampleMaxWidth;
     sampleElem.style.transform = config.sampleTransform;
     sampleElem.style.top = config.sampletopspacing;
-
-    tooltipElem.style.background = config.TooltipBackgroundColor;
-    tooltipElem.style.color = config.TooltipTextColor;
-    tooltipElem.style.border = config.TooltipBorder;
-    tooltipElem.style.borderRadius = `${config.TooltipBorderRadius}px`;
-    tooltipElem.style.padding = config.TooltipPadding;
-    tooltipElem.style.font = config.TooltipFont;
-    tooltipElem.style.lineHeight = config.TooltipLineHeight;
-    tooltipElem.style.boxShadow = config.TooltipBoxShadow;
 }
 
 window.applyInjectedConfig = function () {
@@ -771,178 +762,82 @@ function toggleJsonEditorView() {
     const jsonPanel = document.getElementById("jsonEditorPanel");
     const toggleBtn = document.getElementById("toggleJsonBtn");
 
-    if (interactivePanel.style.display === "none") {
-        interactivePanel.style.display = "flex";
-        jsonPanel.style.display = "none";
-        toggleBtn.innerText = "Use JSON Editor";
-        syncConfigToInteractiveControls();
-    } else {
+    if (jsonPanel.style.display === "none") {
+        // Currently showing sliders -> switch to JSON
         interactivePanel.style.display = "none";
         jsonPanel.style.display = "block";
         toggleBtn.innerText = "Use Sliders Editor";
         syncConfigToTextArea();
+    } else {
+        // Currently showing JSON -> switch to sliders
+        interactivePanel.style.display = "flex";
+        jsonPanel.style.display = "none";
+        toggleBtn.innerText = "Use JSON Editor";
+        syncConfigToInteractiveControls();
     }
 }
 
-// ==========================================
-// FULLY DYNAMIC CONFIG PANEL
-// Every key that exists on the live `config` object gets a field here,
-// generated on the fly. No key is hand-picked, so nothing added to
-// `config` (by this file, a notation module, or injected code) can ever
-// end up inaccessible from the UI. This trades a curated/pretty layout
-// for total coverage, as requested.
-// ==========================================
+// Sync current JS config object to interactive controls
+function syncConfigToInteractiveControls() {
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = val;
+            const display = document.getElementById(`val_${id}`);
+            if (display) display.innerText = val;
+        }
+    };
+    const setCheck = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!val;
+    };
 
-// A key managed by its own dedicated UI elsewhere gets skipped here so the
-// two controls don't fight each other; everything else is fair game.
-const DYN_CFG_EXCLUDED_KEYS = new Set(["modes"]);
+    setVal("aspectratio", config.aspectratio ?? 0.66);
+    setVal("BackgroundColor", config.BackgroundColor ?? "#000000");
+    setVal("TickSpacing", config.TickSpacing ?? 1);
+    setVal("Tickheight", config.Tickheight ?? 0.05);
+    setVal("TickWidth", config.TickWidth ?? 2);
+    setVal("labelscount", config.labelscount ?? 8);
+    setVal("MaxIntervalDepth", config.MaxIntervalDepth ?? -1);
 
-function dynCfgClassify(key, value) {
-    if (typeof value === "boolean") return "toggle";
-    if (/color/i.test(key)) return "color";
-    if (typeof value === "number") return "number";
-    if (value !== null && typeof value === "object") return "json";
-    return "text"; // strings (fonts, css offsets, notation ids, etc.)
+    setCheck("MathstickMode", config.MathstickMode);
+    setCheck("DiagonalTickArrangement", config.DiagonalTickArrangement);
+    setCheck("SlowMode", config.SlowMode);
+    setCheck("EnableOrdinalFinder", config.EnableOrdinalFinder);
 }
 
-function dynCfgIsHexColor(value) {
-    return typeof value === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
-}
+// Update config properties based on control changes
+function updateConfigFromControls() {
+    const getNum = (id) => parseFloat(document.getElementById(id).value);
+    const getCheck = (id) => document.getElementById(id).checked;
 
-function dynCfgCommit() {
+    config.aspectratio = getNum("aspectratio");
+    config.BackgroundColor = document.getElementById("BackgroundColor").value;
+    config.TickSpacing = getNum("TickSpacing");
+    config.Tickheight = getNum("Tickheight");
+    config.TickWidth = getNum("TickWidth");
+    config.labelscount = getNum("labelscount");
+    config.MaxIntervalDepth = getNum("MaxIntervalDepth");
+
+    config.MathstickMode = getCheck("MathstickMode");
+    config.DiagonalTickArrangement = getCheck("DiagonalTickArrangement");
+    config.SlowMode = getCheck("SlowMode");
+    config.EnableOrdinalFinder = getCheck("EnableOrdinalFinder");
+
+    // Update value displays
+    ["aspectratio", "TickSpacing", "Tickheight", "TickWidth", "labelscount", "MaxIntervalDepth"].forEach(id => {
+        const display = document.getElementById(`val_${id}`);
+        if (display) display.innerText = document.getElementById(id).value;
+    });
+
     const configTextArea = document.getElementById('envConfigJson');
     if (configTextArea) {
         configTextArea.value = JSON.stringify(config, null, 4);
     }
+
     displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
     checkAndInitFloatingGui();
-    applyingCSSUpdate();
     render();
-}
-
-function dynCfgMakeRow(key) {
-    const value = config[key];
-    const kind = dynCfgClassify(key, value);
-
-    const row = document.createElement("div");
-    row.className = "dynCfgRow";
-
-    const label = document.createElement("label");
-    label.htmlFor = `dyncfg_${key}`;
-    label.innerText = key;
-    label.title = key;
-
-    let input;
-
-    if (kind === "toggle") {
-        input = document.createElement("input");
-        input.type = "checkbox";
-        input.checked = !!value;
-        input.addEventListener("change", () => {
-            config[key] = input.checked;
-            dynCfgCommit();
-        });
-    } else if (kind === "color" && dynCfgIsHexColor(value)) {
-        input = document.createElement("input");
-        input.type = "color";
-        input.value = value;
-        input.addEventListener("input", () => {
-            config[key] = input.value;
-            dynCfgCommit();
-        });
-    } else if (kind === "number") {
-        input = document.createElement("input");
-        input.type = "number";
-        input.step = "any";
-        input.value = value;
-        input.addEventListener("input", () => {
-            const n = parseFloat(input.value);
-            config[key] = isNaN(n) ? value : n;
-            dynCfgCommit();
-        });
-    } else if (kind === "json") {
-        input = document.createElement("textarea");
-        input.value = JSON.stringify(value, null, 2);
-        input.addEventListener("change", () => {
-            try {
-                config[key] = JSON.parse(input.value);
-                input.style.borderColor = "#444";
-                dynCfgCommit();
-                if (key === "modes") updateNotationConfigUI();
-            } catch (e) {
-                input.style.borderColor = "#ff4444";
-            }
-        });
-    } else {
-        // Plain text: strings that aren't clean hex colors (fonts, css
-        // percentages, transforms, rgba() strings, arbitrary notation
-        // strings, etc.) still get full read/write access here.
-        input = document.createElement("input");
-        input.type = "text";
-        input.value = value;
-        input.addEventListener("change", () => {
-            config[key] = input.value;
-            dynCfgCommit();
-        });
-    }
-
-    input.id = `dyncfg_${key}`;
-    row.appendChild(label);
-    row.appendChild(input);
-    return row;
-}
-
-// Rebuild the entire panel from whatever `config` currently looks like.
-// Called on open, after JSON edits, slot loads, presets, and code injection,
-// so newly added keys (e.g. from an injected notation module) show up too.
-function renderDynamicConfigPanel() {
-    const host = document.getElementById("dynCfgFields");
-    if (!host || typeof config === "undefined") return;
-
-    const filterEl = document.getElementById("dynCfgFilter");
-    const filter = (filterEl ? filterEl.value : "").trim().toLowerCase();
-
-    host.innerHTML = "";
-
-    const keys = Object.keys(config)
-        .filter(k => !DYN_CFG_EXCLUDED_KEYS.has(k))
-        .filter(k => !filter || k.toLowerCase().includes(filter))
-        .sort((a, b) => a.localeCompare(b));
-
-    const sections = [
-        { title: "Toggles", test: k => dynCfgClassify(k, config[k]) === "toggle" },
-        { title: "Colors", test: k => dynCfgClassify(k, config[k]) === "color" },
-        { title: "Numbers", test: k => dynCfgClassify(k, config[k]) === "number" },
-        { title: "Text / Strings", test: k => dynCfgClassify(k, config[k]) === "text" },
-        { title: "Objects / Arrays (JSON)", test: k => dynCfgClassify(k, config[k]) === "json" }
-    ];
-
-    let anyRendered = false;
-    sections.forEach(section => {
-        const sectionKeys = keys.filter(section.test);
-        if (sectionKeys.length === 0) return;
-        anyRendered = true;
-
-        const title = document.createElement("div");
-        title.className = "dynCfgSectionTitle";
-        title.innerText = `${section.title} (${sectionKeys.length})`;
-        host.appendChild(title);
-
-        sectionKeys.forEach(key => host.appendChild(dynCfgMakeRow(key)));
-    });
-
-    if (!anyRendered) {
-        const empty = document.createElement("div");
-        empty.className = "dynCfgEmpty";
-        empty.innerText = filter ? "No config keys match that filter." : "No config keys found.";
-        host.appendChild(empty);
-    }
-}
-
-// Kept as an alias so every existing call site (slot load, JSON apply,
-// code injection, preset load, panel toggle) keeps working unchanged.
-function syncConfigToInteractiveControls() {
-    renderDynamicConfigPanel();
 }
 
 // Hook original config syncing to update both views

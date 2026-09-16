@@ -183,88 +183,6 @@
             color: #fff;
         }
 
-        /* Auto-generated config field list (dynCfgFields) */
-        .dynCfgSectionTitle {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #6cb6ff;
-            margin: 10px 0 4px 0;
-            border-bottom: 1px solid #333;
-            padding-bottom: 2px;
-        }
-
-        .dynCfgRow {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 3px 0;
-        }
-
-        .dynCfgRow label {
-            font-size: 11px;
-            color: #ccc;
-            font-family: monospace;
-            flex: 1 1 auto;
-            word-break: break-all;
-            margin: 0;
-        }
-
-        .dynCfgRow input[type="text"],
-        .dynCfgRow input[type="number"] {
-            width: 140px;
-            flex: 0 0 auto;
-            background: #111;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 3px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 11px;
-            box-sizing: border-box;
-        }
-
-        .dynCfgRow input[type="checkbox"] {
-            flex: 0 0 auto;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        .dynCfgRow input[type="color"] {
-            flex: 0 0 auto;
-            width: 30px;
-            height: 22px;
-            padding: 0;
-            border: 1px solid #444;
-            border-radius: 3px;
-            background: none;
-            cursor: pointer;
-        }
-
-        .dynCfgRow textarea {
-            width: 140px;
-            flex: 0 0 auto;
-            height: 44px;
-            background: #111;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 3px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 10px;
-            box-sizing: border-box;
-            resize: vertical;
-        }
-
-        .dynCfgEmpty {
-            font-size: 11px;
-            color: #777;
-            font-style: italic;
-            padding: 4px 0;
-        }
-
         #hint {
             position: absolute;
             left: 50%;
@@ -543,7 +461,7 @@
                 <label style=" margin:0;" for="BtnViewOpenTool2">Environment Configurations</label>
                 <button type="button" id="toggleJsonBtn" onclick="toggleJsonEditorView()"
                     style="background:#444; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">Use
-                    JSON Editor</button>
+                    Sliders Editor</button>
             </div>
 
             <div class="slot-container" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
@@ -561,20 +479,75 @@
                 </select>
             </div>
 
-            <!-- Interactive Controls Panel: auto-generated from every key in the live config object.
-                 Nothing here is hand-picked, so no property is ever left inaccessible. -->
+            <!-- Interactive Sliders / Controls Panel (11 essentials) -->
             <div id="interactiveControlsPanel"
-                style="display: flex; flex-direction: column; gap: 10px; background: #181818; padding: 12px; border-radius: 4px; border: 1px solid #333;">
+                style="display: none; flex-direction: column; gap: 12px; background: #181818; padding: 12px; border-radius: 4px; border: 1px solid #333;">
 
-                <input type="text" id="dynCfgFilter" placeholder="Filter fields by name..."
-                    oninput="renderDynamicConfigPanel()"
-                    style="width:100%; box-sizing:border-box; background:#111; color:#fff; border:1px solid #444; padding:6px; border-radius:4px; font-family:monospace;">
+                <div>
+                    <label for="aspectratio">Aspect Ratio: <span id="val_aspectratio"></span></label>
+                    <input type="range" id="aspectratio" min="0.1" max="0.9" step="0.01"
+                        style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                </div>
 
-                <div id="dynCfgFields"></div>
+                <!-- Checkboxes Grid (2 Columns) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <label><input type="checkbox" id="MathstickMode" onchange="updateConfigFromControls()"> Mathstick
+                        Mode</label>
+                    <label><input type="checkbox" id="DiagonalTickArrangement" onchange="updateConfigFromControls()">
+                        Diagonal Ticks</label>
+                    <label><input type="checkbox" id="SlowMode" onchange="updateConfigFromControls()"> Slow Mode</label>
+                    <label><input type="checkbox" id="EnableOrdinalFinder" onchange="updateConfigFromControls()">
+                        Ordinal Finder</label>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="BackgroundColor"
+                            style="margin: 0; color: #aaa; font-size: 12px;">Background:</label>
+                        <input type="color" id="BackgroundColor"
+                            style="background: none; border: 1px solid #444; height: 24px; width: 36px; cursor: pointer; border-radius: 4px;"
+                            onchange="updateConfigFromControls()">
+                    </div>
+                </div>
+
+                <hr style="border-color: #333; margin: 2px 0;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px;">
+
+                    <div>
+                        <label for="TickSpacing">Tick Spacing: <span id="val_TickSpacing"></span></label>
+                        <input type="range" id="TickSpacing" min="1" max="15" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="Tickheight">Tick Height: <span id="val_Tickheight"></span></label>
+                        <input type="range" id="Tickheight" min="0.001" max="0.1" step="0.0001"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="TickWidth">Tick Width: <span id="val_TickWidth"></span></label>
+                        <input type="range" id="TickWidth" min="1" max="5" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="labelscount">Labels Count: <span id="val_labelscount"></span></label>
+                        <input type="range" id="labelscount" min="1" max="25" step="0.01"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+
+                    <div>
+                        <label for="MaxIntervalDepth">Max Interval Depth: <span
+                                id="val_MaxIntervalDepth"></span></label>
+                        <input type="range" id="MaxIntervalDepth" min="-1" max="100" step="1"
+                            style="width: 100%; box-sizing: border-box;" oninput="updateConfigFromControls()">
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Raw JSON Textarea (Hidden by default) -->
-            <div id="jsonEditorPanel" style="display:none;">
+            <!-- Raw JSON Textarea (default view) -->
+            <div id="jsonEditorPanel" style="display:block;">
                 <textarea id="envConfigJson" name="envConfigJson"></textarea>
             </div>
         </div>
