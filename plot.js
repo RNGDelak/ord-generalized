@@ -127,7 +127,8 @@ let config = {
     fpsPrecision: 1,
     MaxIntervalsDivision: -1,
     MaxIntervalDepth: -1,
-    BigIntPrecisionMantissa: 8
+    BigIntPrecisionMantissa: 8,
+    tooltipfsterms: 3, //limited usage sorry
 };
 
 let cam = {
@@ -1159,7 +1160,7 @@ function updateCursorTooltip() {
     let fsLines = "";
     if (isLimit && typeof notation.fs === "function") {
         fsLines = "\nFundamental Sequence:\n";
-        for (let i = 0; i <= 3; i++) {
+        for (let i = 0; i <= config.tooltipfsterms; i++) {
             try {
                 let term = notation.fs(ord, i);
                 let termStr = notation.display ? notation.display(term, modeName) : JSON.stringify(term);
