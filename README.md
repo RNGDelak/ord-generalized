@@ -11,6 +11,7 @@
      * waffle3z's notation explorer: https://github.com/Waffle3z/notations
      * janipen's notation explorer: https://janipen.github.io/nox/
      * azertywastaken's notation explorer: https://azertywastaken.github.io/Ordinals/
+     * similelee-lyx's notation explorer: https://smilelee-lyx.github.io/ne-rewritten/
    * And so, complete the collection transfinite number line staircase!!!!
 
 ## About this project
