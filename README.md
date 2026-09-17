@@ -5123,6 +5123,7 @@ Current Version: https://rngdelak.github.io/ord-generalized
       * **wFSS: Weak Fundamental Sequence System** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwFSS.js
       * **wMM: Weak Mutant Matrix System** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwMM.js
       * **wY: ω-Y sequence** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FwY.js
+      * **TBMS: Transfinite BMS** — https://rngdelak.github.io/ord-generalized/#href=Libs%2FTBMS.js
     * Added BMS display modes:
       * `BMS`
       * `DBMS`
