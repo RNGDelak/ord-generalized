@@ -1,4 +1,4 @@
-# Ord-Generalized (now with c++ version!!! (check out ord-cpp.zip))
+# Ord-Generalized (now with c++ version!!! (check out [ord-cpp.zip](https://github.com/RNGDelak/ord-cpp/))
 
 ## *This version, v2.21 has added a lot of notation libs, which is soo much to explore!!!* [click to see more](#added)
 ### In future, i'd add some more notation, which including these
