@@ -5298,7 +5298,7 @@ Yeah, those project are painfully slow. I also realize that it **unnessesarily t
 
 Can't it just a plug-in change since everything we need so far is just 3 main function that makes up a mathematical notation?
 
-And then, i revised everything, try to proof, anf proof, and implement, optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way.
+And then, i revised everything, try to proof, and proof, and implement, optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way.
 
 Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project source code](https://www.stephenbrooks.org/archive/ordinals), i had everything to push this project to reality.
 
