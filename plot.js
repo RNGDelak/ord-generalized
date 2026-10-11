@@ -125,10 +125,10 @@ let config = {
     sampleTextAlign: "left",
     ShowCursorTooltip: false,
     proximitytoshowtooltip: 40,
-    labelXanchorpoint: "Left",
-    labelYanchorpoint: "Bottom",
-    timelinelabelXanchorpoint: "Left",
-    timelinelabelYanchorpoint: "Bottom",
+    labelXanchorpoint: "left",
+    labelYanchorpoint: "bottom",
+    timelinelabelXanchorpoint: "left",
+    timelinelabelYanchorpoint: "bottom",
     
 
     // --- Computation & Performance Limits ---
