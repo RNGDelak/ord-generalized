@@ -5294,7 +5294,11 @@ So do i, i wanted to explore what inside, but sadly, there isn't any source code
 
 And in past year, i tried to firgure out myself , and thats it, i written a [document](https://github.com/RNGDelak/ord-limbms/blob/main/README.md), and making 3 transfinite number line which is [ord-w](https://rngdelak.github.io/ord-w/), [ord-ww](https://rngdelak.github.io/ord-ww/) and [ord-limbms](https://rngdelak.github.io/ord-limbms/) (even a scratch version, which neverrrr to be complete [lol](https://scratch.mit.edu/projects/1247085717/)) with vital help from [@solarzone1010](https://solarzone1010.github.io/).
 
-Yeah, those project are painfully slow. And then, i revised everything, try to optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way.
+Yeah, those project are painfully slow. I also realize that it **unnessesarily tedious** to rewrite everything to just implement a new notation.
+
+Can't it just a plug-in change since everything we need so far is just 3 main function that makes up a mathematical notation?
+
+And then, i revised everything, try to proof, anf proof, and implement, optimize everything i could (thats why there a version 0.1 and 0.2) but sadly, i was on the wrong way.
 
 Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project source code](https://www.stephenbrooks.org/archive/ordinals), i had everything to push this project to reality.
 
