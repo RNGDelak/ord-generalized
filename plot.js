@@ -115,6 +115,8 @@ let config = {
     LabelBetweenTimelineXoffest: 0,
     LabelRotation: 0,
     TimelineRotation: 0,
+    labelfont: "22px Serif",
+    timelinelabelfont: "italic 20px Serif",
     samplefont: "30px Serif",
     sampleleftspacing: "10%",
     sampletopspacing: "83.5%",
