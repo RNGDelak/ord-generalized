@@ -124,6 +124,12 @@ let config = {
     sampleTransform: "translateY(-80%)",
     sampleTextAlign: "left",
     ShowCursorTooltip: false,
+    proximitytoshowtooltip: 40,
+    labelXanchorpoint: "Left",
+    labelYanchorpoint: "Bottom",
+    timelinelabelXanchorpoint: "Left",
+    timelinelabelYanchorpoint: "Bottom",
+    
 
     // --- Computation & Performance Limits ---
     fpsPrecision: 1,
@@ -559,7 +565,7 @@ function drawTimelineLabels() {
 
                 let labelX = px + config.TickBetweenLabelXoffest + (config.LabelBetweenLabelXoffest * (totalModes - 1 - i));
 
-                createTextLabel(labelString, color, labelX, currentY, "left", "bottom", "22px Serif", config.LabelRotation);
+                createTextLabel(labelString, color, labelX, currentY, config.labelXanchorpoint, config.labelYanchorpoint, config.labelfont, config.LabelRotation);
             });
         }
 
@@ -572,7 +578,7 @@ function drawTimelineLabels() {
                 + (modeSteps * config.LabelBetweenLabelXoffest)
                 + config.LabelBetweenTimelineXoffest;
 
-            createTextLabel(aliasName, config.DefaultTimelineLabelColor, aliasX, aliasY, "left", "bottom", "italic 20px Serif", config.TimelineRotation);
+            createTextLabel(aliasName, config.DefaultTimelineLabelColor, aliasX, aliasY, config.timelinelabelXanchorpoint, config.timelinelabelYanchorpoint, config.timelinelabelfont, config.TimelineRotation);
         }
     });
 }
@@ -1045,7 +1051,7 @@ function updateCursorTooltip() {
     let lineY = (canvas.height / 2) + (slope * canvas.height * (px / canvas.width - 0.5));
 
     // Proximity check
-    let proximity = Math.max(40, canvas.height * config.Tickheight * 1.5);
+    let proximity = Math.max(config.proximitytoshowtooltip, canvas.height * config.Tickheight * 1.5);
     if (Math.abs(py - lineY) > proximity) {
         tooltipElem.style.display = "none";
         return;
