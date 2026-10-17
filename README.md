@@ -5330,6 +5330,17 @@ Until [Stephen Brooks's](https://www.stephenbrooks.org/) shared [his project sou
 
 Now I can finally take out the plan I wrote four months ago for this project, which might never have happened without his source code...
 
+thank you, [Stephen Brooks's](https://www.stephenbrooks.org/)
+
 # Final words
 
 I've built everything i wanted, dreamed and hope. See you!
+
+*pictures from the early day of the project*
+
+<img width="1920" height="952" alt="image" src="https://github.com/user-attachments/assets/ab27c48f-d6ba-4c11-8ec7-acdbc61164cb" />
+
+<img width="1920" height="945" alt="image" src="https://github.com/user-attachments/assets/f912f580-de86-4b4f-b170-c0c39fc09e93" />
+
+<img width="1920" height="946" alt="image" src="https://github.com/user-attachments/assets/7ff83cfa-3819-4191-b995-2e551f03174f" />
+
