@@ -250,6 +250,8 @@ window.notation = (() => {
     return Array.from(termsMap.entries()).sort((a, b) => b[0] - a[0]);
   }
 
+  function usercustom() {} //i will talk about this in the next section
+
   const DisplayName = ["raw", "pretty"];
 
   const ordinalTypes = [
@@ -283,6 +285,7 @@ window.notation = (() => {
     ordinalTypes,
     Aliases,
     config,
+    //usercustom, <check out the next section to have more detail about this function>
     title
   };
 
@@ -307,6 +310,29 @@ eg : 2,6,2,8,1 --> fs(fs(fs(fs(fs(Limit,2),6),2),8),1) / Limit[2][6][2][8][1]
 
 */
 ```
+
+# User Custom functions
+
+the function `usercustom()` is created in purpose of letting user creating custom guis, modifying the innercode function (which all of them not warpped inside an IIFE)
+
+it is added here, around line 381 in `ui.js`
+
+```js
+//[379 more lines above...]
+        checkAndInitFloatingGui();
+
+        // --- ADDED: Run usercustom whenever a notation script finishes loading ---
+        if (window.notation && typeof window.notation.usercustom === "function") {
+            window.notation.usercustom();
+        }
+
+    } catch (e) {
+        alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
+    }
+//[726 more lines below...]
+```
+
+it run only ONCE per notation loads, but it give just enough permission for you to edit script, or add any custom guis
 
 # Changelogs
 
