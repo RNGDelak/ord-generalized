@@ -94,9 +94,9 @@ window.notation = (() => {
   function classifyOrdinal(ord) {
     if (ord === Limit) return "#ffffff";
     if (!Array.isArray(ord) || ord.length === 0) return "#808080";
-    if (isSuccessor(ord)) return "#a00000";
-    if (ord.length === 1 && ord[0][1] === 1 && ord[0][0] > 0) return "#ffff00"; // Power of ω
-    return "#ffa000"; // Limit ordinal
+    if (isSuccessor(ord)) return "#d40000";
+    if (ord.length === 1 && ord[0][1] === 1 && ord[0][0] > 0) return "#ffd000"; // Power of ω
+    return "#ff8000"; // Limit ordinal
   }
 
   // Parser supporting pair notation [[e, c], ...], flat array [e1, e2, ...], and text expressions
@@ -166,13 +166,15 @@ window.notation = (() => {
     return Array.from(termsMap.entries()).sort((a, b) => b[0] - a[0]);
   }
 
+  function usercustom() {} //i will talk about this in the next section
+
   const DisplayName = ["raw", "pretty"];
 
   const ordinalTypes = [
     ["Zero", "#808080"],
-    ["Successor Ordinal", "#a00000"],
-    ["Limit Ordinal", "#ffa000"],
-    ["Power of ω", "#ffff00"]
+    ["Successor Ordinal", "#d40000"],
+    ["Limit Ordinal", "#ff8000"],
+    ["Power of ω", "#ffd000"]
   ];
 
   const Aliases = [
@@ -199,6 +201,7 @@ window.notation = (() => {
     ordinalTypes,
     Aliases,
     config,
+    //usercustom, <check out the next section to have more detail about this function>
     title
   };
 
