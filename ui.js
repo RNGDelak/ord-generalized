@@ -377,6 +377,9 @@ function executeCustomScript(codeString) {
         displayElem.innerText = config.MaxIntervalDepth === -1 ? "Depth: Infinite" : `Depth: ${config.MaxIntervalDepth}`;
         checkAndInitFloatingGui();
 
+        if (window.notation && typeof window.notation.usercustom === "function") {
+            window.notation.usercustom(); //you can run anything you want ,here
+        }
     } catch (e) {
         alert(`Runtime Error\n\n${e.message}\n\n${e.stack}`);
     }
