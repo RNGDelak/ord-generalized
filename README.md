@@ -311,7 +311,7 @@ eg : 2,6,2,8,1 --> fs(fs(fs(fs(fs(Limit,2),6),2),8),1) / Limit[2][6][2][8][1]
 */
 ```
 
-# User Custom functions
+## User Custom functions
 
 the function `usercustom()` is created in purpose of letting user creating custom guis, modifying the innercode function (which all of them not warpped inside an IIFE)
 
