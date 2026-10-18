@@ -1309,7 +1309,7 @@ return {parameters, show, strict};
   ];
 
   const config = {};
-  const title = "Transfinitary/Collapsing BMS transfinite number line";
+  const title = "Collapsing BMS transfinite number line";
 
   return { fs, cmp, isSuccessor, display, classifyOrdinal, parse, Zero, Limit, DisplayName, ordinalTypes, Aliases, config, title };
 })();
